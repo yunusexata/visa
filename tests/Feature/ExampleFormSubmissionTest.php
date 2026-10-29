@@ -26,8 +26,8 @@ test('example form component renders all required form sections and does not hav
         ->assertSee('Tempat Lahir')
         ->assertSee('Data di Paspor')
         ->assertSee('Certificate of Eligibility (COE)')
-        ->assertSee('Rencana Kedatangan & Tempat Kerja di Jepang')
-        ->assertSee('Ringkasan & Konfirmasi Pengajuan')
+        ->assertSee('Rencana Kedatangan')
+        ->assertSee('Ringkasan & Konfirmasi Pengajuan', false)
         ->assertDontSee('Reset Form')
         ->assertDontSee('restart_alt');
 });

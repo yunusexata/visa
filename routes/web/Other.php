@@ -10,7 +10,13 @@ Route::get('/reload-captcha', [CaptchaController::class, 'reload'])->name('reloa
 Route::get('/example-form', \App\Livewire\Client\ExampleFormSubmission::class)->name('example-form');
 Route::get('/example/form', function () {
     return redirect()->route('example-form');
-});
+})->name('example.form');
+
+// Document Upload UI
+Route::get('/form/upload-document', \App\Livewire\Form\UploadDocument::class)->name('form.upload-document');
+Route::get('/example/upload', function () {
+    return redirect()->route('form.upload-document');
+})->name('example.upload');
 
 Route::middleware('auth')->group(function () {
     Route::get("/menu-notification", [MenuNotificationController::class, "index"])->name('menu_notification');

@@ -121,18 +121,23 @@ class UploadDocument extends Component
                 $this->$slot = [$this->incomingFile];
             }
 
-            $this->handleSlotUploaded($slot);
+            $this->processSlot($slot);
             $this->incomingFile = null;
             $this->incomingSlot = null;
         }
     }
 
-    public function updatedCoe()      { $this->handleSlotUploaded('coe'); }
-    public function updatedEKtln()    { $this->handleSlotUploaded('e_ktln'); }
-    public function updatedKtp()      { $this->handleSlotUploaded('ktp'); }
-    public function updatedPaspor()   { $this->handleSlotUploaded('paspor'); }
-    public function updatedTiket()    { $this->handleSlotUploaded('tiket'); }
-    public function updatedPasPhoto() { $this->handleSlotUploaded('pas_photo'); }
+    public function updatedCoe()      { $this->processSlot('coe'); }
+    public function updatedEKtln()    { $this->processSlot('e_ktln'); }
+    public function updatedKtp()      { $this->processSlot('ktp'); }
+    public function updatedPaspor()   { $this->processSlot('paspor'); }
+    public function updatedTiket()    { $this->processSlot('tiket'); }
+    public function updatedPasPhoto() { $this->processSlot('pas_photo'); }
+
+    public function processSlot(string $type): void
+    {
+        $this->handleSlotUploaded($type);
+    }
 
     /**
      * Memvalidasi file-file yang diunggah ke slot tertentu

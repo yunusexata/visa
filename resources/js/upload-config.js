@@ -30,3 +30,4 @@ export const UPLOAD_CONFIG = {
   // Batas ukuran awal file mentah (sebelum kompresi)
   rawImageMaxMB: 20,
 };
+
