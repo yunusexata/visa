@@ -45,7 +45,7 @@ test('component renders all 6 document slots and badges', function () {
         ->assertSee('Photo Paspor')
         ->assertSee('Berkas Tiket')
         ->assertSee('Pas Photo Latar Putih')
-        ->assertSee('Auto-Compress Aktif')
+        ->assertSee('auto-kompres')
         ->assertSee('Simpan Seluruh Dokumen');
 });
 

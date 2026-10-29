@@ -12,7 +12,7 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
-    @fluxStyles
+    @fluxAppearance
     @livewireStyles
 
     @stack('css')
@@ -139,7 +139,6 @@
 
     </div>
 
-</body>
     @fluxScripts
     @livewireScripts
 <script>
@@ -266,5 +265,5 @@
         }
 </script>
 @stack('scripts')
-
+</body>
 </html>
