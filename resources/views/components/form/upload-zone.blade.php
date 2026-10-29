@@ -379,7 +379,7 @@
                             <span x-text="file.finalSizeKB + ' KB'"></span>
                             <template x-if="file.savingsPct > 0">
                                 <span class="text-emerald-600 dark:text-emerald-400 font-medium">
-                                    (Hemat <span x-text="file.savingsPct"></span>%)
+                                    (Kompresi <span x-text="file.savingsPct"></span>%)
                                 </span>
                             </template>
                             <span class="text-gray-300 dark:text-gray-600">•</span>
