@@ -160,16 +160,6 @@
     },
 
     confirmSubmit() {
-        if (!$wire.declaration_agreed) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Pernyataan Diperlukan',
-                text: 'Harap centang pernyataan keabsahan dan kebenaran data sebelum mengirim.',
-                confirmButtonText: 'Mengerti',
-                confirmButtonColor: '#0049FF',
-            });
-            return;
-        }
 
         Swal.fire({
             icon: 'question',
@@ -949,24 +939,6 @@
                             </dl>
                         </div>
 
-                    </div>
-
-                    <!-- Declaration Checklist Card -->
-                    <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-blue-50/50 dark:bg-blue-950/20">
-                        <label class="flex items-start gap-3 cursor-pointer">
-                            <input type="checkbox" 
-                                   wire:model="declaration_agreed" 
-                                   class="mt-1 w-4 h-4 rounded text-[#0049FF] focus:ring-blue-500 border-slate-300 dark:border-slate-700">
-                            <span class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
-                                Saya menyatakan dengan sebenar-benarnya bahwa seluruh informasi dan data yang saya isikan pada formulir pengajuan aplikasi visa ini adalah sah, benar, akurat, dan sesuai dengan dokumen identitas asli saya. <span class="text-rose-500">*</span>
-                            </span>
-                        </label>
-                        @error('declaration_agreed')
-                            <p class="text-xs text-rose-500 mt-2 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">error</span>
-                                {{ $message }}
-                            </p>
-                        @enderror
                     </div>
 
                 </div>
