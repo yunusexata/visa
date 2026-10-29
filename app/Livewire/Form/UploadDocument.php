@@ -267,7 +267,8 @@ class UploadDocument extends Component
             return;
         }
 
-        Alert::consoleLog($this, 'Submit All Documents Success', [
+        Alert::consoleLog($this, [
+            'Submit All Documents Success',
             'uploadedSlots' => $this->uploadedTypes,
             'totalFiles'    => collect(['coe', 'e_ktln', 'ktp', 'paspor', 'tiket', 'pas_photo'])
                 ->mapWithKeys(fn($s) => [$s => is_array($this->$s) ? count($this->$s) : ($this->$s ? 1 : 0)])

@@ -18,17 +18,8 @@
                         Unggah Berkas Persyaratan Visa
                     </h1>
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-300 max-w-2xl">
-                        Unggah dokumen pendukung pengajuan visa Anda. Foto akan otomatis dioptimasi dan dikompresi di perangkat Anda sebelum dikirim ke server.
+                        Unggah dokumen pendukung pengajuan visa Anda.
                     </p>
-                </div>
-
-                <!-- Info Card Kecil -->
-                <div class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-[#0049FF]/5 dark:bg-blue-950/40 border border-[#0049FF]/20 text-[#001B5E] dark:text-blue-300 text-xs shrink-0">
-                    <span class="material-symbols-outlined text-[20px] text-[#0049FF]">bolt</span>
-                    <div>
-                        <span class="font-bold">Auto-Compress Aktif:</span>
-                        <span class="text-gray-600 dark:text-gray-400 block sm:inline">Foto dioptimasi s.d. 500KB</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -39,15 +30,17 @@
         <!-- Grid Slot Upload Dokumen (2 Kolom Desktop, 1 Kolom Mobile) -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-7">
             @foreach($slotConfig as $slotKey => $cfg)
-                <x-form.upload-zone
-                    :type="$slotKey"
-                    :label="$cfg['label']"
-                    :description="$cfg['description']"
-                    :icon="$cfg['icon']"
-                    :required="$cfg['required']"
-                    :multiple="$cfg['multiple']"
-                    :acceptPdf="$cfg['accept_pdf']"
-                />
+                <div wire:key="slot-container-{{ $slotKey }}">
+                    <x-form.upload-zone
+                        :type="$slotKey"
+                        :label="$cfg['label']"
+                        :description="$cfg['description']"
+                        :icon="$cfg['icon']"
+                        :required="$cfg['required']"
+                        :multiple="$cfg['multiple']"
+                        :acceptPdf="$cfg['accept_pdf']"
+                    />
+                </div>
             @endforeach
         </div>
 

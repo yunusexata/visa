@@ -21,6 +21,7 @@ enum VisaAttachmentType: string
             self::PASPOR => 'Photo Paspor',
             self::TIKET => 'Berkas Tiket',
             self::PAS_PHOTO => 'Pas Photo Latar Putih',
+            self::PERSYARATAN_PENGURUSAN_VISA => 'PDF Persyaratan Visa'
         };
     }
 

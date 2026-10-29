@@ -15,6 +15,8 @@
 @endphp
 
 <div
+    wire:ignore
+    wire:key="upload-zone-{{ $type }}"
     x-data="{
         slotType: '{{ $type }}',
         isRequired: {{ $required ? 'true' : 'false' }},
@@ -84,7 +86,7 @@
             const fileId = 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 7);
             const isPdf = rawFile.type === 'application/pdf' || rawFile.name.toLowerCase().endsWith('.pdf');
 
-            const entry = {
+            this.files.push({
                 id: fileId,
                 name: rawFile.name,
                 originalSizeKB: Math.round(rawFile.size / 1024),
@@ -97,62 +99,82 @@
                 progress: 15,
                 error: null,
                 serverIndex: null,
-            };
+            });
 
-            this.files.push(entry);
+            // Ambil reactive proxy Alpine agar setiap mutasi properti langsung ter-render ke DOM!
+            const entry = this.files.find(f => f.id === fileId);
+            if (!entry) return;
 
             // 1. Cek izin PDF pada slot ini
             if (isPdf && !this.acceptPdf) {
                 entry.stage = 'error';
+                entry.stageMessage = 'Format PDF ditolak';
                 entry.error = 'Jenis dokumen ini harus berupa foto/gambar (JPG/PNG/WEBP/HEIC), format PDF tidak diperbolehkan.';
                 return;
             }
 
-            // 2. Validasi format & ukuran via UploadCompress helper
-            if (window.UploadCompress && typeof window.UploadCompress.validateFile === 'function') {
-                const validation = window.UploadCompress.validateFile(rawFile);
-                if (!validation.valid) {
-                    entry.stage = 'error';
-                    entry.error = validation.error;
-                    return;
+            // Pastikan modul UploadCompress sudah siap (tunggu jika script sedang loading)
+            if (!window.UploadCompress || typeof window.UploadCompress.processUploadFile !== 'function') {
+                entry.stageMessage = 'Menyiapkan modul kompresi...';
+                if (window.UploadCompress && typeof window.UploadCompress.ready === 'function') {
+                    await window.UploadCompress.ready();
+                } else {
+                    let waited = 0;
+                    while ((!window.UploadCompress || typeof window.UploadCompress.processUploadFile !== 'function') && waited < 2000) {
+                        await new Promise(r => setTimeout(r, 100));
+                        waited += 100;
+                    }
                 }
             }
 
-            // 3. Auto-compress di browser (Web Worker / HEIC converter)
+            if (!window.UploadCompress || typeof window.UploadCompress.processUploadFile !== 'function') {
+                entry.stage = 'error';
+                entry.stageMessage = 'Modul belum siap';
+                entry.error = 'Modul kompresi gambar belum siap di peramban Anda. Silakan muat ulang halaman.';
+                return;
+            }
+
+            // 2. Validasi format & ukuran via UploadCompress helper
+            const validation = window.UploadCompress.validateFile(rawFile);
+            if (!validation.valid) {
+                entry.stage = 'error';
+                entry.stageMessage = 'Format tidak sesuai';
+                entry.error = validation.error;
+                return;
+            }
+
+            // 3. Auto-compress di browser via Native Canvas Engine
             entry.stage = 'compressing';
             entry.stageMessage = isPdf ? 'Menyiapkan berkas PDF...' : 'Mengompresi foto otomatis...';
-            entry.progress = 40;
+            entry.progress = 30;
 
             let fileToUpload = rawFile;
 
-            if (window.UploadCompress && typeof window.UploadCompress.processUploadFile === 'function') {
-                try {
-                    const result = await window.UploadCompress.processUploadFile(rawFile, (status) => {
-                        entry.stageMessage = status.message || entry.stageMessage;
-                        if (status.progress) entry.progress = status.progress;
-                    });
+            try {
+                const result = await window.UploadCompress.processUploadFile(rawFile, (status) => {
+                    entry.stageMessage = status.message || entry.stageMessage;
+                    if (status.progress) entry.progress = status.progress;
+                });
 
-                    fileToUpload = result.file;
-                    entry.finalSizeKB = result.finalSizeKB;
-                    entry.isPdf = result.isPdf;
+                fileToUpload = result.file;
+                entry.name = result.file.name;
+                entry.finalSizeKB = result.finalSizeKB;
+                entry.isPdf = result.isPdf;
 
-                    if (result.isCompressed && entry.originalSizeKB > entry.finalSizeKB) {
-                        entry.savingsPct = Math.round((1 - (entry.finalSizeKB / entry.originalSizeKB)) * 100);
-                    }
-
-                    if (!entry.isPdf) {
-                        entry.previewUrl = URL.createObjectURL(fileToUpload);
-                    }
-                } catch (err) {
-                    entry.stage = 'error';
-                    entry.error = err.message || 'Gagal memproses dan mengompresi gambar.';
-                    return;
+                if (result.isCompressed && entry.originalSizeKB > entry.finalSizeKB) {
+                    entry.savingsPct = Math.round((1 - (entry.finalSizeKB / entry.originalSizeKB)) * 100);
+                } else {
+                    entry.savingsPct = 0;
                 }
-            } else {
-                // Fallback jika helper belum termuat
+
                 if (!entry.isPdf) {
-                    entry.previewUrl = URL.createObjectURL(rawFile);
+                    entry.previewUrl = URL.createObjectURL(fileToUpload);
                 }
+            } catch (err) {
+                entry.stage = 'error';
+                entry.stageMessage = 'Gagal kompresi';
+                entry.error = err.message || 'Gagal memproses dan mengompresi gambar.';
+                return;
             }
 
             // 4. Auto-upload ke backend Livewire
@@ -242,25 +264,6 @@
                         {{ $description ?: 'Format gambar JPG, PNG, WEBP, HEIC' . ($acceptPdf ? ' atau PDF' : '') }}
                     </p>
                 </div>
-            </div>
-
-            <!-- Badges -->
-            <div class="flex items-center gap-1.5 shrink-0">
-                @if($required)
-                    <span class="px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase rounded-full bg-[#001B5E] text-white">
-                        Wajib
-                    </span>
-                @else
-                    <span class="px-2.5 py-0.5 text-[11px] font-medium tracking-wide uppercase rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600">
-                        Opsional
-                    </span>
-                @endif
-
-                @if($multiple)
-                    <span class="hidden sm:inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full bg-blue-50 dark:bg-blue-900/30 text-[#0049FF] dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                        Multi-Berkas
-                    </span>
-                @endif
             </div>
         </div>
     </div>
