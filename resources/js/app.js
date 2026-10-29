@@ -8,11 +8,18 @@ import 'flatpickr/dist/flatpickr.min.css';
 import { Calendar } from '@fullcalendar/core';
 
 import Swal from 'sweetalert2';
+
+// IMPORT ALPINE.JS (Wajib untuk Flux UI)
+import Alpine from 'alpinejs';
+
 import { UPLOAD_CONFIG } from './upload-config';
 import { processUploadFile, validateFile, isPdf, isHeic, ready } from './upload-compress';
 
 window.Swal = Swal;
-// window.Alpine = Alpine;
+
+// DAFTARKAN ALPINE KE WINDOW
+window.Alpine = Alpine;
+
 window.ApexCharts = ApexCharts;
 window.flatpickr = flatpickr;
 window.FullCalendar = Calendar;
@@ -32,4 +39,5 @@ if (typeof window.dispatchEvent === 'function') {
     window.dispatchEvent(new CustomEvent('upload-compress:ready'));
 }
 
-// Alpine.start();
+// MULAI / JALANKAN ALPINE
+Alpine.start();
