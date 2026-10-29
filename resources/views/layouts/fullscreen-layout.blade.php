@@ -97,6 +97,7 @@ window.addEventListener('resize', checkMobile);">
     {{-- preloader end --}}
 
     @yield('content')
+    {{ $slot ?? '' }}
 
 </body>
 

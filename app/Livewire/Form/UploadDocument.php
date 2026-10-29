@@ -28,6 +28,26 @@ class UploadDocument extends Component
     // Status form akhir
     public bool $is_submitted = false;
 
+    // Magic link reference
+    public ?string $link = null;
+
+    public ?string $clientName = null;
+
+    public function mount(?string $link = null): void
+    {
+        $this->link = $link ?: request()->query('link');
+
+        if ($this->link) {
+            $decoded = \Vinkla\Hashids\Facades\Hashids::decode($this->link);
+            if (! empty($decoded)) {
+                $linkModel = \App\Models\Form\VisaFormLink::find($decoded[0]);
+                if ($linkModel) {
+                    $this->clientName = $linkModel->name;
+                }
+            }
+        }
+    }
+
     /**
      * Konfigurasi setiap slot berkas dokumen.
      * Default: SEMUA MULTIPLE dan SEMUA OPSIONAL (dapat diubah manual sewaktu-waktu).
@@ -289,6 +309,7 @@ class UploadDocument extends Component
     {
         return view('livewire.form.upload-document', [
             'slotConfig' => $this->slotConfig,
+            'clientName' => $this->clientName,
         ])->extends('layouts.fullscreen-layout')->section('content');
     }
 }

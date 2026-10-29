@@ -18,6 +18,9 @@ Route::get('/example/upload', function () {
     return redirect()->route('form.upload-document');
 })->name('example.upload');
 
+// Client Visa Form Submission via Magic Link
+Route::get('/form/{hashid}', \App\Livewire\Form\VisaFormSubmission::class)->name('form.show');
+
 Route::middleware('auth')->group(function () {
     Route::get("/menu-notification", [MenuNotificationController::class, "index"])->name('menu_notification');
 });
