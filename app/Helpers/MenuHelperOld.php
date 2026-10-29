@@ -2,18 +2,17 @@
 
 namespace App\Helpers;
 
-use App\Models\User;
 use App\Repositories\Account\UserRepository;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
 
 class MenuHelper
 {
     public static function menu()
     {
         $user = Auth::user();
-        $validatedMenu = Cache::remember(CacheHelper::KEY_MENU . $user->id, CacheHelper::TIME_MENU, function () {
+        $validatedMenu = Cache::remember(CacheHelper::KEY_MENU.$user->id, CacheHelper::TIME_MENU, function () {
             return self::getValidatedMenu();
         });
 
@@ -32,7 +31,7 @@ class MenuHelper
             if (isset($menu['submenu'])) {
                 $validatedSubmenu = [];
                 foreach ($menu['submenu'] as $submenu) {
-                    if (!isset($submenu['route']) || PermissionHelper::isRoutePermitted($submenu['route'], $user)) {
+                    if (! isset($submenu['route']) || PermissionHelper::isRoutePermitted($submenu['route'], $user)) {
                         $validatedSubmenu[] = $submenu;
                     }
                 }
@@ -43,7 +42,7 @@ class MenuHelper
                 }
             } else {
 
-                if (!isset($menu['route']) || PermissionHelper::isRoutePermitted($menu['route'], $user)) {
+                if (! isset($menu['route']) || PermissionHelper::isRoutePermitted($menu['route'], $user)) {
                     $validatedMenu[] = $menu;
                 }
             }
@@ -75,14 +74,14 @@ class MenuHelper
 
     public static function resetCacheByUser($userId)
     {
-        Cache::forget(CacheHelper::KEY_MENU . $userId);
+        Cache::forget(CacheHelper::KEY_MENU.$userId);
     }
 
     public static function resetCacheByRole($roleId)
     {
         $users = UserRepository::getByRole($roleId);
         foreach ($users as $user) {
-            Cache::forget(CacheHelper::KEY_MENU . $user->id);
+            Cache::forget(CacheHelper::KEY_MENU.$user->id);
         }
     }
 }

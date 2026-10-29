@@ -33,10 +33,10 @@ enum VisaFormLinkStatus: string
     public function print(): string
     {
         return match ($this) {
-            self::STATUS_ACTIVE => '<span class="btn btn-sm btn-warning">' . $this->label() . '</span>',
-            self::STATUS_INACTIVE => '<span class="btn btn-sm btn-success">' . $this->label() . '</span>',
-            self::STATUS_EXPIRED => '<span class="btn btn-sm btn-success">' . $this->label() . '</span>',
-            self::STATUS_SUCCESS => '<span class="btn btn-sm btn-success">' . $this->label() . '</span>',
+            self::STATUS_ACTIVE => '<span class="btn btn-sm btn-warning">'.$this->label().'</span>',
+            self::STATUS_INACTIVE => '<span class="btn btn-sm btn-success">'.$this->label().'</span>',
+            self::STATUS_EXPIRED => '<span class="btn btn-sm btn-success">'.$this->label().'</span>',
+            self::STATUS_SUCCESS => '<span class="btn btn-sm btn-success">'.$this->label().'</span>',
         };
     }
 
@@ -48,7 +48,7 @@ enum VisaFormLinkStatus: string
     public static function options(): array
     {
         return collect(self::cases())
-            ->mapWithKeys(fn($case) => [
+            ->mapWithKeys(fn ($case) => [
                 $case->value => $case->label(),
             ])
             ->toArray();

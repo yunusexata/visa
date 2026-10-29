@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\User;
+use App\Http\Controllers\Controller;
+use App\Repositories\Account\UserRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\Controller;
-use App\Repositories\Account\UserRepository;
 
 class AuthController extends Controller
 {
@@ -54,7 +53,7 @@ class AuthController extends Controller
     public function emailVerificationVerify(Request $request)
     {
         $user = UserRepository::find($request->id);
-        if (!hash_equals(sha1($user->getEmailForVerification()), (string) $request->hash)) {
+        if (! hash_equals(sha1($user->getEmailForVerification()), (string) $request->hash)) {
             return redirect()->route('login');
         }
 
@@ -69,6 +68,7 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::logout();
+
         return redirect()->route('login');
     }
 }

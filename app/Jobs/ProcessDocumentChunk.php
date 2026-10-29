@@ -5,28 +5,27 @@ namespace App\Jobs;
 use App\Models\Document;
 use App\Models\DocumentUploadBatch;
 use App\Models\DocumentUploadFailure;
-use Illuminate\Bus\Queueable;
+use Exception;
 use Illuminate\Bus\Batchable;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use Exception;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class ProcessDocumentChunk implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
+    use Batchable, Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 120;
 
     /**
      * Create a new job instance.
      *
-     * @param int $uploadBatchId
-     * @param array $filesData Array of file results to process in this chunk
+     * @param  array  $filesData  Array of file results to process in this chunk
      */
     public function __construct(
         protected int $uploadBatchId,
@@ -46,7 +45,7 @@ class ProcessDocumentChunk implements ShouldQueue
         }
 
         $batch = DocumentUploadBatch::find($this->uploadBatchId);
-        if (!$batch) {
+        if (! $batch) {
             return;
         }
 
@@ -57,10 +56,10 @@ class ProcessDocumentChunk implements ShouldQueue
             $isMatched = $file['matched'];
 
             // Jika file tidak dicocokkan (unmatched)
-            if (!$isMatched) {
+            if (! $isMatched) {
                 $bestMatchName = $file['best_match_name'] ?? null;
                 $bestMatchScore = $file['best_match_score'] ?? null;
-                $reason = "Nama tidak cocok. Kecocokan tertinggi: \"" . ($bestMatchName ?? 'N/A') . "\" dengan skor " . number_format($bestMatchScore ?? 0.0, 3) . " < 0.85";
+                $reason = 'Nama tidak cocok. Kecocokan tertinggi: "'.($bestMatchName ?? 'N/A').'" dengan skor '.number_format($bestMatchScore ?? 0.0, 3).' < 0.85';
 
                 DocumentUploadFailure::create([
                     'batch_id' => $this->uploadBatchId,
@@ -77,6 +76,7 @@ class ProcessDocumentChunk implements ShouldQueue
                 if (Storage::disk('local')->exists($tempPath)) {
                     Storage::disk('local')->delete($tempPath);
                 }
+
                 continue;
             }
 
@@ -97,6 +97,7 @@ class ProcessDocumentChunk implements ShouldQueue
                     if (Storage::disk('local')->exists($tempPath)) {
                         Storage::disk('local')->delete($tempPath);
                     }
+
                     continue;
                 } else {
                     // Kasus D: Konflik internal batch (Batch sama tapi nama file beda) -> Duplikasi
@@ -106,7 +107,7 @@ class ProcessDocumentChunk implements ShouldQueue
                         ->where('failure_reason', 'duplicate_in_batch')
                         ->exists();
 
-                    if (!$alreadyLogged) {
+                    if (! $alreadyLogged) {
                         DocumentUploadFailure::create([
                             'batch_id' => $this->uploadBatchId,
                             'original_filename' => $originalName,
@@ -123,12 +124,13 @@ class ProcessDocumentChunk implements ShouldQueue
                     if (Storage::disk('local')->exists($tempPath)) {
                         Storage::disk('local')->delete($tempPath);
                     }
+
                     continue;
                 }
             }
 
             // 1. Cek keberadaan file temp lokal
-            if (!Storage::disk('local')->exists($tempPath)) {
+            if (! Storage::disk('local')->exists($tempPath)) {
                 DocumentUploadFailure::create([
                     'batch_id' => $this->uploadBatchId,
                     'original_filename' => $originalName,
@@ -139,6 +141,7 @@ class ProcessDocumentChunk implements ShouldQueue
                     'resolved_client_id' => null,
                     'resolved_at' => null,
                 ]);
+
                 continue;
             }
 
@@ -146,22 +149,23 @@ class ProcessDocumentChunk implements ShouldQueue
             try {
                 $fileContents = Storage::disk('local')->get($tempPath);
                 $uploadSuccess = Storage::disk('supabase')->put($targetPath, $fileContents);
-                if (!$uploadSuccess) {
-                    throw new Exception("Gagal mengunggah file ke Supabase Storage (S3 return false).");
+                if (! $uploadSuccess) {
+                    throw new Exception('Gagal mengunggah file ke Supabase Storage (S3 return false).');
                 }
             } catch (Throwable $uploadEx) {
                 // Catat kegagalan upload S3 (file temp lokal tetap dipertahankan untuk retry)
-                logger()->error("Gagal mengunggah file {$originalName} ke S3: " . $uploadEx->getMessage());
+                logger()->error("Gagal mengunggah file {$originalName} ke S3: ".$uploadEx->getMessage());
                 DocumentUploadFailure::create([
                     'batch_id' => $this->uploadBatchId,
                     'original_filename' => $originalName,
                     'folder_type' => $type,
-                    'failure_reason' => "Gagal upload S3: " . $uploadEx->getMessage(),
+                    'failure_reason' => 'Gagal upload S3: '.$uploadEx->getMessage(),
                     'best_match_name' => null,
                     'best_match_score' => null,
                     'resolved_client_id' => null,
                     'resolved_at' => null,
                 ]);
+
                 continue;
             }
 
@@ -179,7 +183,7 @@ class ProcessDocumentChunk implements ShouldQueue
                                         Storage::disk('supabase')->delete($existingDoc->bucket_path);
                                     }
                                 } catch (Throwable $e) {
-                                    logger()->warning("Gagal menghapus file lama di S3: " . $e->getMessage());
+                                    logger()->warning('Gagal menghapus file lama di S3: '.$e->getMessage());
                                 }
                             }
 
@@ -210,17 +214,18 @@ class ProcessDocumentChunk implements ShouldQueue
                 });
             } catch (Throwable $dbEx) {
                 // Log error database, rollback transaksi per-file (file lain tetap aman)
-                logger()->error("Gagal menyimpan record DB untuk {$originalName}: " . $dbEx->getMessage());
+                logger()->error("Gagal menyimpan record DB untuk {$originalName}: ".$dbEx->getMessage());
                 DocumentUploadFailure::create([
                     'batch_id' => $this->uploadBatchId,
                     'original_filename' => $originalName,
                     'folder_type' => $type,
-                    'failure_reason' => "Error Database: " . $dbEx->getMessage(),
+                    'failure_reason' => 'Error Database: '.$dbEx->getMessage(),
                     'best_match_name' => null,
                     'best_match_score' => null,
                     'resolved_client_id' => null,
                     'resolved_at' => null,
                 ]);
+
                 continue;
             }
 

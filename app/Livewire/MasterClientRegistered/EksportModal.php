@@ -39,26 +39,28 @@ class EksportModal extends Component
 
     // Import Pipeline
     public $previewBulkStatusRows;
+
     public $errorBulkStatusRows = [];
 
     public function mount()
     {
         $authUser = UserRepository::authenticatedUser();
-        if (!$this->batch_name) {
+        if (! $this->batch_name) {
             $this->batch_name = 'all';
         }
 
-        if (!$this->bulkPic) {
+        if (! $this->bulkPic) {
             $this->bulkPic = $authUser->hasPermissionTo(PermissionHelper::transform(PermissionHelper::ACCESS_FILTER_ALL_PIC, PermissionHelper::TYPE_READ)) ? null : auth()->user()->pic;
         }
     }
+
     // IMPORT PIPELINE
     public function updatedInputFile()
     {
         ini_set('memory_limit', '1024M');
         set_time_limit(300);
         consoleLog($this, 'con');
-        $import = new ExcelImportBulk();
+        $import = new ExcelImportBulk;
         Excel::import($import, $this->input_file);
 
         $this->previewBulkStatusRows = [];
@@ -99,7 +101,7 @@ class EksportModal extends Component
 
             $this->previewBulkStatusRows[] = [
                 'data' => $d,
-                'error' => $validator->errors()->toArray()
+                'error' => $validator->errors()->toArray(),
             ];
 
             if ($validator->fails()) {
@@ -134,11 +136,11 @@ class EksportModal extends Component
             $extension = $this->input_file
                 ->extension();
 
-            $fileName = $this->input_file->getClientOriginalName() . '.' . $extension;
+            $fileName = $this->input_file->getClientOriginalName().'.'.$extension;
             $disk = env('DEFAULT_STORE_DISK', 'private');
 
-            $storedName = Str::uuid() . '.' . $this->input_file->extension();
-            $filePath =   "import_excel_jp";
+            $storedName = Str::uuid().'.'.$this->input_file->extension();
+            $filePath = 'import_excel_jp';
 
             $path = Storage::disk($disk)->putFileAs(
                 $filePath,
@@ -151,7 +153,7 @@ class EksportModal extends Component
 
             foreach ($this->previewBulkStatusRows as $key => $value) {
 
-                if (!$value['error']) {
+                if (! $value['error']) {
                     $phone = trim((string) ($value['data']['phone'] ?? ''));
                     // 1. Bersihkan spasi di awal dan akhir teks
                     $rawPic = $value['data']['pic'] ?? ''; // Tambahkan ?? '' aman jika key 'pic' absen
@@ -166,9 +168,9 @@ class EksportModal extends Component
 
                         // 4. Peta normalisasi nama (Mengubah 'selamet' menjadi 'slamet')
                         $allowedPics = [
-                            'ainul'   => 'ainul',
-                            'kim'     => 'kim',
-                            'slamet'  => 'slamet',
+                            'ainul' => 'ainul',
+                            'kim' => 'kim',
+                            'slamet' => 'slamet',
                             'selamet' => 'slamet', // Auto-correct ke 'slamet' sesuai keinginan Anda
                         ];
 
@@ -216,7 +218,7 @@ class EksportModal extends Component
             Alert::information($this, 'Data berhasil disimpan');
         } catch (\Exception $e) {
             DB::rollBack();
-            Alert::fail($this, "Gagal", $e->getMessage());
+            Alert::fail($this, 'Gagal', $e->getMessage());
         }
     }
 
@@ -231,7 +233,8 @@ class EksportModal extends Component
     #[On('export')]
     public function export($type)
     {
-        $fileName = "Data Client " . Carbon::now()->format('Y-m-d H:i:s');
+        $fileName = 'Data Client '.Carbon::now()->format('Y-m-d H:i:s');
+
         return ExportHelper::export(
             $type,
             $fileName,

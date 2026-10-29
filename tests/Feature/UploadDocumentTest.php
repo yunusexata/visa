@@ -1,30 +1,39 @@
 <?php
 
+use App\Enums\Form\VisaFormStatus;
 use App\Helpers\Alert;
 use App\Livewire\Form\UploadDocument;
+use App\Models\Form\VisaForm;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Vinkla\Hashids\Facades\Hashids;
 
 beforeEach(function () {
+    Storage::fake('public');
     Storage::fake('local');
+
+    $this->visaForm = VisaForm::factory()->create([
+        'status' => VisaFormStatus::DRAFT,
+    ]);
+    $this->hashid = Hashids::encode($this->visaForm->id);
 });
 
 test('upload document page is accessible and renders livewire component', function () {
-    $response = $this->get(route('form.upload-document'));
+    $response = $this->get(route('form.upload-document', ['hashid' => $this->hashid]));
 
     $response->assertOk();
     $response->assertSeeLivewire(UploadDocument::class);
 });
 
-test('example upload alias redirects to form.upload-document', function () {
+test('example upload alias redirects to example-form', function () {
     $response = $this->get('/example/upload');
 
-    $response->assertRedirect(route('form.upload-document'));
+    $response->assertRedirect(route('example-form'));
 });
 
 test('all slots default to multiple true and required false', function () {
-    $component = Livewire::test(UploadDocument::class);
+    $component = Livewire::test(UploadDocument::class, ['hashid' => $this->hashid]);
     $config = $component->instance()->getSlotConfig();
 
     $expectedSlots = ['coe', 'e_ktln', 'ktp', 'paspor', 'tiket', 'pas_photo'];
@@ -37,7 +46,7 @@ test('all slots default to multiple true and required false', function () {
 });
 
 test('component renders all 6 document slots and badges', function () {
-    Livewire::test(UploadDocument::class)
+    Livewire::test(UploadDocument::class, ['hashid' => $this->hashid])
         ->assertOk()
         ->assertSee('Photo COE')
         ->assertSee('E-KTLN')
@@ -52,7 +61,7 @@ test('component renders all 6 document slots and badges', function () {
 test('backend validation rejects unsupported mime types', function () {
     $fakeFile = UploadedFile::fake()->create('malicious.exe', 500, 'application/x-msdownload');
 
-    Livewire::test(UploadDocument::class)
+    Livewire::test(UploadDocument::class, ['hashid' => $this->hashid])
         ->set('coe', [$fakeFile])
         ->call('processSlot', 'coe')
         ->assertHasErrors(['coe.0']);
@@ -61,7 +70,7 @@ test('backend validation rejects unsupported mime types', function () {
 test('backend validation accepts valid jpg image and dispatches attachment-saved and consoleLog', function () {
     $imageFile = UploadedFile::fake()->image('coe_dokumen.jpg', 800, 600)->size(400);
 
-    Livewire::test(UploadDocument::class)
+    Livewire::test(UploadDocument::class, ['hashid' => $this->hashid])
         ->set('coe', [$imageFile])
         ->call('processSlot', 'coe')
         ->assertHasNoErrors()
@@ -72,7 +81,7 @@ test('backend validation accepts valid jpg image and dispatches attachment-saved
 test('backend validation accepts pdf file under 2mb for tiket slot', function () {
     $pdfFile = UploadedFile::fake()->create('tiket_flight.pdf', 1500, 'application/pdf');
 
-    Livewire::test(UploadDocument::class)
+    Livewire::test(UploadDocument::class, ['hashid' => $this->hashid])
         ->set('tiket', [$pdfFile])
         ->call('processSlot', 'tiket')
         ->assertHasNoErrors()
@@ -83,7 +92,7 @@ test('backend validation rejects pdf file over 2mb', function () {
     // 2.5MB = 2560KB (melebihi batas 2048KB)
     $largePdf = UploadedFile::fake()->create('tiket_jumbo.pdf', 2600, 'application/pdf');
 
-    Livewire::test(UploadDocument::class)
+    Livewire::test(UploadDocument::class, ['hashid' => $this->hashid])
         ->set('tiket', [$largePdf])
         ->call('processSlot', 'tiket')
         ->assertHasErrors(['tiket.0']);
@@ -92,7 +101,7 @@ test('backend validation rejects pdf file over 2mb', function () {
 test('backend validation rejects pdf on image-only slot like ktp', function () {
     $pdfOnKtp = UploadedFile::fake()->create('ktp.pdf', 300, 'application/pdf');
 
-    Livewire::test(UploadDocument::class)
+    Livewire::test(UploadDocument::class, ['hashid' => $this->hashid])
         ->set('ktp', [$pdfOnKtp])
         ->call('processSlot', 'ktp')
         ->assertHasErrors(['ktp.0']);
@@ -102,7 +111,7 @@ test('buffer incomingSlot and incomingFile appends to slot without overwriting p
     $file1 = UploadedFile::fake()->image('paspor_hal_1.jpg')->size(350);
     $file2 = UploadedFile::fake()->image('paspor_hal_2.jpg')->size(420);
 
-    $component = Livewire::test(UploadDocument::class)
+    $component = Livewire::test(UploadDocument::class, ['hashid' => $this->hashid])
         ->set('incomingSlot', 'paspor')
         ->set('incomingFile', $file1)
         ->assertDispatched('attachment-saved', type: 'paspor', count: 1);
@@ -122,7 +131,7 @@ test('removeFile removes file from slot and dispatches attachment-removed', func
     $file1 = UploadedFile::fake()->image('paspor_hal_1.jpg')->size(300);
     $file2 = UploadedFile::fake()->image('paspor_hal_2.jpg')->size(300);
 
-    $component = Livewire::test(UploadDocument::class)
+    $component = Livewire::test(UploadDocument::class, ['hashid' => $this->hashid])
         ->set('paspor', [$file1, $file2])
         ->call('processSlot', 'paspor')
         ->assertSet('uploadedTypes', ['paspor']);
@@ -140,16 +149,18 @@ test('removeFile removes file from slot and dispatches attachment-removed', func
 });
 
 test('submitAllDocuments succeeds when all slots are optional by default', function () {
-    Livewire::test(UploadDocument::class)
+    Livewire::test(UploadDocument::class, ['hashid' => $this->hashid])
         ->call('submitAllDocuments')
         ->assertHasNoErrors()
         ->assertSet('is_submitted', true)
         ->assertDispatched('documents-submitted')
-        ->assertDispatched('SwalInfo');
+        ->assertRedirect(route('form.success', ['hashid' => $this->hashid]));
+
+    expect($this->visaForm->fresh()->status)->toBe(VisaFormStatus::DIAJUKAN);
 });
 
 test('submitAllDocuments blocks and alerts if required slot has no uploaded files', function () {
-    $component = Livewire::test(UploadDocument::class);
+    $component = Livewire::test(UploadDocument::class, ['hashid' => $this->hashid]);
 
     // Ubah slot coe menjadi required via Livewire call agar tersimpan di state component
     $component->call('setSlotRequired', 'coe', true);
@@ -159,4 +170,3 @@ test('submitAllDocuments blocks and alerts if required slot has no uploaded file
         ->assertNotDispatched('documents-submitted')
         ->assertDispatched('SwalInfo'); // Alert::fail dispatches SwalInfo
 });
-

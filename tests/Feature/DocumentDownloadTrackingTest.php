@@ -5,8 +5,8 @@ use App\Models\Document;
 use App\Models\DocumentUploadBatch;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
-
 use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
@@ -41,7 +41,7 @@ test('document download records live tracking activity with batch_id', function 
         'status' => 'completed',
     ]);
 
-    $filePath = 'documents/' . $client->id . '/ichijikin/test.jpg';
+    $filePath = 'documents/'.$client->id.'/ichijikin/test.jpg';
     Storage::disk('supabase')->put($filePath, 'dummy file content');
 
     $document = Document::create([
@@ -63,10 +63,10 @@ test('document download records live tracking activity with batch_id', function 
 
     // 4. Assert row created in document_downloads
     $this->assertDatabaseHas('document_downloads', [
-        'client_id'   => $client->id,
+        'client_id' => $client->id,
         'document_id' => $document->id,
-        'batch_id'    => $batch->id,
-        'source'      => 'live_tracked',
+        'batch_id' => $batch->id,
+        'source' => 'live_tracked',
     ]);
 });
 
@@ -87,7 +87,7 @@ test('document download survives db logging exception (Test Case #3)', function 
     ]);
     $user->update(['client_id' => $client->id]);
 
-    $filePath = 'documents/' . $client->id . '/resi/test_resi.jpg';
+    $filePath = 'documents/'.$client->id.'/resi/test_resi.jpg';
     Storage::disk('supabase')->put($filePath, 'dummy resi content');
 
     Document::create([
@@ -99,7 +99,7 @@ test('document download survives db logging exception (Test Case #3)', function 
     ]);
 
     // 2. Simulate DB logging failure by dropping document_downloads table
-    Illuminate\Support\Facades\Schema::dropIfExists('document_downloads');
+    Schema::dropIfExists('document_downloads');
 
     // 3. Perform download request
     $response = $this->actingAs($user)
@@ -135,7 +135,7 @@ test('multiple download requests by same client record separate rows (Test Case 
         'status' => 'completed',
     ]);
 
-    $filePath = 'documents/' . $client->id . '/kwitansi/test_kwitansi.jpg';
+    $filePath = 'documents/'.$client->id.'/kwitansi/test_kwitansi.jpg';
     Storage::disk('supabase')->put($filePath, 'dummy kwitansi content');
 
     $document = Document::create([

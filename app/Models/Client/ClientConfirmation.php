@@ -14,7 +14,7 @@ use Muhammadyunus1072\TrackHistory\HasTrackHistory;
 class ClientConfirmation extends Model
 {
     // php artisan reverb:start
-    use HasFactory, SoftDeletes, HasTrackHistory;
+    use HasFactory, HasTrackHistory, SoftDeletes;
 
     protected $fillable = [
         'client_id',
@@ -39,9 +39,10 @@ class ClientConfirmation extends Model
 
     protected $guarded = ['id'];
 
-
     const NENKIN_80_RECEIVED_TYPE_RECEIVED = 'received';
+
     const NENKIN_80_RECEIVED_TYPE_NOT_RECEIVED = 'not_received';
+
     const NENKIN_80_RECEIVED_TYPE_NOT_CHECKED = 'not_checked';
 
     const NENKIN_80_RECEIVED_TYPE_CHOICE = [
@@ -51,6 +52,7 @@ class ClientConfirmation extends Model
     ];
 
     const CURRENT_POSITION_INDONESIA = 'indonesia';
+
     const CURRENT_POSITION_JEPANG = 'jepang';
 
     const CURRENT_POSITION_CHOICE = [
@@ -59,6 +61,7 @@ class ClientConfirmation extends Model
     ];
 
     const BACK_TO_JP_TYPE_YES = 'yes';
+
     const BACK_TO_JP_TYPE_NO = 'no';
 
     const BACK_TO_JP_TYPE_CHOICE = [
@@ -85,7 +88,7 @@ class ClientConfirmation extends Model
                 $model->current_position === ClientConfirmation::CURRENT_POSITION_INDONESIA &&
                 $model->back_to_jp_type === ClientConfirmation::BACK_TO_JP_TYPE_YES
             ) {
-                $departure = Carbon::createFromFormat('Y-m', $model->departure_year . "-" . $model->departure_month);
+                $departure = Carbon::createFromFormat('Y-m', $model->departure_year.'-'.$model->departure_month);
                 $is_less_then_7_month = $departure->greaterThanOrEqualTo(now()->addMonths(6));
                 if (
                     $is_less_then_7_month
@@ -99,7 +102,7 @@ class ClientConfirmation extends Model
                     // Alert::information($model, 'ADJUSMENT');
                 }
                 if (
-                    !$is_less_then_7_month
+                    ! $is_less_then_7_month
                 ) {
                     // if ($model->client) {
                     // $model->client()->update([
@@ -159,18 +162,22 @@ class ClientConfirmation extends Model
     {
         return $this->belongsTo(Client::class, 'client_id', 'id');
     }
+
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
+
     public function updator()
     {
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }
+
     public function deletor()
     {
         return $this->belongsTo(User::class, 'deleted_by', 'id');
     }
+
     public function closing()
     {
         return $this->belongsTo(ClientClosingHistory::class, 'client_closing_history_id', 'id');

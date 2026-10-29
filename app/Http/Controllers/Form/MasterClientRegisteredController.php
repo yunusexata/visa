@@ -14,11 +14,11 @@ class MasterClientRegisteredController extends Controller
 
     public function create()
     {
-        return view('app.master-client-registered.import', ["objId" => null]);
+        return view('app.master-client-registered.import', ['objId' => null]);
     }
 
     public function edit(Request $request)
     {
-        return view('app.master-client-registered.detail', ["objId" => $request->id]);
+        return view('app.master-client-registered.detail', ['objId' => $request->id]);
     }
 }

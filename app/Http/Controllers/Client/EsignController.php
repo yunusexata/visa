@@ -7,6 +7,7 @@ use App\Models\Client\ClientEsign;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class EsignController extends Controller
 {
@@ -16,18 +17,18 @@ class EsignController extends Controller
         // dd($user);
         $client = $user->client;
 
-        if (!$client) {
+        if (! $client) {
             return redirect()->route('dashboard.index')->with('error', 'Data klien tidak ditemukan.');
         }
 
         // Klien harus sudah mengisi konfirmasi terlebih dahulu
-        if (!$client->confirmation) {
+        if (! $client->confirmation) {
             return redirect()->route('dashboard.index')->with('error', 'Silakan isi formulir konfirmasi terlebih dahulu.');
         }
 
         // Hanya tipe klaim SPEED atau ADJUSTMENT yang wajib E-Sign
         $claimType = strtoupper($client->confirmation->claim_type ?? '');
-        if (!in_array($claimType, ['SPEED', 'ADJUSTMENT', 'ADJUSMENT'])) {
+        if (! in_array($claimType, ['SPEED', 'ADJUSTMENT', 'ADJUSMENT'])) {
             return redirect()->route('dashboard.index');
         }
 
@@ -38,7 +39,7 @@ class EsignController extends Controller
 
         $now = Carbon::now()->locale('id');
         $dateFormatted = $now->translatedFormat('l, d F Y');
-        $letterNumber = str_pad($client->id, 4, '0', STR_PAD_LEFT) . '/LSN/SREI/2026';
+        $letterNumber = str_pad($client->id, 4, '0', STR_PAD_LEFT).'/LSN/SREI/2026';
 
         // Ambil NIK dan Alamat dari tabel client_confirmations
         $nik = $client->confirmation->nik ?? '';
@@ -60,13 +61,13 @@ class EsignController extends Controller
         $user = Auth::user();
         $client = $user->client;
 
-        if (!$client) {
+        if (! $client) {
             return redirect()->route('dashboard.index')->with('error', 'Data klien tidak ditemukan.');
         }
 
         // Validasi tipe klaim
         $claimType = strtoupper($client->confirmation->claim_type ?? '');
-        if (!in_array($claimType, ['SPEED', 'ADJUSTMENT', 'ADJUSMENT'])) {
+        if (! in_array($claimType, ['SPEED', 'ADJUSTMENT', 'ADJUSMENT'])) {
             return redirect()->route('dashboard.index');
         }
 
@@ -84,7 +85,7 @@ class EsignController extends Controller
         // Generate Document Hash
         $now = Carbon::now()->locale('id');
         $dateFormatted = $now->translatedFormat('l, d F Y');
-        $letterNumber = str_pad($client->id, 4, '0', STR_PAD_LEFT) . '/LSN/SREI/2026';
+        $letterNumber = str_pad($client->id, 4, '0', STR_PAD_LEFT).'/LSN/SREI/2026';
 
         // Render the agreement content to string for hashing
         $agreementHtml = view('client.partials.agreement-content', [
@@ -111,15 +112,15 @@ class EsignController extends Controller
         ]);
 
         $pdfStored = false;
-        $pdfPath = 'esigns/' . $client->id . '_agreement.pdf';
+        $pdfPath = 'esigns/'.$client->id.'_agreement.pdf';
 
         try {
             // Generate and save the PDF file
             $pdfContent = ClientEsign::generatePdfForUser($user);
-            \Illuminate\Support\Facades\Storage::disk('local')->put($pdfPath, $pdfContent);
+            Storage::disk('local')->put($pdfPath, $pdfContent);
             $pdfStored = true;
         } catch (\Throwable $e) {
-            logger()->error("Failed to generate and store agreement PDF during sign store", [
+            logger()->error('Failed to generate and store agreement PDF during sign store', [
                 'exception' => $e->getMessage(),
                 'client_id' => $client->id,
             ]);
@@ -132,7 +133,7 @@ class EsignController extends Controller
                 'stored_name' => basename($pdfPath),
                 'extension' => 'pdf',
                 'mime_type' => 'application/pdf',
-                'file_size' => \Illuminate\Support\Facades\Storage::disk('local')->size($pdfPath),
+                'file_size' => Storage::disk('local')->size($pdfPath),
                 'signed_at' => Carbon::now('Asia/Jakarta'),
             ]);
         } else {

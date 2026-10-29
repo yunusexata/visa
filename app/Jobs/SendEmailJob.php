@@ -3,13 +3,12 @@
 namespace App\Jobs;
 
 use App\Enums\Service\EmailLogStatus;
-use App\Models\GensenForm\GensenForm;
 use App\Models\Service\SendEmailLog;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Mail;
 use Throwable;
 
 class SendEmailJob implements ShouldQueue
@@ -39,7 +38,7 @@ class SendEmailJob implements ShouldQueue
                 'status' => EmailLogStatus::SENT,
                 'finished_at' => now(),
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
 
             $this->log->update([
                 'status' => EmailLogStatus::FAILED,
@@ -50,7 +49,6 @@ class SendEmailJob implements ShouldQueue
             throw $e;
         }
     }
-
 
     public function failed(?Throwable $e): void
     {

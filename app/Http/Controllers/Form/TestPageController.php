@@ -14,11 +14,11 @@ class TestPageController extends Controller
 
     public function create()
     {
-        return view('app.test-page.import', ["objId" => null]);
+        return view('app.test-page.import', ['objId' => null]);
     }
 
     public function edit(Request $request)
     {
-        return view('app.test-page.detail', ["objId" => $request->id]);
+        return view('app.test-page.detail', ['objId' => $request->id]);
     }
 }

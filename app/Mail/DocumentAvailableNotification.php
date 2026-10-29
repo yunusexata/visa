@@ -35,7 +35,7 @@ class DocumentAvailableNotification extends Mailable
             view: 'emails.document_available',
             with: [
                 'clientName' => $clientName,
-                'dashboardUrl' => config('app.url') . '/dashboard',
+                'dashboardUrl' => config('app.url').'/dashboard',
                 'reviewUrl' => config('exata.google_review_url'),
             ],
         );

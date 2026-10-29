@@ -24,11 +24,11 @@ class ClientRepository extends MasterDataRepository
             ->whereDoesntHave('esign')
             ->whereDoesntHave('confirmation')
             ->where('clients.claim_type', '!=', Client::CLAIM_TYPE_KOKUMIN)
-            ->when($batchName  != 'all', function ($q) use ($batchName) {
+            ->when($batchName != 'all', function ($q) use ($batchName) {
                 $q->where('clients.source_file_name', $batchName);
             })
             ->when($pic, function ($q) use ($pic) {
-                $q->where('clients.pic', 'ILIKE', '%' . $pic . '%');
+                $q->where('clients.pic', 'ILIKE', '%'.$pic.'%');
             })
             ->when($data_type && $data_type === Client::FILTER_DATA_TYPE_CONFIRMATION, function ($q) {
                 $q->whereHas('confirmation');
@@ -61,14 +61,14 @@ class ClientRepository extends MasterDataRepository
             })
             ->whereHas('confirmation')
             ->select('clients.*')
-            ->selectRaw("
+            ->selectRaw('
             EXISTS (
                 SELECT 1
                 FROM client_esigns
                 WHERE client_esigns.client_id = clients.id
                     AND client_esigns.deleted_at IS NULL
             ) as esign_exists
-        ")
+        ')
             ->orderByDesc('clients.is_exported')
             ->orderBy('clients.exported_at', 'ASC')
             ->orderByDesc('clients.no_jp');
@@ -96,26 +96,26 @@ class ClientRepository extends MasterDataRepository
                     $claimType,
                     [Client::CLAIM_TYPE_SPEED, Client::CLAIM_TYPE_ADJUSTMENT]
                 ), function ($q) use ($claimType) {
-                $q->where('client_confirmations.claim_type', $claimType)
-                    ->whereHas('esign');
-            })
+                    $q->where('client_confirmations.claim_type', $claimType)
+                        ->whereHas('esign');
+                })
             ->when($claimType && $claimType === Client::STATUS_PENDING, function ($q) {
                 $q->whereIn('client_confirmations.claim_type', [Client::CLAIM_TYPE_ADJUSTMENT, Client::CLAIM_TYPE_SPEED])
                     ->whereDoesntHave('esign');
             })
             ->when($pic, function ($q) use ($pic) {
-                $q->where('clients.pic', 'ILIKE', '%' . $pic . '%');
+                $q->where('clients.pic', 'ILIKE', '%'.$pic.'%');
             })
             ->whereHas('confirmation')
             ->select('clients.*')
-            ->selectRaw("
+            ->selectRaw('
             EXISTS (
                 SELECT 1
                 FROM client_esigns
                 WHERE client_esigns.client_id = clients.id
                     AND client_esigns.deleted_at IS NULL
             ) as esign_exists
-        ")
+        ')
             ->orderByDesc('clients.is_exported')
             ->when($orderByClaimType, function ($q) {
                 $q->orderByDesc('client_confirmations.claim_type', 'DESC');
@@ -123,6 +123,7 @@ class ClientRepository extends MasterDataRepository
             ->orderBy('clients.exported_at', 'ASC')
             ->orderByDesc('clients.no_jp');
     }
+
     public static function getClientUnclosing($batchName = null, $claimType = null, $pic = null, $closing_id = null, $orderByClaimType = false)
     {
         return Client::query()
@@ -143,29 +144,30 @@ class ClientRepository extends MasterDataRepository
                     $claimType,
                     [Client::CLAIM_TYPE_SPEED, Client::CLAIM_TYPE_ADJUSTMENT]
                 ), function ($q) use ($claimType) {
-                $q->where('client_confirmations.claim_type', $claimType)
-                    ->whereHas('esign');
-            })
+                    $q->where('client_confirmations.claim_type', $claimType)
+                        ->whereHas('esign');
+                })
             ->when($claimType && $claimType === Client::STATUS_PENDING, function ($q) {
                 $q->whereIn('client_confirmations.claim_type', [Client::CLAIM_TYPE_ADJUSTMENT, Client::CLAIM_TYPE_SPEED])
                     ->whereDoesntHave('esign');
             })
             ->when($pic, function ($q) use ($pic) {
-                $q->where('clients.pic', 'ILIKE', '%' . $pic . '%');
+                $q->where('clients.pic', 'ILIKE', '%'.$pic.'%');
             })
             ->select('clients.*')
-            ->selectRaw("
+            ->selectRaw('
             EXISTS (
                 SELECT 1
                 FROM client_esigns
                 WHERE client_esigns.client_id = clients.id
                     AND client_esigns.deleted_at IS NULL
             ) as esign_exists
-        ")
+        ')
             ->orderByDesc('clients.is_exported')
             ->orderBy('clients.exported_at', 'ASC')
             ->orderByDesc('clients.no_jp');
     }
+
     public static function getClientUnregistered($batchName = null, $claimType = null, $pic = null, $closing_id = null, $orderByClaimType = false)
     {
         return Client::query()
@@ -188,32 +190,33 @@ class ClientRepository extends MasterDataRepository
                     $claimType,
                     [Client::CLAIM_TYPE_SPEED, Client::CLAIM_TYPE_ADJUSTMENT]
                 ), function ($q) use ($claimType) {
-                $q->where('client_confirmations.claim_type', $claimType)
-                    ->whereHas('esign');
-            })
+                    $q->where('client_confirmations.claim_type', $claimType)
+                        ->whereHas('esign');
+                })
             ->when($claimType && $claimType === Client::STATUS_PENDING, function ($q) {
                 $q->whereIn('client_confirmations.claim_type', [Client::CLAIM_TYPE_ADJUSTMENT, Client::CLAIM_TYPE_SPEED])
                     ->whereDoesntHave('esign');
             })
             ->when($pic, function ($q) use ($pic) {
-                $q->where('clients.pic', 'ILIKE', '%' . $pic . '%');
+                $q->where('clients.pic', 'ILIKE', '%'.$pic.'%');
             })
             ->whereDoesntHave('confirmation')
             ->select('clients.*')
-            ->selectRaw("
+            ->selectRaw('
             EXISTS (
                 SELECT 1
                 FROM client_esigns
                 WHERE client_esigns.client_id = clients.id
                     AND client_esigns.deleted_at IS NULL
             ) as esign_exists
-        ")
+        ')
             ->orderByDesc('clients.is_exported')
             ->when($orderByClaimType, function ($q) {
                 $q->orderByDesc('client_confirmations.claim_type', 'DESC');
             })
             ->orderByDesc('clients.no_jp');
     }
+
     public static function getClientKokumin($batchName = null, $claimType = null, $pic = null, $closing_id = null, $orderByClaimType = false)
     {
         return Client::query()
@@ -236,26 +239,26 @@ class ClientRepository extends MasterDataRepository
                     $claimType,
                     [Client::CLAIM_TYPE_SPEED, Client::CLAIM_TYPE_ADJUSTMENT]
                 ), function ($q) use ($claimType) {
-                $q->where('client_confirmations.claim_type', $claimType)
-                    ->whereHas('esign');
-            })
+                    $q->where('client_confirmations.claim_type', $claimType)
+                        ->whereHas('esign');
+                })
             ->when($claimType && $claimType === Client::STATUS_PENDING, function ($q) {
                 $q->whereIn('client_confirmations.claim_type', [Client::CLAIM_TYPE_ADJUSTMENT, Client::CLAIM_TYPE_SPEED])
                     ->whereDoesntHave('esign');
             })
             ->when($pic, function ($q) use ($pic) {
-                $q->where('clients.pic', 'ILIKE', '%' . $pic . '%');
+                $q->where('clients.pic', 'ILIKE', '%'.$pic.'%');
             })
             ->whereDoesntHave('confirmation')
             ->select('clients.*')
-            ->selectRaw("
+            ->selectRaw('
             EXISTS (
                 SELECT 1
                 FROM client_esigns
                 WHERE client_esigns.client_id = clients.id
                     AND client_esigns.deleted_at IS NULL
             ) as esign_exists
-        ")
+        ')
             ->orderByDesc('clients.is_exported')
             ->when($orderByClaimType, function ($q) {
                 $q->orderByDesc('client_confirmations.claim_type', 'DESC');

@@ -2,20 +2,21 @@
 
 namespace App\Livewire\Account\Role;
 
-use App\Traits\Livewire\WithDatatable;
 use App\Helpers\Alert;
 use App\Helpers\PermissionHelper;
 use App\Repositories\Account\RoleRepository;
 use App\Repositories\Account\UserRepository;
-use Livewire\Component;
+use App\Traits\Livewire\WithDatatable;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\On;
+use Livewire\Component;
 
 class Datatable extends Component
 {
     use WithDatatable;
 
     public $isCanUpdate;
+
     public $isCanDelete;
 
     // Delete Dialog
@@ -31,7 +32,7 @@ class Datatable extends Component
     #[On('on-delete-dialog-confirm')]
     public function onDialogDeleteConfirm()
     {
-        if (!$this->isCanDelete || $this->targetDeleteId == null) {
+        if (! $this->isCanDelete || $this->targetDeleteId == null) {
             return;
         }
 
@@ -52,15 +53,14 @@ class Datatable extends Component
         Alert::confirmation(
             $this,
             Alert::ICON_QUESTION,
-            "Hapus Data",
-            "Apakah Anda Yakin Ingin Menghapus Data Ini ?",
-            "on-delete-dialog-confirm",
-            "on-delete-dialog-cancel",
-            "Hapus",
-            "Batal",
+            'Hapus Data',
+            'Apakah Anda Yakin Ingin Menghapus Data Ini ?',
+            'on-delete-dialog-confirm',
+            'on-delete-dialog-cancel',
+            'Hapus',
+            'Batal',
         );
     }
-
 
     public function getColumns(): array
     {
@@ -70,7 +70,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'render' => function ($item) {
-                    $editHtml = "";
+                    $editHtml = '';
                     if ($this->isCanUpdate) {
 
                         $editUrl = route('role.edit', $item->id);
@@ -81,8 +81,8 @@ class Datatable extends Component
                         </div>";
                     }
 
-                    $destroyHtml = "";
-                    $destroyHtml = "";
+                    $destroyHtml = '';
+                    $destroyHtml = '';
                     if ($this->isCanDelete) {
                         $destroyHtml = "<div class='col-auto'>
                             <button type='button' class='inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-2 py-1 text-sm bg-red-500 text-white shadow-theme-xs hover:bg-red-600 disabled:bg-brand-300' wire:click=\"showDeleteDialog($item->id)\">
@@ -111,9 +111,10 @@ class Datatable extends Component
                         $translatedName = PermissionHelper::translate($permission->name);
                         $html .= "<li class='list-group-item'>$translatedName</li>";
                     }
-                    $html .= "</ul>";
+                    $html .= '</ul>';
+
                     return $html;
-                }
+                },
             ],
         ];
     }

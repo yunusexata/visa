@@ -18,6 +18,7 @@ class CollectionMultiSheetExport implements WithMultipleSheets
         $this->query = $query;
         $this->view = $view;
     }
+
     public function sheets(): array
     {
 

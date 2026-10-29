@@ -2,6 +2,11 @@
 
 namespace App\Models\Client;
 
+use App\Models\Document;
+use App\Models\DocumentDownload;
+use App\Models\Review;
+use App\Models\UpodSubmission;
+use App\Models\UpodSurveyResponse;
 use App\Models\User;
 use App\Repositories\Client\ClientMagicLinkRepository;
 use App\Traits\Models\LowercaseAttributes;
@@ -15,7 +20,7 @@ use Muhammadyunus1072\TrackHistory\HasTrackHistory;
 class Client extends Model
 {
     // php artisan reverb:start
-    use HasFactory, SoftDeletes, HasTrackHistory, LowercaseAttributes;
+    use HasFactory, HasTrackHistory, LowercaseAttributes, SoftDeletes;
 
     protected $fillable = [
 
@@ -46,19 +51,26 @@ class Client extends Model
     protected array $lowercase = [
         'pic',
     ];
+
     protected array $uppercase = [
         'name',
     ];
 
     const STATUS_PENDING = 'pending';
+
     const STATUS_ACTIVE = 'active';
+
     const STATUS_COMPLETE = 'complete';
 
     // const CLAIM_TYPE_RE_ENTRY = 're_entry';
     const CLAIM_TYPE_ADJUSTMENT = 'adjusment';
+
     const CLAIM_TYPE_NORMAL = 'normal';
+
     const CLAIM_TYPE_SPEED = 'speed';
+
     const CLAIM_TYPE_PENDING = 'pending';
+
     const CLAIM_TYPE_KOKUMIN = 'kokumin';
 
     const CLAIM_TYPE_CHOICE = [
@@ -70,8 +82,11 @@ class Client extends Model
     ];
 
     const FILTER_DATA_TYPE_CONFIRMATION = 'confirmation';
+
     const FILTER_DATA_TYPE_NOT_CONFIRMATION = 'not_confirmation';
+
     const FILTER_DATA_TYPE_REGISTERED = 'registered';
+
     const FILTER_DATA_TYPE_NOT_REGISTERED = 'not_registered';
 
     const FILTER_DATA_TYPE_CHOICE = [
@@ -119,10 +134,12 @@ class Client extends Model
     {
         return $this->belongsTo(User::class, 'pic', 'pic')->role(User::ROLE_SALES);
     }
+
     public function magicLink()
     {
         return $this->hasOne(ClientMagicLink::class);
     }
+
     public function historyMagicLink()
     {
         return $this->hasMany(ClientMagicLink::class)->latestOfMany();
@@ -132,38 +149,47 @@ class Client extends Model
     {
         return $this->hasOne(User::class);
     }
+
     public function confirmation()
     {
         return $this->hasOne(ClientConfirmation::class);
     }
+
     public function esign()
     {
         return $this->hasOne(ClientEsign::class);
     }
+
     public function review()
     {
-        return $this->hasOne(\App\Models\Review::class);
+        return $this->hasOne(Review::class);
     }
+
     public function documents()
     {
-        return $this->hasMany(\App\Models\Document::class);
+        return $this->hasMany(Document::class);
     }
+
     public function upodSubmission()
     {
-        return $this->hasOne(\App\Models\UpodSubmission::class);
+        return $this->hasOne(UpodSubmission::class);
     }
+
     public function upodSurveyResponse()
     {
-        return $this->hasOne(\App\Models\UpodSurveyResponse::class);
+        return $this->hasOne(UpodSurveyResponse::class);
     }
+
     public function downloads()
     {
-        return $this->hasMany(\App\Models\DocumentDownload::class, 'client_id');
+        return $this->hasMany(DocumentDownload::class, 'client_id');
     }
+
     public function liveDownloads()
     {
         return $this->downloads()->where('source', 'live_tracked');
     }
+
     public function resolvedUpodType(?array $picMappings = null): string
     {
         $type = null;
@@ -188,7 +214,7 @@ class Client extends Model
             }
         }
 
-        if (!$type) {
+        if (! $type) {
             $type = 'google_review';
         }
 

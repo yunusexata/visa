@@ -1,15 +1,18 @@
 <?php
 
+use App\Jobs\ProcessDocumentChunk;
 use App\Models\Client\Client;
 use App\Models\Document;
 use App\Models\DocumentUploadBatch;
-use App\Models\DocumentUploadFailure;
 use App\Models\User;
-use App\Jobs\ProcessDocumentChunk;
+use Database\Seeders\User\PermissionSeeder;
+use Database\Seeders\User\RoleSeeder;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
+
 beforeEach(function () {
-    (new \Database\Seeders\User\PermissionSeeder())->run();
-    (new \Database\Seeders\User\RoleSeeder())->run();
+    (new PermissionSeeder)->run();
+    (new RoleSeeder)->run();
 });
 
 test('process document chunk handles successful upload and database creation', function () {
@@ -49,7 +52,7 @@ test('process document chunk handles successful upload and database creation', f
             'matched' => true,
             'client_id' => $client->id,
             'confidence' => 0.98,
-        ]
+        ],
     ];
 
     $job = new ProcessDocumentChunk($batch->id, $filesData);
@@ -78,7 +81,7 @@ test('process document chunk handles S3 upload failure without database write an
     // We can override supabase put behaviour or use mock, but simpler:
     // We can configure a fake disk that is write-protected or throws error.
     // In Laravel, we can mock the Storage disk:
-    $mockDisk = Mockery::mock(\Illuminate\Contracts\Filesystem\Filesystem::class);
+    $mockDisk = Mockery::mock(Filesystem::class);
     $mockDisk->shouldReceive('put')->andReturn(false); // Simulate return false on S3
     Storage::set('supabase', $mockDisk);
 
@@ -115,7 +118,7 @@ test('process document chunk handles S3 upload failure without database write an
             'matched' => true,
             'client_id' => $client->id,
             'confidence' => 0.98,
-        ]
+        ],
     ];
 
     $job = new ProcessDocumentChunk($batch->id, $filesData);
@@ -142,7 +145,7 @@ test('process document chunk handles DB failure by rolling back record and keepi
     Storage::fake('supabase');
 
     $admin = User::factory()->create();
-    
+
     $batch = DocumentUploadBatch::create([
         'uploaded_by' => $admin->id,
         'status' => 'processing',
@@ -163,7 +166,7 @@ test('process document chunk handles DB failure by rolling back record and keepi
             'matched' => true,
             'client_id' => 999999, // Invalid client ID
             'confidence' => 0.98,
-        ]
+        ],
     ];
 
     $job = new ProcessDocumentChunk($batch->id, $filesData);
@@ -227,7 +230,7 @@ test('process document chunk idempotency: retry handles previously processed fil
             'matched' => true,
             'client_id' => $client->id,
             'confidence' => 0.98,
-        ]
+        ],
     ];
 
     $job = new ProcessDocumentChunk($batch->id, $filesData);
@@ -235,7 +238,7 @@ test('process document chunk idempotency: retry handles previously processed fil
 
     // Assert no duplicate index errors or new records
     expect(Document::count())->toBe(1);
-    
+
     // Assert no duplicate failure records or file_lost logs
     $this->assertDatabaseMissing('document_upload_failures', [
         'batch_id' => $batch->id,
@@ -291,7 +294,7 @@ test('process document chunk idempotency: duplicate_in_batch is skipped and reco
             'matched' => true,
             'client_id' => $client->id,
             'confidence' => 0.98,
-        ]
+        ],
     ];
 
     $job = new ProcessDocumentChunk($batch->id, $filesData);
@@ -361,7 +364,7 @@ test('process document chunk idempotency: replacement from old batch updates suc
             'matched' => true,
             'client_id' => $client->id,
             'confidence' => 0.99,
-        ]
+        ],
     ];
 
     $job = new ProcessDocumentChunk($newBatch->id, $filesData);
@@ -371,7 +374,7 @@ test('process document chunk idempotency: replacement from old batch updates suc
     $existing = Document::where('client_id', $client->id)->where('type', 'ichijikin')->first();
     expect($existing->original_filename)->toBe('new_file.png');
     expect($existing->batch_id)->toBe($newBatch->id);
-    expect($existing->match_confidence)->toBe("0.990");
+    expect($existing->match_confidence)->toBe('0.990');
 
     // Assert old file deleted from S3
     Storage::disk('supabase')->assertMissing("documents/{$client->id}/ichijikin/old_file.png");
@@ -418,7 +421,7 @@ test('process document chunk handles lost local file and records failure_reason 
             'matched' => true,
             'client_id' => $client->id,
             'confidence' => 0.98,
-        ]
+        ],
     ];
 
     $job = new ProcessDocumentChunk($batch->id, $filesData);

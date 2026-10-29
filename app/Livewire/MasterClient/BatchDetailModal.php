@@ -3,18 +3,22 @@
 namespace App\Livewire\MasterClient;
 
 use App\Models\Client\Client;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\Attributes\On;
 
 class BatchDetailModal extends Component
 {
     use WithPagination;
 
     public $isOpen = false;
+
     public $batchName;
+
     public $search = '';
+
     public $claimType = '';
+
     public $status = '';
 
     protected $queryString = [
@@ -63,7 +67,7 @@ class BatchDetailModal extends Component
         }
 
         if ($this->search) {
-            $query->where('name', 'ILIKE', '%' . $this->search . '%');
+            $query->where('name', 'ILIKE', '%'.$this->search.'%');
         }
 
         if ($this->claimType) {

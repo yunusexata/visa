@@ -9,31 +9,38 @@ use App\Models\Client\ClientConfirmation;
 use App\Repositories\Client\ClientClosingHistoryRepository;
 use App\Repositories\Client\ClientRepository;
 use App\Traits\Livewire\WithDatatable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Database\Eloquent\Builder;
 
 class PreviewModal extends Component
 {
     use WithDatatable;
+
     public $collection;
+
     #[Url(except: '')]
     public $selectedBatch;
+
     public $closingHistories = [];
+
     public $bulkPic;
+
     public $filter_claim_type;
+
     public $totals = [];
 
     public $type;
+
     public $name;
+
     public function mount()
     {
         if ($this->selectedBatch) {
             $this->closingHistories = ClientClosingHistoryRepository::getBy([
-                ['source_file_name', $this->selectedBatch]
+                ['source_file_name', $this->selectedBatch],
             ]);
         }
     }
@@ -53,7 +60,7 @@ class PreviewModal extends Component
             $this->$key = $value;
             if ($key === 'selectedBatch') {
                 $this->closingHistories = ClientClosingHistoryRepository::getBy([
-                    ['source_file_name', $this->selectedBatch]
+                    ['source_file_name', $this->selectedBatch],
                 ]);
             }
         }
@@ -63,7 +70,8 @@ class PreviewModal extends Component
     public function validateModal()
     {
         if (blank($this->selectedBatch) || $this->selectedBatch === 'all') {
-            Alert::fail($this, "Gagal", 'Silakan pilih batch terlebih dahulu');
+            Alert::fail($this, 'Gagal', 'Silakan pilih batch terlebih dahulu');
+
             return;
         }
 
@@ -155,10 +163,10 @@ class PreviewModal extends Component
                 DB::raw("SUM(CASE WHEN clients.pic = 'slamet' THEN 1 ELSE 0 END) as total_sn"),
 
                 // KOKUMIN
-                DB::raw("SUM(CASE WHEN clients.claim_type = '" . Client::CLAIM_TYPE_KOKUMIN . "' THEN 1 ELSE 0 END) as total_kokumin"),
+                DB::raw("SUM(CASE WHEN clients.claim_type = '".Client::CLAIM_TYPE_KOKUMIN."' THEN 1 ELSE 0 END) as total_kokumin"),
 
                 // PENDING
-                DB::raw("SUM(CASE WHEN client_confirmations.claim_type IN ('" . Client::CLAIM_TYPE_SPEED . "', '" . Client::CLAIM_TYPE_ADJUSTMENT . "') AND NOT EXISTS (
+                DB::raw("SUM(CASE WHEN client_confirmations.claim_type IN ('".Client::CLAIM_TYPE_SPEED."', '".Client::CLAIM_TYPE_ADJUSTMENT."') AND NOT EXISTS (
                 SELECT 1
                 FROM client_esigns ce
                 WHERE ce.client_id = clients.id
@@ -167,7 +175,7 @@ class PreviewModal extends Component
              THEN 1 ELSE 0 END) as total_pending"),
 
                 // SPEED
-                DB::raw("SUM(CASE WHEN client_confirmations.claim_type = '" . Client::CLAIM_TYPE_SPEED . "' 
+                DB::raw("SUM(CASE WHEN client_confirmations.claim_type = '".Client::CLAIM_TYPE_SPEED."' 
             AND EXISTS (
                 SELECT 1
                 FROM client_esigns ce
@@ -177,7 +185,7 @@ class PreviewModal extends Component
              THEN 1 ELSE 0 END) as total_speed"),
 
                 // ADJUSTMENT
-                DB::raw("SUM(CASE WHEN client_confirmations.claim_type = '" . Client::CLAIM_TYPE_ADJUSTMENT . "' 
+                DB::raw("SUM(CASE WHEN client_confirmations.claim_type = '".Client::CLAIM_TYPE_ADJUSTMENT."' 
             AND EXISTS (
                 SELECT 1
                 FROM client_esigns ce
@@ -187,14 +195,15 @@ class PreviewModal extends Component
              THEN 1 ELSE 0 END) as total_adjustment"),
 
                 // RE
-                DB::raw("SUM(CASE WHEN client_confirmations.claim_type = '" . Client::CLAIM_TYPE_NORMAL . "' AND client_confirmations.current_position = '" . ClientConfirmation::CURRENT_POSITION_INDONESIA . "' THEN 1 ELSE 0 END) as total_re"),
+                DB::raw("SUM(CASE WHEN client_confirmations.claim_type = '".Client::CLAIM_TYPE_NORMAL."' AND client_confirmations.current_position = '".ClientConfirmation::CURRENT_POSITION_INDONESIA."' THEN 1 ELSE 0 END) as total_re"),
 
                 // JPN
-                DB::raw("SUM(CASE WHEN client_confirmations.claim_type = '" . Client::CLAIM_TYPE_NORMAL . "' AND client_confirmations.current_position = '" . ClientConfirmation::CURRENT_POSITION_JEPANG . "' THEN 1 ELSE 0 END) as total_jpn"),
+                DB::raw("SUM(CASE WHEN client_confirmations.claim_type = '".Client::CLAIM_TYPE_NORMAL."' AND client_confirmations.current_position = '".ClientConfirmation::CURRENT_POSITION_JEPANG."' THEN 1 ELSE 0 END) as total_jpn"),
             ])->first();
 
             $this->totals = $result?->getAttributes() ?? [];
         }
+
         return $query ?? ClientClosingHistory::query();
     }
 

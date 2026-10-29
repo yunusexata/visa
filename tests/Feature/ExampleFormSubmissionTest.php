@@ -47,7 +47,7 @@ test('example form nextStep records step history and dispatches consoleLog and s
     $stepPayload = [
         'nama_lengkap' => 'BUDI SANTOSO',
         'tempat_lahir' => 'KOTA SURABAYA',
-        'nik_ktp'      => '3578012345670001',
+        'nik_ktp' => '3578012345670001',
     ];
 
     Livewire::test(ExampleFormSubmission::class)

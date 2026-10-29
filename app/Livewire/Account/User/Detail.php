@@ -2,16 +2,16 @@
 
 namespace App\Livewire\Account\User;
 
-use Exception;
 use App\Helpers\Alert;
 use App\Models\User;
 use App\Repositories\Account\RoleRepository;
 use App\Repositories\Account\UserRepository;
-use Livewire\Component;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class Detail extends Component
 {
@@ -23,7 +23,7 @@ class Detail extends Component
     public $name;
 
     #[Validate('required', message: 'Email Harus Diisi', onUpdate: false)]
-    #[Validate('email', message: "Format Email Tidak Sesuai", onUpdate: false)]
+    #[Validate('email', message: 'Format Email Tidak Sesuai', onUpdate: false)]
     public $email;
 
     #[Validate('required', message: 'Jabatan Harus Dipilih', onUpdate: false)]
@@ -56,11 +56,11 @@ class Detail extends Component
             return;
         }
 
-        $this->name = "";
-        $this->email = "";
+        $this->name = '';
+        $this->email = '';
         $this->upod_type = User::UPOD_TYPE_GOOGLE;
         $this->role = $this->roles[0];
-        $this->password = "";
+        $this->password = '';
     }
 
     #[On('on-dialog-cancel')]
@@ -74,13 +74,15 @@ class Detail extends Component
         $this->validate();
 
         $otherUser = UserRepository::findByEmail($this->email);
-        if (!empty($otherUser) && $otherUser->id != $this->objId) {
-            Alert::fail($this, "Gagal", "Email telah digunakan pada akun yang lainnya. Silahkan gunakan email lain.");
+        if (! empty($otherUser) && $otherUser->id != $this->objId) {
+            Alert::fail($this, 'Gagal', 'Email telah digunakan pada akun yang lainnya. Silahkan gunakan email lain.');
+
             return;
         }
 
         if (empty($this->objId) && empty($this->password)) {
-            Alert::fail($this, "Gagal", "Password Harus Diisi");
+            Alert::fail($this, 'Gagal', 'Password Harus Diisi');
+
             return;
         }
 
@@ -93,7 +95,7 @@ class Detail extends Component
             $validatedData['upod_type'] = $this->upod_type;
         }
 
-        if (!empty($this->password)) {
+        if (! empty($this->password)) {
             $validatedData['password'] = Hash::make($this->password);
         }
 
@@ -112,16 +114,16 @@ class Detail extends Component
             Alert::confirmation(
                 $this,
                 Alert::ICON_SUCCESS,
-                "Berhasil",
-                "Pengguna Berhasil Diperbarui",
-                "on-dialog-confirm",
-                "on-dialog-cancel",
-                "Oke",
-                "Tutup",
+                'Berhasil',
+                'Pengguna Berhasil Diperbarui',
+                'on-dialog-confirm',
+                'on-dialog-cancel',
+                'Oke',
+                'Tutup',
             );
         } catch (Exception $e) {
             DB::rollBack();
-            Alert::fail($this, "Gagal", $e->getMessage());
+            Alert::fail($this, 'Gagal', $e->getMessage());
         }
     }
 

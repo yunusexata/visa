@@ -26,7 +26,7 @@ class DocumentController extends Controller
             $clientId = $model->client_id;
         }
 
-        if (!$clientId) {
+        if (! $clientId) {
             abort(403, 'Akses ditolak: User tidak terasosiasi dengan klien manapun.');
         }
 
@@ -40,19 +40,19 @@ class DocumentController extends Controller
         if ($model->hasRole(User::ROLE_CLIENT)) {
             try {
                 DB::table('document_downloads')->insert([
-                    'client_id'     => $clientId,
-                    'document_id'   => $document->id,
-                    'batch_id'      => $document->batch_id,
-                    'ip_address'    => request()->ip(),
-                    'user_agent'    => request()->userAgent(),
+                    'client_id' => $clientId,
+                    'document_id' => $document->id,
+                    'batch_id' => $document->batch_id,
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
                     'downloaded_at' => now(),
-                    'source'        => 'live_tracked',
-                    'created_at'    => now(),
-                    'updated_at'    => now(),
+                    'source' => 'live_tracked',
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
             } catch (\Throwable $e) {
-                logger()->warning('Failed to record document download activity: ' . $e->getMessage(), [
-                    'client_id'   => $clientId,
+                logger()->warning('Failed to record document download activity: '.$e->getMessage(), [
+                    'client_id' => $clientId,
                     'document_id' => $document->id,
                 ]);
             }
@@ -62,7 +62,7 @@ class DocumentController extends Controller
             ->header('Content-Type', Storage::disk('supabase')->mimeType($document->bucket_path))
             ->header(
                 'Content-Disposition',
-                'attachment; filename="' . basename($document->bucket_path) . '"'
+                'attachment; filename="'.basename($document->bucket_path).'"'
             );
         // return redirect($url);
     }

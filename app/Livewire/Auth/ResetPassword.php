@@ -2,14 +2,14 @@
 
 namespace App\Livewire\Auth;
 
+use App\Helpers\Alert;
+use App\Repositories\Account\UserRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Livewire\Component;
 use Illuminate\Support\Facades\Password;
 use Livewire\Attributes\Validate;
-use App\Helpers\Alert;
-use App\Repositories\Account\UserRepository;
+use Livewire\Component;
 
 class ResetPassword extends Component
 {
@@ -35,12 +35,14 @@ class ResetPassword extends Component
 
         if ($this->password != $this->retypePassword) {
             Alert::fail($this, 'Register Gagal', 'Pengetikan Ulang Password Tidak Sama');
+
             return;
         }
 
         $user = UserRepository::findByEmail($this->email);
         if (empty($user)) {
             Alert::fail($this, 'Gagal', 'Email Belum Terdaftar');
+
             return;
         }
 
@@ -52,7 +54,7 @@ class ResetPassword extends Component
             ],
             function ($user, string $password) {
                 $user->forceFill([
-                    'password' => Hash::make($password)
+                    'password' => Hash::make($password),
                 ]);
 
                 $user->email_verified_at = Carbon::now();
@@ -61,7 +63,6 @@ class ResetPassword extends Component
                 Auth::loginUsingId($user->id);
             }
         );
-
 
         if ($status === Password::PASSWORD_RESET) {
             Alert::success($this, 'Berhasil', 'Password Berhasil Diatur Ulang');

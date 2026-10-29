@@ -32,98 +32,66 @@ return new class extends Migration
 
         if ($is_history) {
             $table->bigInteger('obj_id')->unsigned();
+            $table->unsignedBigInteger('visa_form_link_id')->nullable();
+            $table->string('nomor_registrasi', 50)->nullable();
         } else {
-            $table->index('id_customer', 'visa_forms_id_customer_idx');
-            $table->index('remarks_id', 'visa_forms_remarks_id_idx');
-            $table->index('remarks_type', 'visa_forms_remarks_type_idx');
+            $table->index('nomor_registrasi', 'visa_forms_nomor_registrasi_idx');
             $table->index('status', 'visa_forms_status_idx');
-            $table->index('tanggal_lengkap', 'visa_forms_tanggal_lengkap_idx');
-            $table->index('tanggal_verified', 'visa_forms_tanggal_verified_idx');
-            $table->index('no_input_jepang', 'visa_forms_no_input_jepang_idx');
+            $table->index('pic_code', 'visa_forms_pic_code_idx');
+            $table->index('nama_lengkap', 'visa_forms_nama_lengkap_idx');
+            $table->foreignId('visa_form_link_id')->nullable()->constrained('visa_form_links')->nullOnDelete();
+            $table->string('nomor_registrasi', 50)->nullable()->unique();
         }
 
-        // Sistem
-        $table->string('id_customer');
-        $table->string('status')->nullable();
+        $table->string('status', 30)->default('DIAJUKAN')->index();
+        $table->string('pic_code', 50)->nullable()->index();
 
-        // ---------- //
-        // Form Input //
-        // ---------- //
-
-        // Data Diri
+        // Step 1: Identitas Diri Pemohon
         $table->string('nama_lengkap');
+        $table->string('tempat_lahir');
         $table->date('tanggal_lahir');
-        $table->string('email');
-        $table->date('tanggal_kepulangan')->nullable();
-        $table->string('nama_instagram')->nullable();
-        $table->string('nama_tiktok')->nullable();
-        $table->string('nomor_whatsapp')->nullable();
-        $table->string('nomor_whatsapp_darurat')->nullable();
-        $table->text('alamat_jepang')->nullable();
-        $table->string('kode_pos_jepang')->nullable();
-        $table->string('nama_lpk')->nullable();
+        $table->string('nik_ktp', 16)->index();
+        $table->text('alamat_indonesia');
+        $table->string('kode_pos_indonesia', 10)->nullable();
+        $table->string('telepon_indonesia', 25);
+        $table->string('email_aktif');
 
-        // REK PENERIMA
-        $table->string('no_rekening_penerima')->nullable();
-        $table->string('nama_bank_penerima')->nullable();
-        $table->string('nama_penerima')->nullable();
-        $table->string('hubungan_penerima')->nullable();
+        // Step 2: Data di Paspor
+        $table->string('nomor_paspor', 25)->index();
+        $table->string('kantor_paspor');
+        $table->date('tanggal_pengeluaran_paspor');
+        $table->date('tanggal_habis_berlaku_paspor');
 
-        // Gensen
-        // $table->integer('tahun_gensen')->nullable();
-        // $table->integer('tahun_transfer')->nullable();
+        // Step 3: Certificate of Eligibility (COE)
+        $table->string('nomor_coe', 50)->index();
+        $table->string('status_kependudukan_jepang');
+        $table->string('lama_stay_jepang', 30);
 
-        // Relasi History
-        $table->unsignedBigInteger('remarks_id');
-        $table->string('remarks_type');
+        // Step 4: Rencana Kedatangan & Kaisha di Jepang
+        $table->date('tanggal_kedatangan');
+        $table->string('bandara_tujuan');
+        $table->string('bandara_lainnya')->nullable();
+        $table->string('maskapai');
+        $table->string('nama_kaisha');
+        $table->text('alamat_jepang');
+        $table->string('kode_pos_jepang', 15)->nullable();
+        $table->string('telepon_jepang', 25);
+        $table->string('pernah_kerja_jepang', 10)->default('tidak');
+        $table->string('periode_kerja_mulai', 30)->nullable();
+        $table->string('periode_kerja_selesai', 30)->nullable();
+        $table->string('nama_penanggung_jawab');
+        $table->string('alamat_penanggung_jawab');
+        $table->string('telepon_penanggung_jawab', 25);
 
-        // Validasi
-        $table->boolean('is_should_filled')->default(false)->nullable();
-        $table->boolean('is_submitted')->default(false)->nullable();
+        // Step 5: Pernyataan, Riwayat & Audit
+        $table->boolean('pernyataan_persetujuan')->default(false);
+        $table->timestamp('tanggal_diajukan')->nullable();
+        $table->timestamp('tanggal_verifikasi')->nullable();
+        $table->text('catatan')->nullable();
 
-        // ----------- //
-        // Flow Bisnis //
-        // ----------- //
-
-        // Step 1 - HS
-        // $table->double('nominal_gensen', 20, 2, true)->nullable();
-        // $table->double('jumlah_kirim_uang', 20, 2, true)->nullable();
-        // $table->text('nama_penerima_dan_hubungan')->nullable();
-        $table->date('tanggal_lengkap')->default(null)->nullable();
-
-        // Step 2 - HS2
-        $table->date('tanggal_verified')->default(null)->nullable();
-
-        // Step 3 - Admin Jepang
-        $table->string('no_input_jepang')->nullable();
-
-        // Step 4 - Admin Jepang
-        $table->date('tanggal_pengajuan')->nullable(); // Tanggal Pengajuan Ke Kantor Pajak
-
-        // Step 5 - Acc Exata
-        // $table->double('nominal_cair', 20, 2, true)->nullable();
-        // $table->date('tanggal_cair')->nullable();
-
-        // MONDAI
-        $table->text('keterangan')->nullable();
-        $table->boolean('is_previously_processed')->default(false)->nullable(); // Gensen pernah diproses sebelumnya oleh pihak lain (belum/sudah)
-
-
-        //         CREATE INDEX idx_gensen_bulk_filter
-        // ON gensen_forms (
-        //     no_input_jepang,
-        //     nama_lengkap
-        // )
-
-        //         CREATE INDEX idx_gfd_bulk
-        // ON gensen_form_details (
-        //     gensen_form_id,
-        //     tahun_gensen
-        // )
-
-        $table->bigInteger("created_by")->unsigned()->nullable();
-        $table->bigInteger("updated_by")->unsigned()->nullable();
-        $table->bigInteger("deleted_by")->unsigned()->nullable()->default(null);
+        $table->bigInteger('created_by')->unsigned()->nullable();
+        $table->bigInteger('updated_by')->unsigned()->nullable();
+        $table->bigInteger('deleted_by')->unsigned()->nullable()->default(null);
         $table->softDeletes();
         $table->timestamps();
     }

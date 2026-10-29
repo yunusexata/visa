@@ -7,15 +7,22 @@ use Livewire\Component;
 class Alert
 {
     const EVENT_INFO = 'SwalInfo';
+
     const EVENT_CONFIRMATION = 'SwalConfirm';
+
     const EVENT_INFORMATION = 'SwalInformation';
+
     const EVENT_CONSOLE_LOG = 'ConsoleLog';
 
-    const ICON_QUESTION = "question";
-    const ICON_ERROR = "error";
-    const ICON_SUCCESS = "success";
-    const ICON_WARNING = "warning";
-    const ICON_INFO = "info";
+    const ICON_QUESTION = 'question';
+
+    const ICON_ERROR = 'error';
+
+    const ICON_SUCCESS = 'success';
+
+    const ICON_WARNING = 'warning';
+
+    const ICON_INFO = 'info';
 
     public static function success(Component $component, $title, $message)
     {
@@ -34,17 +41,19 @@ class Alert
         $message,
         $eventConfirmName,
         $eventCancelName,
-        $confirmText = "Iya",
-        $cancelText = "Tidak",
+        $confirmText = 'Iya',
+        $cancelText = 'Tidak',
     ) {
         $component->dispatch(self::EVENT_CONFIRMATION, $icon, $title, $message, $confirmText, $cancelText, $eventConfirmName, $eventCancelName);
     }
+
     public static function information(
         Component $component,
         $title,
     ) {
         $component->dispatch(self::EVENT_INFORMATION, self::ICON_SUCCESS, $title);
     }
+
     public static function consoleLog(
         Component $component,
         $message,

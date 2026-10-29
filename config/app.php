@@ -1,6 +1,9 @@
 <?php
 
+use App\Helpers\Alert;
+use App\Helpers\PermissionHelper;
 use Illuminate\Support\Facades\Facade;
+use Mews\Captcha\Facades\Captcha;
 
 return [
 
@@ -125,10 +128,9 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
-
     'aliases' => Facade::defaultAliases()->merge([
-        'Captcha' => Mews\Captcha\Facades\Captcha::class,
-        'PermissionHelper' => App\Helpers\PermissionHelper::class,
-        'Alert' => App\Helpers\Alert::class,
+        'Captcha' => Captcha::class,
+        'PermissionHelper' => PermissionHelper::class,
+        'Alert' => Alert::class,
     ])->toArray(),
 ];

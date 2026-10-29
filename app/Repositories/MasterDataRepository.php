@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-
 abstract class MasterDataRepository
 {
     const OPERATOR = ['=', '!=', '<>', '<', '<=', '>', '>=', 'IN', 'NOT IN'];
@@ -25,23 +24,23 @@ abstract class MasterDataRepository
                 $value = isset($clause['value']) ? $clause['value'] : $clause[2];
                 $conjunction = isset($clause['conjunction']) ? isset($clause['conjunction']) : (isset($clause[3]) ? $clause[3] : null);
             } else {
-                $operator = is_array($clause[1]) ? "IN" : "=";
+                $operator = is_array($clause[1]) ? 'IN' : '=';
                 $value = isset($clause['value']) ? $clause['value'] : $clause[1];
                 $conjunction = isset($clause['conjunction']) ? isset($clause['conjunction']) : (isset($clause[2]) ? $clause[2] : null);
             }
 
             if ($conjunction == 'OR') {
-                if ($operator == "IN") {
+                if ($operator == 'IN') {
                     $query->orWhereIn($column, $value);
-                } else if ($operator == "NOT IN") {
+                } elseif ($operator == 'NOT IN') {
                     $query->orWhereNotIn($column, $value);
                 } else {
                     $query->orWhere($column, $operator, $value);
                 }
             } else {
-                if ($operator == "IN") {
+                if ($operator == 'IN') {
                     $query->whereIn($column, $value);
-                } else if ($operator == "NOT IN") {
+                } elseif ($operator == 'NOT IN') {
                     $query->whereNotIn($column, $value);
                 } else {
                     $query->where($column, $operator, $value);
@@ -101,18 +100,21 @@ abstract class MasterDataRepository
     public static function update($id, $data)
     {
         $obj = self::find($id);
+
         return empty($obj) ? false : $obj->update($data);
     }
 
     public static function updateBy($whereClause, $data)
     {
         $obj = self::findBy($whereClause);
+
         return empty($obj) ? false : $obj->update($data);
     }
 
     public static function delete($id)
     {
         $obj = self::find($id);
+
         return empty($obj) ? false : $obj->delete();
     }
 
@@ -122,12 +124,14 @@ abstract class MasterDataRepository
         foreach ($objs as $obj) {
             $obj->delete();
         }
+
         return count($objs) > 0;
     }
 
     public static function forceDelete($id)
     {
         $obj = self::find($id);
+
         return empty($obj) ? false : $obj->forceDelete();
     }
 
@@ -137,6 +141,7 @@ abstract class MasterDataRepository
         foreach ($objs as $obj) {
             $obj->forceDelete();
         }
+
         return count($objs) > 0;
     }
 

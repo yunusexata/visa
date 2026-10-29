@@ -2,25 +2,28 @@
 
 namespace App\Livewire\Admin;
 
-use Livewire\Component;
-use Livewire\WithPagination;
 use App\Models\Review;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class ReviewTable extends Component
 {
     use WithPagination;
 
     public $statusFilter = 'all'; // all, intercepted, resolved
+
     public $selectedReviewId;
+
     public $notes = '';
+
     public $isModalOpen = false;
 
     protected $queryString = [
         'statusFilter' => [
             'except' => 'all',
-            'as' => 'status'
+            'as' => 'status',
         ],
     ];
 
@@ -45,7 +48,7 @@ class ReviewTable extends Component
 
     public function resolveReview()
     {
-        if (!$this->selectedReviewId) {
+        if (! $this->selectedReviewId) {
             return;
         }
 
@@ -53,6 +56,7 @@ class ReviewTable extends Component
 
         if ($review->status !== 'intercepted') {
             $this->closeResolveModal();
+
             return;
         }
 
@@ -68,7 +72,7 @@ class ReviewTable extends Component
         $this->dispatch('SwalInformation', [
             'success',
             'Ulasan Di-resolve',
-            'Ulasan berhasil ditandai sebagai resolved.'
+            'Ulasan berhasil ditandai sebagai resolved.',
         ]);
     }
 

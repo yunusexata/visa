@@ -3,13 +3,14 @@
 namespace App\Traits\Livewire;
 
 use Livewire\Attributes\On;
-use Livewire\Component;
 
 trait WithChartJs
 {
-    public $canvasId = "canvas-id";
-    public $containerStyle = "";
-    public $containerClass = "";
+    public $canvasId = 'canvas-id';
+
+    public $containerStyle = '';
+
+    public $containerClass = '';
 
     public $config;
 
@@ -43,8 +44,11 @@ trait WithChartJs
     // ];
 
     abstract public function getConfig(): array;
+
     abstract public function getData(): array;
+
     abstract public function getView(): string;
+
     public function onMount() {}
 
     public function mount()

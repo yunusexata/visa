@@ -2,15 +2,14 @@
 
 namespace App\Livewire\Account\Permission;
 
-use Exception;
 use App\Helpers\Alert;
 use App\Helpers\PermissionHelper;
 use App\Repositories\Account\PermissionRepository;
-use Livewire\Component;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
-
+use Livewire\Component;
 
 class Detail extends Component
 {
@@ -40,7 +39,7 @@ class Detail extends Component
             return;
         }
 
-        $this->name = "";
+        $this->name = '';
         $this->type = PermissionHelper::TYPE_ALL[0];
     }
 
@@ -57,14 +56,15 @@ class Detail extends Component
         $permissionName = PermissionHelper::transform($this->name, $this->type);
 
         $permission = PermissionRepository::findByName($permissionName);
-        if (!empty($permission) && $permission->id != $this->objId) {
+        if (! empty($permission) && $permission->id != $this->objId) {
             $translatedPermissionName = PermissionHelper::translate($permissionName);
             Alert::fail($this, 'Gagal', "Akses dengan nama {$translatedPermissionName} sudah pernah dibuat");
+
             return;
         }
 
         $validatedData = [
-            'name' => $permissionName
+            'name' => $permissionName,
         ];
 
         try {
@@ -79,16 +79,16 @@ class Detail extends Component
             Alert::confirmation(
                 $this,
                 Alert::ICON_SUCCESS,
-                "Berhasil",
-                "Akses Berhasil Diperbarui",
-                "on-dialog-confirm",
-                "on-dialog-cancel",
-                "Oke",
-                "Tutup",
+                'Berhasil',
+                'Akses Berhasil Diperbarui',
+                'on-dialog-confirm',
+                'on-dialog-cancel',
+                'Oke',
+                'Tutup',
             );
         } catch (Exception $e) {
             DB::rollBack();
-            Alert::fail($this, "Gagal", $e->getMessage());
+            Alert::fail($this, 'Gagal', $e->getMessage());
         }
     }
 

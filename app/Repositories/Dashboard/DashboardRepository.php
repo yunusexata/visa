@@ -17,20 +17,20 @@ class DashboardRepository extends MasterDataRepository
     public static function transactionMonthly(?Carbon $month = null)
     {
         $start = now()->startOfMonth();
-        $end   = now()->endOfMonth();
+        $end = now()->endOfMonth();
 
         return GensenForm::query()
-            ->selectRaw("
+            ->selectRaw('
             CAST(created_at AS DATE) as transaction_date,
             pic_code,
             COUNT(*) as total
-        ")
+        ')
             ->whereBetween('created_at', [$start, $end])
             ->whereNotNull('pic_code')
-            ->groupByRaw("
+            ->groupByRaw('
             CAST(created_at AS DATE),
             pic_code
-        ")
+        ')
             ->orderBy('transaction_date')
             ->get();
     }
@@ -40,10 +40,10 @@ class DashboardRepository extends MasterDataRepository
         $month ??= now();
 
         return GensenForm::query()
-            ->selectRaw("
+            ->selectRaw('
             pic_code,
             COUNT(*) as total_transaction
-        ")
+        ')
             ->whereBetween('created_at', [
                 $month->copy()->startOfMonth(),
                 $month->copy()->endOfMonth(),

@@ -25,12 +25,13 @@ class CollectionExport implements FromView, WithColumnWidths, WithTitle
             'C' => 20,
         ];
     }
+
     public function __construct($request, $query, $view)
     {
         $this->request = $request;
         $this->query = $query;
         $this->view = $view;
-        $this->title = $request['title'] ?? 'Sheet ' . random_int(1, 100);
+        $this->title = $request['title'] ?? 'Sheet '.random_int(1, 100);
     }
 
     public function title(): string

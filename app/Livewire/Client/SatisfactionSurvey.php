@@ -11,6 +11,7 @@ use Livewire\Component;
 class SatisfactionSurvey extends Component
 {
     public $step = 1;
+
     public $responses = [
         'q1' => '',
         'q2' => '',
@@ -23,7 +24,9 @@ class SatisfactionSurvey extends Component
         'q9' => '',
         'q10' => '',
     ];
+
     public $hasSubmitted = false;
+
     public $showSurvey = false;
 
     public function mount()
@@ -44,7 +47,7 @@ class SatisfactionSurvey extends Component
                 // Resolved UPOD type must be satisfaction_survey
                 $isSurveyType = $client->resolvedUpodType() === 'satisfaction_survey';
 
-                if (!$this->hasSubmitted && $hasAllDocs && $isSurveyType) {
+                if (! $this->hasSubmitted && $hasAllDocs && $isSurveyType) {
                     $this->showSurvey = true;
                 }
             }
@@ -139,12 +142,12 @@ class SatisfactionSurvey extends Component
         $this->validateCurrentStep();
 
         $user = Auth::user();
-        if (!$user || !$user->client_id) {
+        if (! $user || ! $user->client_id) {
             return;
         }
 
         $client = $user->client;
-        if (!$client) {
+        if (! $client) {
             return;
         }
 
@@ -187,7 +190,7 @@ class SatisfactionSurvey extends Component
         $this->dispatch('SwalInformation', [
             'success',
             'Survei Terkirim',
-            'Terima kasih atas partisipasi Anda dalam survei kepuasan pelanggan.'
+            'Terima kasih atas partisipasi Anda dalam survei kepuasan pelanggan.',
         ]);
 
         $this->dispatch('refresh-survey');

@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Client\ClientConfirmation;
+use App\Models\Client\ClientEsign;
+use App\Models\Document;
+use App\Observers\ClientConfirmationObserver;
+use App\Observers\DocumentObserver;
+use App\Observers\EsignObserver;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -30,9 +36,9 @@ class AppServiceProvider extends ServiceProvider
 
         $this->configureDefaults();
 
-        \App\Models\Document::observe(\App\Observers\DocumentObserver::class);
-        \App\Models\Client\ClientConfirmation::observe(\App\Observers\ClientConfirmationObserver::class);
-        \App\Models\Client\ClientEsign::observe(\App\Observers\EsignObserver::class);
+        Document::observe(DocumentObserver::class);
+        ClientConfirmation::observe(ClientConfirmationObserver::class);
+        ClientEsign::observe(EsignObserver::class);
     }
 
     /**
@@ -55,13 +61,13 @@ class AppServiceProvider extends ServiceProvider
         );
 
         Password::defaults(
-            fn(): ?Password => app()->isProduction()
+            fn (): ?Password => app()->isProduction()
                 ? Password::min(12)
-                ->mixedCase()
-                ->letters()
-                ->numbers()
-                ->symbols()
-                ->uncompromised()
+                    ->mixedCase()
+                    ->letters()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised()
                 : null,
         );
     }

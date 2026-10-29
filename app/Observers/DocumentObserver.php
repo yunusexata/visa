@@ -2,13 +2,13 @@
 
 namespace App\Observers;
 
+use App\Enums\Service\EmailLogStatus;
+use App\Mail\DocumentAvailableNotification;
+use App\Models\Client\Client;
 use App\Models\Document;
 use App\Models\Service\SendEmailLog;
-use App\Repositories\Service\SendEmailLogRepository;
-use App\Mail\DocumentAvailableNotification;
-use App\Enums\Service\EmailLogStatus;
 use App\Models\User;
-use App\Models\Client\Client;
+use App\Repositories\Service\SendEmailLogRepository;
 
 class DocumentObserver
 {
@@ -32,16 +32,17 @@ class DocumentObserver
         $documentTypes = $client->documents()->pluck('type')->toArray();
         $requiredTypes = ['ichijikin', 'resi', 'kwitansi'];
         foreach ($requiredTypes as $type) {
-            if (!in_array($type, $documentTypes)) {
+            if (! in_array($type, $documentTypes)) {
                 return;
             }
         }
 
         $user = User::where('client_id', $client->id)->first();
-        if (!$user || !$user->email) {
-            logger()->warning("Cannot notify client of document: client user or email not found", [
+        if (! $user || ! $user->email) {
+            logger()->warning('Cannot notify client of document: client user or email not found', [
                 'client_id' => $client->id,
             ]);
+
             return;
         }
 
@@ -52,7 +53,7 @@ class DocumentObserver
             ->whereIn('status', [
                 EmailLogStatus::PENDING,
                 EmailLogStatus::SENDING,
-                EmailLogStatus::SENT
+                EmailLogStatus::SENT,
             ])
             ->exists();
 
@@ -68,7 +69,7 @@ class DocumentObserver
             ]),
             'email' => $user->email,
             'mailable' => DocumentAvailableNotification::class,
-            'subject_line' => " Selamat Nenkin 20% Kamu Sudah Cair!",
+            'subject_line' => ' Selamat Nenkin 20% Kamu Sudah Cair!',
             'status' => EmailLogStatus::PENDING,
         ]);
     }

@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Auth;
 
-use Exception;
 use App\Helpers\Alert;
 use App\Repositories\Account\UserRepository;
-use Livewire\Component;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class Profile extends Component
 {
@@ -16,14 +16,21 @@ class Profile extends Component
     public $name;
 
     public $email;
+
     public $role;
+
     public $pic_code;
+
     public $no_whatsapp;
+
     public $password_gensen_form;
+
     public $pic_code_choice = [];
 
     public $oldPassword;
+
     public $password;
+
     public $retypePassword;
 
     public function mount()
@@ -51,25 +58,30 @@ class Profile extends Component
             'no_whatsapp' => $this->no_whatsapp,
             'password_gensen_form' => $this->password_gensen_form,
         ];
-        if (!empty($this->oldPassword) || !empty($this->password) || !empty($this->retypePassword)) {
+        if (! empty($this->oldPassword) || ! empty($this->password) || ! empty($this->retypePassword)) {
             if (empty($this->oldPassword)) {
-                Alert::fail($this, "Gagal", "Password Lama Harus Diisi");
+                Alert::fail($this, 'Gagal', 'Password Lama Harus Diisi');
+
                 return;
             }
             if (empty($this->password)) {
-                Alert::fail($this, "Gagal", "Password Baru Harus Diisi");
+                Alert::fail($this, 'Gagal', 'Password Baru Harus Diisi');
+
                 return;
             }
             if (empty($this->retypePassword)) {
-                Alert::fail($this, "Gagal", "Ketik Ulang Password Baru Harus Diisi");
+                Alert::fail($this, 'Gagal', 'Ketik Ulang Password Baru Harus Diisi');
+
                 return;
             }
             if ($this->retypePassword != $this->password) {
-                Alert::fail($this, "Gagal", "Pengetikan Ulang Password Baru Tidak Sama");
+                Alert::fail($this, 'Gagal', 'Pengetikan Ulang Password Baru Tidak Sama');
+
                 return;
             }
-            if (!Hash::check($this->oldPassword, $user->password)) {
+            if (! Hash::check($this->oldPassword, $user->password)) {
                 Alert::fail($this, 'Gagal', 'Password Lama Tidak Sesuai');
+
                 return;
             }
 
@@ -85,7 +97,7 @@ class Profile extends Component
             $this->redirectRoute('profile');
         } catch (Exception $e) {
             DB::rollBack();
-            Alert::fail($this, "Gagal", $e->getMessage());
+            Alert::fail($this, 'Gagal', $e->getMessage());
         }
     }
 

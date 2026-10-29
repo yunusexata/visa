@@ -10,7 +10,7 @@ use Muhammadyunus1072\TrackHistory\HasTrackHistory;
 
 class DocumentUploadFailure extends Model
 {
-    use HasFactory, SoftDeletes, HasTrackHistory;
+    use HasFactory, HasTrackHistory, SoftDeletes;
 
     protected $fillable = [
         'batch_id',

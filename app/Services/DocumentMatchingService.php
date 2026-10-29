@@ -37,7 +37,7 @@ class DocumentMatchingService
     private function extractNameFromFilename(string $filename, string $type): string
     {
         $filenameNoExt = pathinfo($filename, PATHINFO_FILENAME);
-        
+
         // Split filename by underscores or spaces using preg_split
         $tokens = preg_split('/[_\s]+/', $filenameNoExt);
         $tokens = array_filter($tokens); // remove any empty tokens
@@ -53,14 +53,14 @@ class DocumentMatchingService
             case 'ichijikin':
                 // Pola Baru: {NAMA LENGKAP}_{NO NENKIN}.jpg (contoh: AAN ULIN NUHA_3858043907.jpg)
                 // Pola Lama: {angka}_{NAMA LENGKAP}.jpg (contoh: 123_Budi Santoso.jpg)
-                
+
                 // 1. Hapus token pertama jika berupa angka murni (pola lama)
                 if (ctype_digit($tokens[0]) || preg_match('/^\d+$/', $tokens[0])) {
                     array_shift($tokens);
                 }
-                
+
                 // 2. Hapus token terakhir jika berupa angka murni (pola baru / nomor nenkin)
-                if (!empty($tokens)) {
+                if (! empty($tokens)) {
                     $last = end($tokens);
                     if (ctype_digit($last) || preg_match('/^\d+$/', $last)) {
                         array_pop($tokens);
@@ -75,16 +75,16 @@ class DocumentMatchingService
                 $parts = explode('_', $filenameNoExt);
                 $parts = array_filter(array_map('trim', $parts));
                 $parts = array_values($parts);
-                
-                if (!empty($parts)) {
+
+                if (! empty($parts)) {
                     // 1. Hapus bagian terakhir jika berupa angka murni (nomor transaksi/rekening)
                     $last = end($parts);
                     if (ctype_digit($last) || preg_match('/^\d+$/', $last)) {
                         array_pop($parts);
                     }
                 }
-                
-                if (!empty($parts)) {
+
+                if (! empty($parts)) {
                     // 2. Cari separator BANK. Bank adalah token yang cocok dengan list bank indonesia
                     $banks = ['bri', 'bca', 'bni', 'mandiri', 'bsi', 'danamon', 'cimb', 'permata', 'btpn', 'panin', 'ocbc', 'maybank', 'jago', 'sea'];
                     $bankIndex = null;
@@ -94,7 +94,7 @@ class DocumentMatchingService
                             break;
                         }
                     }
-                    
+
                     if ($bankIndex !== null && $bankIndex < count($parts) - 1) {
                         // Jika ditemukan bank, ambil semua bagian setelah bank
                         $parts = array_slice($parts, $bankIndex + 1);
@@ -103,7 +103,7 @@ class DocumentMatchingService
                         $parts = [end($parts)];
                     }
                 }
-                
+
                 // Gabungkan kembali sebagai tokens untuk normalizer
                 $tokens = [];
                 foreach ($parts as $part) {
@@ -118,12 +118,12 @@ class DocumentMatchingService
                 if (ctype_digit($tokens[0]) || preg_match('/^\d+$/', $tokens[0])) {
                     array_shift($tokens);
                 }
-                
+
                 // 2. Hapus token yang memiliki format tanggal (DD-MM-YYYY atau DD-MM-YY)
-                $tokens = array_values(array_filter($tokens, function($token) {
-                    return !preg_match('/^\d{2}-\d{2}-\d{2,4}$/', $token);
+                $tokens = array_values(array_filter($tokens, function ($token) {
+                    return ! preg_match('/^\d{2}-\d{2}-\d{2,4}$/', $token);
                 }));
-                
+
                 // 3. Ambil token-token sebelum keyword "NENKIN" (case-insensitive)
                 $nenkinIndex = null;
                 foreach ($tokens as $index => $token) {
@@ -173,7 +173,7 @@ class DocumentMatchingService
         // Fetch all active clients or filter by allowed IDs if clients is not passed as pre-loaded collection
         if ($clients === null) {
             $clients = Client::all();
-        } elseif (is_array($clients) && !empty($clients) && is_numeric(reset($clients))) {
+        } elseif (is_array($clients) && ! empty($clients) && is_numeric(reset($clients))) {
             // Backward compatibility if an array of IDs is passed:
             $clients = Client::whereIn('id', $clients)->get();
         }
@@ -182,7 +182,7 @@ class DocumentMatchingService
         $exactMatches = [];
         foreach ($clients as $client) {
             $clientId = $client->id;
-            if (!isset($this->normalizedClientsCache[$clientId])) {
+            if (! isset($this->normalizedClientsCache[$clientId])) {
                 $this->normalizedClientsCache[$clientId] = $this->normalize($client->name, false);
             }
             $clientNameNormalized = $this->normalizedClientsCache[$clientId];
@@ -223,7 +223,7 @@ class DocumentMatchingService
 
         foreach ($clients as $client) {
             $clientId = $client->id;
-            if (!isset($this->normalizedClientsCache[$clientId])) {
+            if (! isset($this->normalizedClientsCache[$clientId])) {
                 $this->normalizedClientsCache[$clientId] = $this->normalize($client->name, false);
             }
             $clientNameNormalized = $this->normalizedClientsCache[$clientId];

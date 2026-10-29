@@ -9,7 +9,7 @@ class Datatable extends Component
     public function getOrdersProperty()
     {
         return collect([
-            (object)[
+            (object) [
                 'id' => 'ORD-1001',
                 'customer_name' => 'Siti Aminah',
                 'lpk' => 'LPK Sakura Mandiri',
@@ -17,7 +17,7 @@ class Datatable extends Component
                 'departure_date' => '2026-05-12',
                 'status' => 'Active',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1002',
                 'customer_name' => 'Budi Santoso',
                 'lpk' => 'LPK Nihon Go',
@@ -25,7 +25,7 @@ class Datatable extends Component
                 'departure_date' => '2026-06-20',
                 'status' => 'Pending',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1003',
                 'customer_name' => 'Dewi Lestari',
                 'lpk' => 'LPK Asahi Indonesia',
@@ -33,7 +33,7 @@ class Datatable extends Component
                 'departure_date' => '2026-04-15',
                 'status' => 'Completed',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1004',
                 'customer_name' => 'Ahmad Fauzi',
                 'lpk' => 'LPK Bunkasai',
@@ -41,7 +41,7 @@ class Datatable extends Component
                 'departure_date' => '2026-07-01',
                 'status' => 'Processing',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1005',
                 'customer_name' => 'Rina Melati',
                 'lpk' => 'LPK Sakura Mandiri',
@@ -49,7 +49,7 @@ class Datatable extends Component
                 'departure_date' => '2026-08-10',
                 'status' => 'Pending',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1001',
                 'customer_name' => 'Siti Aminah',
                 'lpk' => 'LPK Sakura Mandiri',
@@ -57,7 +57,7 @@ class Datatable extends Component
                 'departure_date' => '2026-05-12',
                 'status' => 'Active',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1002',
                 'customer_name' => 'Budi Santoso',
                 'lpk' => 'LPK Nihon Go',
@@ -65,7 +65,7 @@ class Datatable extends Component
                 'departure_date' => '2026-06-20',
                 'status' => 'Pending',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1003',
                 'customer_name' => 'Dewi Lestari',
                 'lpk' => 'LPK Asahi Indonesia',
@@ -73,7 +73,7 @@ class Datatable extends Component
                 'departure_date' => '2026-04-15',
                 'status' => 'Completed',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1004',
                 'customer_name' => 'Ahmad Fauzi',
                 'lpk' => 'LPK Bunkasai',
@@ -81,7 +81,7 @@ class Datatable extends Component
                 'departure_date' => '2026-07-01',
                 'status' => 'Processing',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1005',
                 'customer_name' => 'Rina Melati',
                 'lpk' => 'LPK Sakura Mandiri',
@@ -89,7 +89,7 @@ class Datatable extends Component
                 'departure_date' => '2026-08-10',
                 'status' => 'Pending',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1001',
                 'customer_name' => 'Siti Aminah',
                 'lpk' => 'LPK Sakura Mandiri',
@@ -97,7 +97,7 @@ class Datatable extends Component
                 'departure_date' => '2026-05-12',
                 'status' => 'Active',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1002',
                 'customer_name' => 'Budi Santoso',
                 'lpk' => 'LPK Nihon Go',
@@ -105,7 +105,7 @@ class Datatable extends Component
                 'departure_date' => '2026-06-20',
                 'status' => 'Pending',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1003',
                 'customer_name' => 'Dewi Lestari',
                 'lpk' => 'LPK Asahi Indonesia',
@@ -113,7 +113,7 @@ class Datatable extends Component
                 'departure_date' => '2026-04-15',
                 'status' => 'Completed',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1004',
                 'customer_name' => 'Ahmad Fauzi',
                 'lpk' => 'LPK Bunkasai',
@@ -121,7 +121,7 @@ class Datatable extends Component
                 'departure_date' => '2026-07-01',
                 'status' => 'Processing',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1005',
                 'customer_name' => 'Rina Melati',
                 'lpk' => 'LPK Sakura Mandiri',
@@ -129,7 +129,7 @@ class Datatable extends Component
                 'departure_date' => '2026-08-10',
                 'status' => 'Pending',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1001',
                 'customer_name' => 'Siti Aminah',
                 'lpk' => 'LPK Sakura Mandiri',
@@ -137,7 +137,7 @@ class Datatable extends Component
                 'departure_date' => '2026-05-12',
                 'status' => 'Active',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1002',
                 'customer_name' => 'Budi Santoso',
                 'lpk' => 'LPK Nihon Go',
@@ -145,7 +145,7 @@ class Datatable extends Component
                 'departure_date' => '2026-06-20',
                 'status' => 'Pending',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1003',
                 'customer_name' => 'Dewi Lestari',
                 'lpk' => 'LPK Asahi Indonesia',
@@ -153,7 +153,7 @@ class Datatable extends Component
                 'departure_date' => '2026-04-15',
                 'status' => 'Completed',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1004',
                 'customer_name' => 'Ahmad Fauzi',
                 'lpk' => 'LPK Bunkasai',
@@ -161,7 +161,7 @@ class Datatable extends Component
                 'departure_date' => '2026-07-01',
                 'status' => 'Processing',
             ],
-            (object)[
+            (object) [
                 'id' => 'ORD-1005',
                 'customer_name' => 'Rina Melati',
                 'lpk' => 'LPK Sakura Mandiri',

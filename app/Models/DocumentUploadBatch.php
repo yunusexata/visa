@@ -9,7 +9,7 @@ use Muhammadyunus1072\TrackHistory\HasTrackHistory;
 
 class DocumentUploadBatch extends Model
 {
-    use HasFactory, SoftDeletes, HasTrackHistory;
+    use HasFactory, HasTrackHistory, SoftDeletes;
 
     protected $table = 'document_upload_batchs';
 

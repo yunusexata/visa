@@ -36,7 +36,7 @@ class ResetPasswordMail extends Mailable
     public function content(): Content
     {
         logger('mail reset password created');
-        
+
         $data = json_decode($this->log->data, true);
         $token = $data['token'] ?? '';
         $email = $data['email'] ?? '';

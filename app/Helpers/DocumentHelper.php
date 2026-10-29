@@ -6,7 +6,7 @@ class CacheHelper
 {
     public function convertPdfToImages(string $path): array
     {
-        $imagick = new \Imagick();
+        $imagick = new \Imagick;
 
         // ⭐ optimal DPI
         $imagick->setResolution(150, 150);

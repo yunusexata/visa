@@ -2,23 +2,28 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\ExportHelper;
+use App\Helpers\PermissionHelper;
 use App\Http\Controllers\Controller;
+use App\Imports\ExcelImportBulk;
+use App\Jobs\ProcessDocumentChunk;
 use App\Models\Client\Client;
 use App\Models\Document;
 use App\Models\DocumentUploadBatch;
 use App\Models\DocumentUploadFailure;
-use App\Jobs\ProcessDocumentChunk;
+use App\Models\User;
+use App\Observers\DocumentObserver;
 use App\Services\DocumentMatchingService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Helpers\PermissionHelper;
-use App\Helpers\ExportHelper;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Bus;
-use Throwable;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Throwable;
 
 class AdminDocumentController extends Controller
 {
@@ -53,7 +58,7 @@ class AdminDocumentController extends Controller
             $adminId = auth()->id();
 
             // Read the Excel sheet directly as an array without making a new import class
-            $array = Excel::toArray(new \App\Imports\ExcelImportBulk(), $request->file('excel_file'));
+            $array = Excel::toArray(new ExcelImportBulk, $request->file('excel_file'));
             $sheet = $array[0] ?? [];
 
             if (empty($sheet)) {
@@ -68,21 +73,21 @@ class AdminDocumentController extends Controller
                 $name = $row['nama'] ?? $row['name'] ?? null;
                 $dob = $row['tgl_lahir'] ?? $row['tanggal_lahir'] ?? $row['dob'] ?? null;
 
-                if (!$noJpn && !$name) {
+                if (! $noJpn && ! $name) {
                     continue;
                 }
 
                 // Convert DOB if it is a serial Excel date number
                 if (is_numeric($dob)) {
                     try {
-                        $dob = \Carbon\Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($dob))->format('Y-m-d');
-                    } catch (\Throwable $e) {
+                        $dob = Carbon::instance(Date::excelToDateTimeObject($dob))->format('Y-m-d');
+                    } catch (Throwable $e) {
                         // Keep as is if conversion fails
                     }
                 } elseif ($dob) {
                     try {
-                        $dob = \Carbon\Carbon::parse($dob)->format('Y-m-d');
-                    } catch (\Throwable $e) {
+                        $dob = Carbon::parse($dob)->format('Y-m-d');
+                    } catch (Throwable $e) {
                         // Keep as is
                     }
                 }
@@ -108,8 +113,8 @@ class AdminDocumentController extends Controller
 
             return redirect()->route('admin_upload_document.index')
                 ->with('success', 'Excel referensi berhasil di-upload. Silakan tinjau daftar klien sebelum melanjutkannya.');
-        } catch (\Throwable $e) {
-            return redirect()->back()->withErrors(['error' => 'Gagal memproses file Excel: ' . $e->getMessage()]);
+        } catch (Throwable $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal memproses file Excel: '.$e->getMessage()]);
         }
     }
 
@@ -150,7 +155,7 @@ class AdminDocumentController extends Controller
         $adminId = auth()->id();
         $referenceClients = Cache::get("reference_clients_{$adminId}");
 
-        if (!$referenceClients) {
+        if (! $referenceClients) {
             return redirect()->route('admin_upload_document.index')
                 ->withErrors(['error' => 'Referensi klien dari Step 1 tidak ditemukan. Harap upload Excel terlebih dahulu.']);
         }
@@ -159,7 +164,7 @@ class AdminDocumentController extends Controller
         $fileTypes = [
             'ichijikin' => 'ichijikin_files',
             'resi' => 'resi_files',
-            'kwitansi' => 'kwitansi_files'
+            'kwitansi' => 'kwitansi_files',
         ];
 
         foreach ($fileTypes as $inputKey) {
@@ -173,7 +178,7 @@ class AdminDocumentController extends Controller
         }
 
         // Generate a temporary batch ID
-        $tempBatchId = 'temp_' . Str::random(12);
+        $tempBatchId = 'temp_'.Str::random(12);
 
         // Get subset of found client IDs from Step 1 to restrict name matching space
         $allowedClientIds = collect($referenceClients)
@@ -196,7 +201,7 @@ class AdminDocumentController extends Controller
                     $originalName = $file->getClientOriginalName();
 
                     // Standardize local filename
-                    $safeName = Str::slug(pathinfo($originalName, PATHINFO_FILENAME), '_') . '_' . time() . '.' . $file->getClientOriginalExtension();
+                    $safeName = Str::slug(pathinfo($originalName, PATHINFO_FILENAME), '_').'_'.time().'.'.$file->getClientOriginalExtension();
 
                     // Save to local private temp folder
                     $tempPath = "tmp_uploads/pending_{$adminId}_{$tempBatchId}/{$type}/{$safeName}";
@@ -221,25 +226,25 @@ class AdminDocumentController extends Controller
                         // For failed, low_confidence, and ambiguous files, serialize Eloquent models into plain primitive arrays
                         // to avoid "__PHP_Incomplete_Class" serialization issues when stored in Cache.
                         $candidatesArray = [];
-                        if (!empty($matchResult['candidates'])) {
+                        if (! empty($matchResult['candidates'])) {
                             foreach ($matchResult['candidates'] as $c) {
                                 $candidatesArray[] = [
                                     'id' => $c->id,
                                     'name' => $c->name,
                                     'no_jp' => $c->no_jp,
-                                    'dob' => $c->dob instanceof \Carbon\Carbon ? $c->dob->format('Y-m-d') : (is_string($c->dob) ? $c->dob : ''),
+                                    'dob' => $c->dob instanceof Carbon ? $c->dob->format('Y-m-d') : (is_string($c->dob) ? $c->dob : ''),
                                 ];
                             }
                         }
 
                         $bestCandidateArray = null;
-                        if (!empty($matchResult['best_candidate'])) {
+                        if (! empty($matchResult['best_candidate'])) {
                             $bc = $matchResult['best_candidate'];
                             $bestCandidateArray = [
                                 'id' => $bc->id,
                                 'name' => $bc->name,
                                 'no_jp' => $bc->no_jp,
-                                'dob' => $bc->dob instanceof \Carbon\Carbon ? $bc->dob->format('Y-m-d') : (is_string($bc->dob) ? $bc->dob : ''),
+                                'dob' => $bc->dob instanceof Carbon ? $bc->dob->format('Y-m-d') : (is_string($bc->dob) ? $bc->dob : ''),
                             ];
                         }
 
@@ -270,7 +275,7 @@ class AdminDocumentController extends Controller
             'matched_files' => $matchedFiles,
             'failed_files' => $failedFiles,
             'missing_documents' => $missingDocuments,
-            'reference_clients' => $referenceClients
+            'reference_clients' => $referenceClients,
         ];
 
         Cache::put("matching_preview_{$adminId}_{$tempBatchId}", $previewData, now()->addMinutes(30));
@@ -286,7 +291,7 @@ class AdminDocumentController extends Controller
         $adminId = auth()->id();
         $previewData = Cache::get("matching_preview_{$adminId}_{$tempBatchId}");
 
-        if (!$previewData) {
+        if (! $previewData) {
             return redirect()->route('admin_upload_document.index')
                 ->withErrors(['error' => 'Data preview tidak ditemukan atau telah kedaluwarsa. Harap ulangi upload dokumen.']);
         }
@@ -316,7 +321,7 @@ class AdminDocumentController extends Controller
 
         $previewData = Cache::get("matching_preview_{$adminId}_{$tempBatchId}");
 
-        if (!$previewData) {
+        if (! $previewData) {
             return redirect()->back()->withErrors(['error' => 'Data preview tidak ditemukan atau telah kedaluwarsa.']);
         }
 
@@ -375,7 +380,7 @@ class AdminDocumentController extends Controller
 
         $previewData = Cache::get("matching_preview_{$adminId}_{$tempBatchId}");
 
-        if (!$previewData) {
+        if (! $previewData) {
             return redirect()->route('admin_upload_document.index')
                 ->withErrors(['error' => 'Data preview tidak ditemukan atau telah kedaluwarsa. Harap ulangi pemrosesan.']);
         }
@@ -411,7 +416,7 @@ class AdminDocumentController extends Controller
             $bestMatchName = $file['best_candidate']['name'] ?? null;
             $bestMatchScore = $file['confidence'] ?? null;
 
-            $reason = "Nama tidak cocok. Kecocokan tertinggi: \"" . ($bestMatchName ?? 'N/A') . "\" dengan skor " . number_format($bestMatchScore ?? 0.0, 3) . " < 0.85";
+            $reason = 'Nama tidak cocok. Kecocokan tertinggi: "'.($bestMatchName ?? 'N/A').'" dengan skor '.number_format($bestMatchScore ?? 0.0, 3).' < 0.85';
 
             DocumentUploadFailure::create([
                 'batch_id' => $batch->id,
@@ -465,7 +470,7 @@ class AdminDocumentController extends Controller
                     logger()->info("Batch upload #{$batch->id} selesai diproses di background.");
                 })
                 ->catch(function ($innerBatch, Throwable $e) use ($batch) {
-                    logger()->error("Batch upload #{$batch->id} gagal: " . $e->getMessage());
+                    logger()->error("Batch upload #{$batch->id} gagal: ".$e->getMessage());
                 })
                 ->finally(function ($innerBatch) use ($batch) {
                     // Cleanup batch directory
@@ -475,8 +480,8 @@ class AdminDocumentController extends Controller
                     }
 
                     // Hitung jumlah sukses dan gagal dari DB riil
-                    $failedCount = \App\Models\DocumentUploadFailure::where('batch_id', $batch->id)->count();
-                    $successCount = \App\Models\Document::where('batch_id', $batch->id)->count();
+                    $failedCount = DocumentUploadFailure::where('batch_id', $batch->id)->count();
+                    $successCount = Document::where('batch_id', $batch->id)->count();
 
                     $status = 'completed';
                     if ($failedCount > 0 && $successCount > 0) {
@@ -494,18 +499,18 @@ class AdminDocumentController extends Controller
 
                     // Trigger consolidated notification check for all clients in this batch
                     try {
-                        $clientIds = \App\Models\Document::where('batch_id', $batch->id)
+                        $clientIds = Document::where('batch_id', $batch->id)
                             ->distinct()
                             ->pluck('client_id');
 
                         foreach ($clientIds as $clientId) {
-                            $client = \App\Models\Client\Client::find($clientId);
+                            $client = Client::find($clientId);
                             if ($client) {
-                                \App\Observers\DocumentObserver::notifyIfComplete($client);
+                                DocumentObserver::notifyIfComplete($client);
                             }
                         }
                     } catch (Throwable $notifEx) {
-                        logger()->error("Gagal mengirimkan notifikasi konsolidasi untuk batch #{$batch->id}: " . $notifEx->getMessage());
+                        logger()->error("Gagal mengirimkan notifikasi konsolidasi untuk batch #{$batch->id}: ".$notifEx->getMessage());
                     }
                 })
                 ->dispatch();
@@ -566,7 +571,7 @@ class AdminDocumentController extends Controller
 
         if ($tempBatchId) {
             $previewData = Cache::get("matching_preview_{$adminId}_{$tempBatchId}");
-            if ($previewData && !empty($previewData['reference_clients'])) {
+            if ($previewData && ! empty($previewData['reference_clients'])) {
                 $allowedClientIds = collect($previewData['reference_clients'])
                     ->where('found', true)
                     ->pluck('client_id')
@@ -595,7 +600,7 @@ class AdminDocumentController extends Controller
     public function resolveFailure(Request $request, $id)
     {
         $request->validate([
-            'client_id' => 'required|exists:clients,id'
+            'client_id' => 'required|exists:clients,id',
         ]);
 
         $failure = DocumentUploadFailure::findOrFail($id);
@@ -604,7 +609,7 @@ class AdminDocumentController extends Controller
         $failuresPath = "failures/{$failure->batch_id}/{$failure->original_filename}";
         $targetPath = "documents/{$client->id}/{$failure->folder_type}/{$failure->original_filename}";
 
-        if (!Storage::disk('supabase')->exists($failuresPath)) {
+        if (! Storage::disk('supabase')->exists($failuresPath)) {
             return redirect()->back()->withErrors(['error' => 'File kegagalan tidak ditemukan di cloud storage.']);
         }
 
@@ -667,7 +672,7 @@ class AdminDocumentController extends Controller
         $batch->update([
             'matched_files' => $matchedCount,
             'failed_files' => $failedCount,
-            'status' => $status
+            'status' => $status,
         ]);
 
         return redirect()->back()->with('success', "File \"{$failure->original_filename}\" berhasil di-resolve ke klien {$client->name}.");
@@ -689,7 +694,7 @@ class AdminDocumentController extends Controller
             $file = fopen('php://output', 'w');
 
             // Add UTF-8 BOM for Excel compatibility
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
 
             fputcsv($file, ['Original Filename', 'Folder Type', 'Failure Reason', 'Best Match Suggestion', 'Best Match Score', 'Status']);
 
@@ -745,7 +750,7 @@ class AdminDocumentController extends Controller
                 ->isNotEmpty();
 
             // If any of the three documents is missing, add to missing documents list
-            if (!$hasIchijikin || !$hasResi || !$hasKwitansi) {
+            if (! $hasIchijikin || ! $hasResi || ! $hasKwitansi) {
                 $missingDocuments[] = [
                     'client_id' => $clientId,
                     'name' => $refClient['name'],
@@ -765,7 +770,7 @@ class AdminDocumentController extends Controller
      */
     public function downloadZip(Client $client)
     {
-        if (!class_exists('\ZipArchive')) {
+        if (! class_exists('\ZipArchive')) {
             return redirect()->back()->with('error', 'Ekstensi ZipArchive tidak tersedia di server ini.');
         }
 
@@ -775,38 +780,38 @@ class AdminDocumentController extends Controller
         $resiDoc = $client->documents->where('type', 'resi')->first();
         $kwitansiDoc = $client->documents->where('type', 'kwitansi')->first();
 
-        if (!$ichijikinDoc || !$ichijikinDoc->bucket_path) {
+        if (! $ichijikinDoc || ! $ichijikinDoc->bucket_path) {
             return redirect()->back()->with('error', 'Dokumen Ichijikin untuk client ini belum tersedia.');
         }
-        if (!$resiDoc || !$resiDoc->bucket_path) {
+        if (! $resiDoc || ! $resiDoc->bucket_path) {
             return redirect()->back()->with('error', 'Dokumen Resi Transfer untuk client ini belum tersedia.');
         }
-        if (!$kwitansiDoc || !$kwitansiDoc->bucket_path) {
+        if (! $kwitansiDoc || ! $kwitansiDoc->bucket_path) {
             return redirect()->back()->with('error', 'Dokumen Kwitansi untuk client ini belum tersedia.');
         }
 
         $disk = Storage::disk('supabase');
 
-        if (!$disk->exists($ichijikinDoc->bucket_path)) {
+        if (! $disk->exists($ichijikinDoc->bucket_path)) {
             return redirect()->back()->with('error', 'File Ichijikin tidak ditemukan di penyimpanan awan.');
         }
-        if (!$disk->exists($resiDoc->bucket_path)) {
+        if (! $disk->exists($resiDoc->bucket_path)) {
             return redirect()->back()->with('error', 'File Resi Transfer tidak ditemukan di penyimpanan awan.');
         }
-        if (!$disk->exists($kwitansiDoc->bucket_path)) {
+        if (! $disk->exists($kwitansiDoc->bucket_path)) {
             return redirect()->back()->with('error', 'File Kwitansi tidak ditemukan di penyimpanan awan.');
         }
 
         try {
-            $zip = new \ZipArchive();
-            $zipFileName = 'Dokumen_' . Str::slug($client->name) . '_' . now()->format('Ymd') . '.zip';
+            $zip = new \ZipArchive;
+            $zipFileName = 'Dokumen_'.Str::slug($client->name).'_'.now()->format('Ymd').'.zip';
             $tempDir = storage_path('app/temp');
 
-            if (!file_exists($tempDir)) {
+            if (! file_exists($tempDir)) {
                 mkdir($tempDir, 0755, true);
             }
 
-            $zipPath = $tempDir . '/' . $zipFileName;
+            $zipPath = $tempDir.'/'.$zipFileName;
 
             if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
                 return redirect()->back()->with('error', 'Gagal membuat file ZIP di server.');
@@ -818,9 +823,9 @@ class AdminDocumentController extends Controller
 
             $clientNameClean = str_replace(['/', '\\', '?', '%', '*', ':', '|', '"', '<', '>', '.'], '', $client->name);
 
-            $ichijikinName = "Ichijikin_" . $clientNameClean . "." . $ichijikinExt;
-            $resiName = "Resi_" . $clientNameClean . "." . $resiExt;
-            $kwitansiName = "Kwitansi_" . $clientNameClean . "." . $kwitansiExt;
+            $ichijikinName = 'Ichijikin_'.$clientNameClean.'.'.$ichijikinExt;
+            $resiName = 'Resi_'.$clientNameClean.'.'.$resiExt;
+            $kwitansiName = 'Kwitansi_'.$clientNameClean.'.'.$kwitansiExt;
 
             $zip->addFromString($ichijikinName, $disk->get($ichijikinDoc->bucket_path));
             $zip->addFromString($resiName, $disk->get($resiDoc->bucket_path));
@@ -831,12 +836,13 @@ class AdminDocumentController extends Controller
             return response()->download($zipPath, $zipFileName, [
                 'Content-Type' => 'application/zip',
             ])->deleteFileAfterSend(true);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             if (isset($zipPath) && file_exists($zipPath)) {
                 @unlink($zipPath);
             }
-            logger()->error("Failed to generate ZIP", ['exception' => $e->getMessage(), 'client_id' => $client->id]);
-            return redirect()->back()->with('error', 'Terjadi kesalahan sistem saat membuat file ZIP: ' . $e->getMessage());
+            logger()->error('Failed to generate ZIP', ['exception' => $e->getMessage(), 'client_id' => $client->id]);
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem saat membuat file ZIP: '.$e->getMessage());
         }
     }
 
@@ -845,9 +851,9 @@ class AdminDocumentController extends Controller
      */
     public function exportDownloadStatus(DocumentUploadBatch $batch)
     {
-        if (auth()->user() && !auth()->user()->hasRole(\App\Models\User::ROLE_SUPER_ADMIN)) {
+        if (auth()->user() && ! auth()->user()->hasRole(User::ROLE_SUPER_ADMIN)) {
             $permission = PermissionHelper::transform(PermissionHelper::ACCESS_ADMIN_UPLOAD_DOCUMENT, PermissionHelper::TYPE_READ);
-            if (!auth()->user()->hasPermissionTo($permission)) {
+            if (! auth()->user()->hasPermissionTo($permission)) {
                 abort(403, 'Akses ditolak: Anda tidak memiliki izin untuk mengunduh laporan status batch.');
             }
         }
@@ -865,7 +871,7 @@ class AdminDocumentController extends Controller
                             ->orWhereNull('dd.batch_id');
                     });
             })
-            ->leftJoin('client_confirmations as cc', function ($join) use ($batch) {
+            ->leftJoin('client_confirmations as cc', function ($join) {
                 $join->on('cc.client_id', '=', 'c.id')
                     ->whereNull('cc.deleted_at');
             })
@@ -885,7 +891,7 @@ class AdminDocumentController extends Controller
             ->groupBy('c.id', 'c.no_jp', 'c.name', 'c.pic', 'c.phone', 'b.id', 'b.created_at', 'cc.current_phone')
             ->orderBy('c.id', 'asc');
 
-        $fileName = "Laporan_Status_Download_Batch_" . $batch->id . "_" . now()->format('Ymd_His');
+        $fileName = 'Laporan_Status_Download_Batch_'.$batch->id.'_'.now()->format('Ymd_His');
 
         return ExportHelper::export(
             ExportHelper::TYPE_EXCEL,

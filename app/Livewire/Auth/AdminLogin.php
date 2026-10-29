@@ -2,14 +2,13 @@
 
 namespace App\Livewire\Auth;
 
-use App\Enums\Auth\Role;
 use App\Helpers\Alert;
-use App\Repositories\Account\UserRepository;
 use App\Models\User;
-use Livewire\Component;
+use App\Repositories\Account\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class AdminLogin extends Component
 {
@@ -26,20 +25,23 @@ class AdminLogin extends Component
         $user = UserRepository::findByNameOrEmail($this->nameOrEmail);
         if (empty($user)) {
             Alert::fail($this, 'Login Gagal', 'Akun Belum Terdaftar');
+
             return;
         }
 
-        if (!$user->hasAnyRole([User::ROLE_SUPERADMIN, User::ROLE_ADMIN])) {
+        if (! $user->hasAnyRole([User::ROLE_SUPERADMIN, User::ROLE_ADMIN])) {
             Alert::fail(
                 $this,
                 'Akses Ditolak',
                 'Maaf, halaman ini hanya dapat diakses oleh Administrator.'
             );
+
             return;
         }
 
-        if (!Hash::check($this->password, $user->password)) {
+        if (! Hash::check($this->password, $user->password)) {
             Alert::fail($this, 'Login Gagal', 'Password Tidak Sesuai');
+
             return;
         }
 

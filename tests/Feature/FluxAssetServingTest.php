@@ -32,4 +32,3 @@ test('app layout uses fluxAppearance and proper script placement', function () {
     expect($bodyClosePos)->not->toBeFalse();
     expect($fluxScriptsPos)->toBeLessThan($bodyClosePos);
 });
-

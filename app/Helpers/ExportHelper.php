@@ -2,23 +2,27 @@
 
 namespace App\Helpers;
 
-use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\CollectionExport;
 use App\Exports\CollectionMultiSheetExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
-use PhpOffice\PhpWord\TemplateProcessor;
-use PhpOffice\PhpWord\SimpleType\TblWidth;
 use PhpOffice\PhpWord\Element\Table;
+use PhpOffice\PhpWord\TemplateProcessor;
 
 class ExportHelper
 {
     public const TYPE_EXCEL = 'excel';
+
     public const TYPE_PDF = 'pdf';
+
     public const TYPE_PDF_DOWNLOAD = 'pdf-download';
+
     public const TYPE_WORD = 'word';
 
     public const SPN_1 = 'SPN 1';
+
     public const SPN_2 = 'SPN 2';
+
     public const SPN_3 = 'SPN 3';
 
     public static function export(
@@ -30,9 +34,9 @@ class ExportHelper
         $paperOption = null,
         $isMultiSheet = false,
     ) {
-        if (self::TYPE_EXCEL == $type) {
+        if ($type == self::TYPE_EXCEL) {
             return $isMultiSheet ? Excel::download(new CollectionMultiSheetExport($request, $data, $view), "$fileName.xlsx") : Excel::download(new CollectionExport($request, $data, $view), "$fileName.xlsx");
-        } elseif (self::TYPE_WORD == $type) {
+        } elseif ($type == self::TYPE_WORD) {
             // $publicPath = $view;
             // $template = new TemplateProcessor($publicPath);
 
@@ -99,7 +103,7 @@ class ExportHelper
                 200,
                 [
                     'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'inline; filename="' . $fileName . '.pdf"',
+                    'Content-Disposition' => 'inline; filename="'.$fileName.'.pdf"',
                 ]
             );
         }

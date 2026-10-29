@@ -63,7 +63,7 @@ class UserRepository extends MasterDataRepository
     public static function datatable($roleId)
     {
         return User::with('roles')
-            ->when($roleId  && $roleId != "Seluruh", function ($query) use ($roleId) {
+            ->when($roleId && $roleId != 'Seluruh', function ($query) use ($roleId) {
                 $query->whereHas('roles', function ($query) use ($roleId) {
                     $query->whereId($roleId);
                 });

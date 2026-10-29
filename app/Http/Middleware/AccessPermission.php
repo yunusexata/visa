@@ -16,7 +16,7 @@ class AccessPermission
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!PermissionHelper::isRoutePermitted($request->route()->getName())) {
+        if (! PermissionHelper::isRoutePermitted($request->route()->getName())) {
             abort(401);
         }
 

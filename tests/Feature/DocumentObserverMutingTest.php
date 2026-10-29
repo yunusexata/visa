@@ -1,18 +1,19 @@
 <?php
 
+use App\Jobs\ProcessDocumentChunk;
 use App\Models\Client\Client;
 use App\Models\Document;
 use App\Models\DocumentUploadBatch;
-use App\Models\User;
 use App\Models\Service\SendEmailLog;
-use App\Jobs\ProcessDocumentChunk;
+use App\Models\User;
 use App\Observers\DocumentObserver;
+use Database\Seeders\User\PermissionSeeder;
+use Database\Seeders\User\RoleSeeder;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Bus;
 
 beforeEach(function () {
-    (new \Database\Seeders\User\PermissionSeeder())->run();
-    (new \Database\Seeders\User\RoleSeeder())->run();
+    (new PermissionSeeder)->run();
+    (new RoleSeeder)->run();
 });
 
 test('DocumentObserver is muted during ProcessDocumentChunk and triggered consolidatedly afterwards', function () {
@@ -71,7 +72,7 @@ test('DocumentObserver is muted during ProcessDocumentChunk and triggered consol
             'type' => 'kwitansi',
             'matched' => true,
             'client_id' => $client->id,
-        ]
+        ],
     ];
 
     foreach ($files as $file) {

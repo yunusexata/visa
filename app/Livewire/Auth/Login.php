@@ -3,12 +3,12 @@
 namespace App\Livewire\Auth;
 
 use App\Helpers\Alert;
+use App\Models\User;
 use App\Repositories\Account\UserRepository;
-use Livewire\Component;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Hash;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class Login extends Component
 {
@@ -24,7 +24,6 @@ class Login extends Component
     #[Validate('required', message: 'Tahun Harus Diisi', onUpdate: false)]
     public $tahun;
 
-
     public function registerWithGoogle()
     {
         return redirect()->route('auth.socialite.redirect', 'google');
@@ -37,11 +36,13 @@ class Login extends Component
         $user = UserRepository::findByNameOrEmail($this->nameOrEmail);
         if (empty($user)) {
             Alert::fail($this, 'Login Gagal', 'Akun Belum Terdaftar');
+
             return;
         }
 
-        if (!$user->hasRole(\App\Models\User::ROLE_CLIENT)) {
+        if (! $user->hasRole(User::ROLE_CLIENT)) {
             Alert::fail($this, 'Akses Ditolak', 'Akun Belum Terdaftar');
+
             return;
         }
 
@@ -49,11 +50,12 @@ class Login extends Component
 
         $clientDob = null;
         if ($user->client && $user->client->dob) {
-            $clientDob = \Carbon\Carbon::parse($user->client->dob)->format('Y-m-d');
+            $clientDob = Carbon::parse($user->client->dob)->format('Y-m-d');
         }
 
-        if (!$clientDob || $clientDob !== $formattedDob) {
+        if (! $clientDob || $clientDob !== $formattedDob) {
             Alert::fail($this, 'Login Gagal', 'Tanggal Lahir Tidak Sesuai');
+
             return;
         }
 

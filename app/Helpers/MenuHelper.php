@@ -33,18 +33,17 @@ class MenuHelper
                 'subItems' => [
                     ['name' => 'Pengguna', 'path' => 'user.index', 'pro' => false],
                     ['name' => 'Jabatan', 'path' => 'role.index', 'pro' => false],
-                    ['name' => 'Akses', 'path' => 'permission.index', 'pro' => false]
+                    ['name' => 'Akses', 'path' => 'permission.index', 'pro' => false],
                 ],
             ],
         ];
 
         // if (auth()->check() && !auth()->user()->hasRole(\App\Models\User::ROLE_CLIENT)) {
-        //     $items[] = 
+        //     $items[] =
         // }
 
         return $items;
     }
-
 
     private static function getValidatedMenu()
     {
@@ -58,7 +57,7 @@ class MenuHelper
             if (isset($menu['subItems'])) {
                 $validatedSubmenu = [];
                 foreach ($menu['subItems'] as $submenu) {
-                    if (!isset($submenu['path']) || PermissionHelper::isRoutePermitted($submenu['path'], $user)) {
+                    if (! isset($submenu['path']) || PermissionHelper::isRoutePermitted($submenu['path'], $user)) {
                         $validatedSubmenu[] = $submenu;
                     }
                 }
@@ -69,7 +68,7 @@ class MenuHelper
                 }
             } else {
 
-                if (!isset($menu['path']) || PermissionHelper::isRoutePermitted($menu['path'], $user)) {
+                if (! isset($menu['path']) || PermissionHelper::isRoutePermitted($menu['path'], $user)) {
                     $validatedMenu[] = $menu;
                 }
             }
@@ -83,9 +82,10 @@ class MenuHelper
         $items = [
             [
                 'title' => 'Menu',
-                'items' => self::getValidatedMenu()
+                'items' => self::getValidatedMenu(),
             ],
         ];
+
         return $items;
     }
 
@@ -135,14 +135,14 @@ class MenuHelper
 
     public static function resetCacheByUser($userId)
     {
-        Cache::forget(CacheHelper::KEY_MENU . $userId);
+        Cache::forget(CacheHelper::KEY_MENU.$userId);
     }
 
     public static function resetCacheByRole($roleId)
     {
         $users = UserRepository::getByRole($roleId);
         foreach ($users as $user) {
-            Cache::forget(CacheHelper::KEY_MENU . $user->id);
+            Cache::forget(CacheHelper::KEY_MENU.$user->id);
         }
     }
 }

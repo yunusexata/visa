@@ -1,7 +1,9 @@
 <?php
 
 use App\Enums\Form\VisaFormLinkStatus;
+use App\Enums\Form\VisaFormStatus;
 use App\Livewire\Form\VisaFormSubmission;
+use App\Models\Form\VisaForm;
 use App\Models\Form\VisaFormLink;
 use Livewire\Livewire;
 use Vinkla\Hashids\Facades\Hashids;
@@ -123,7 +125,7 @@ test('submitting form increments link used_count and redirects to upload documen
 
     $hashid = Hashids::encode($link->id);
 
-    Livewire::test(VisaFormSubmission::class, ['hashid' => $hashid])
+    $test = Livewire::test(VisaFormSubmission::class, ['hashid' => $hashid])
         ->set('nama_lengkap', 'BUDI SANTOSO')
         ->set('declaration_agreed', false)
         ->call('submit')
@@ -131,8 +133,14 @@ test('submitting form increments link used_count and redirects to upload documen
         ->set('declaration_agreed', true)
         ->call('submit')
         ->assertHasNoErrors()
-        ->assertDispatched('clear-form-draft')
-        ->assertRedirect(route('form.upload-document', ['link' => $hashid]));
+        ->assertDispatched('clear-form-draft');
+
+    $visaForm = VisaForm::latest('id')->first();
+    expect($visaForm)->not->toBeNull();
+    $expectedFormHashid = Hashids::encode($visaForm->id);
+
+    $test->assertRedirect(route('form.upload-document', ['hashid' => $expectedFormHashid]));
 
     expect($link->fresh()->used_count)->toBe(1);
+    expect($visaForm->status)->toBe(VisaFormStatus::DRAFT);
 });

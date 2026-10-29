@@ -257,7 +257,8 @@
             </div>
 
             <!-- Form Content Area (Autosave triggers on change & blur only) -->
-            <form wire:submit.prevent="submit" 
+            <form novalidate 
+                  wire:submit.prevent="submit" 
                   @change="saveDraft()" 
                   @blur.capture="saveDraft()"
                   class="p-5 sm:p-8">

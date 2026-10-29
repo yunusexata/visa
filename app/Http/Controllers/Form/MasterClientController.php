@@ -14,11 +14,11 @@ class MasterClientController extends Controller
 
     public function create()
     {
-        return view('app.master-client.import', ["objId" => null]);
+        return view('app.master-client.import', ['objId' => null]);
     }
 
     public function edit(Request $request)
     {
-        return view('app.master-client.detail', ["objId" => $request->id]);
+        return view('app.master-client.detail', ['objId' => $request->id]);
     }
 }

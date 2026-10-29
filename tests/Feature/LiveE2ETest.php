@@ -43,13 +43,13 @@ test('end-to-end dummy batch creation, client download, and live-tracking verifi
     $dummyUser = User::create([
         'client_id' => $dummyClient->id,
         'name' => 'CLIENT DUMMY TEST TRACKING',
-        'email' => 'dummy_e2e_test_' . uniqid() . '@exata.test',
+        'email' => 'dummy_e2e_test_'.uniqid().'@exata.test',
         'password' => bcrypt('password'),
     ]);
     $dummyUser->assignRole(User::ROLE_CLIENT);
 
     // 3. Create Dummy Documents (Ichijikin, Resi, Kwitansi)
-    $filePath = 'documents/' . $dummyClient->id . '/ichijikin/dummy_ichijikin.jpg';
+    $filePath = 'documents/'.$dummyClient->id.'/ichijikin/dummy_ichijikin.jpg';
     Storage::disk('supabase')->put($filePath, 'dummy binary content');
 
     $dummyDoc = Document::create([

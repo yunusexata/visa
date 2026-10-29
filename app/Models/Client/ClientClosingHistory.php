@@ -11,7 +11,7 @@ use Muhammadyunus1072\TrackHistory\HasTrackHistory;
 class ClientClosingHistory extends Model
 {
     // php artisan reverb:start
-    use HasFactory, SoftDeletes, HasTrackHistory;
+    use HasFactory, HasTrackHistory, SoftDeletes;
 
     protected $fillable = [
 

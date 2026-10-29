@@ -2,14 +2,17 @@
 
 use App\Models\Client\Client;
 use App\Services\DocumentMatchingService;
+use Database\Seeders\User\PermissionSeeder;
+use Database\Seeders\User\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-uses(Tests\TestCase::class, RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 test('matchFilename behaves identically with preloaded collection vs allowed client IDs', function () {
     // Run seeders to set up roles and permissions
-    (new \Database\Seeders\User\PermissionSeeder())->run();
-    (new \Database\Seeders\User\RoleSeeder())->run();
+    (new PermissionSeeder)->run();
+    (new RoleSeeder)->run();
 
     // Create reference clients in sqlite memory
     $client1 = Client::create([
@@ -44,12 +47,12 @@ test('matchFilename behaves identically with preloaded collection vs allowed cli
         'pic' => 'sg',
     ]);
 
-    $service = new DocumentMatchingService();
+    $service = new DocumentMatchingService;
 
     // 1. Exact Match Test
     $filename1 = '1_Budi Santoso.jpg';
     $resOld1 = $service->matchFilename($filename1, [$client1->id, $client2->id], 'ichijikin');
-    
+
     $preloaded = Client::whereIn('id', [$client1->id, $client2->id])->get();
     $resNew1 = $service->matchFilename($filename1, $preloaded, 'ichijikin');
 
@@ -64,7 +67,7 @@ test('matchFilename behaves identically with preloaded collection vs allowed cli
 
     expect($resNew2['status'])->toBe($resOld2['status']);
     expect($resNew2['confidence'])->toBe($resOld2['confidence']);
-    
+
     // Explicitly compare client details of match outcomes
     if ($resOld2['matched_client'] !== null) {
         expect($resNew2['matched_client'])->not->toBeNull();
@@ -83,8 +86,8 @@ test('matchFilename behaves identically with preloaded collection vs allowed cli
 
 test('matchFilename matches correctly based on document type patterns', function () {
     // Run seeders to set up roles and permissions
-    (new \Database\Seeders\User\PermissionSeeder())->run();
-    (new \Database\Seeders\User\RoleSeeder())->run();
+    (new PermissionSeeder)->run();
+    (new RoleSeeder)->run();
 
     $client = Client::create([
         'no_jp' => 'JP333',
@@ -125,7 +128,7 @@ test('matchFilename matches correctly based on document type patterns', function
         'pic' => 'sg',
     ]);
 
-    $service = new DocumentMatchingService();
+    $service = new DocumentMatchingService;
     $preloaded = Client::all();
 
     // Test pattern Ichijikin: Old pattern ({angka}_{NAMA LENGKAP})

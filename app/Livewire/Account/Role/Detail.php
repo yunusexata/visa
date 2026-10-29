@@ -2,15 +2,15 @@
 
 namespace App\Livewire\Account\Role;
 
-use Exception;
 use App\Helpers\Alert;
 use App\Helpers\PermissionHelper;
 use App\Repositories\Account\PermissionRepository;
 use App\Repositories\Account\RoleRepository;
-use Livewire\Component;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class Detail extends Component
 {
@@ -27,10 +27,10 @@ class Detail extends Component
 
         foreach ($permissions as $permission) {
             $access = PermissionHelper::getAccess($permission->name);
-            if (!isset($this->accesses[$access])) {
+            if (! isset($this->accesses[$access])) {
                 $this->accesses[$access] = [
                     'name' => isset(PermissionHelper::TRANSLATE_ACCESS[$access]) ? PermissionHelper::TRANSLATE_ACCESS[$access] : $access,
-                    'permissions' => []
+                    'permissions' => [],
                 ];
             }
 
@@ -86,7 +86,7 @@ class Detail extends Component
             return;
         }
 
-        $this->name = "";
+        $this->name = '';
         foreach ($this->accesses as $keyAccess => $access) {
             foreach ($access['permissions'] as $keyPermission => $permission) {
                 $this->accesses[$keyAccess]['permissions'][$keyPermission]['is_checked'] = false;
@@ -114,7 +114,7 @@ class Detail extends Component
         }
 
         $validatedData = [
-            'name' => $this->name
+            'name' => $this->name,
         ];
 
         try {
@@ -132,16 +132,16 @@ class Detail extends Component
             Alert::confirmation(
                 $this,
                 Alert::ICON_SUCCESS,
-                "Berhasil",
-                "Jabatan Berhasil Diperbarui",
-                "on-dialog-confirm",
-                "on-dialog-cancel",
-                "Oke",
-                "Tutup",
+                'Berhasil',
+                'Jabatan Berhasil Diperbarui',
+                'on-dialog-confirm',
+                'on-dialog-cancel',
+                'Oke',
+                'Tutup',
             );
         } catch (Exception $e) {
             DB::rollBack();
-            Alert::fail($this, "Gagal", $e->getMessage());
+            Alert::fail($this, 'Gagal', $e->getMessage());
         }
     }
 

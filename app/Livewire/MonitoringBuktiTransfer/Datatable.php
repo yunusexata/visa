@@ -2,14 +2,15 @@
 
 namespace App\Livewire\MonitoringBuktiTransfer;
 
+use App\Helpers\ExportHelper;
 use App\Helpers\PermissionHelper;
 use App\Models\Client\Client;
-use App\Models\Client\ClientConfirmation;
 use App\Traits\Livewire\WithDatatable;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\Url;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class Datatable extends Component
@@ -34,24 +35,29 @@ class Datatable extends Component
     public $bulkPic = '';
 
     public $batches = [];
+
     public $closings = [];
 
     public function updatingSelectedBatch()
     {
         $this->resetPage();
     }
+
     public function updatingSelectedClosing()
     {
         $this->resetPage();
     }
+
     public function updatingDocumentType()
     {
         $this->resetPage();
     }
+
     public function updatingFilterStatus()
     {
         $this->resetPage();
     }
+
     public function updatingBulkPic()
     {
         $this->resetPage();
@@ -63,7 +69,7 @@ class Datatable extends Component
         $this->isCanGetAll = auth()->user()->hasPermissionTo(
             PermissionHelper::transform(PermissionHelper::ACCESS_FILTER_ALL_PIC, PermissionHelper::TYPE_READ)
         );
-        if (!$this->isCanGetAll) {
+        if (! $this->isCanGetAll) {
             $this->bulkPic = auth()->user()->pic;
         }
 
@@ -81,7 +87,7 @@ class Datatable extends Component
             ->groupBy('client_closing_batch_number')
             ->orderBy('client_closing_batch_number')
             ->get()
-            ->map(fn($item) => (array)$item)
+            ->map(fn ($item) => (array) $item)
             ->toArray();
     }
 
@@ -94,14 +100,13 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'render' => function ($item) {
-                    $credential = $item->email . " " . $item->password;
+                    $credential = $item->email.' '.$item->password;
                     $credentialHtml = "<div class='col-auto'>
                                 <button type='button' class='inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-2 py-1 text-sm bg-success-500 text-white shadow-theme-xs hover:bg-success-600 disabled:bg-brand-300' onclick=\"copyToClipboard('$credential')\">
                                     <span class='material-symbols-outlined text-lg' data-icon='edit'>vpn_key</span>
                                 </button>
                             </div>
                     ";
-
 
                     $html = "<div class='flex flex-nowrap justify-start p-0 m-0 gap-1'>
                         $credentialHtml
@@ -151,7 +156,7 @@ class Datatable extends Component
 
                     if ($client) {
                         if ($hasAllDocs) {
-                            $html = "<a href='" . route('admin.documents.download-zip', $client->id) . "' 
+                            $html = "<a href='".route('admin.documents.download-zip', $client->id)."' 
                                                 class='inline-flex items-center text-brand-600 dark:text-brand-400 hover:underline font-semibold'
                                                 title='Download ZIP'>
                                                 Download ZIP
@@ -168,8 +173,8 @@ class Datatable extends Component
                     }
 
                     return $html;
-                }
-            ]
+                },
+            ],
         ];
     }
 
@@ -191,8 +196,8 @@ class Datatable extends Component
                 'client_confirmations.closed_at',
                 'client_magic_links.email',
                 'client_magic_links.password',
-                DB::raw("MAX(CASE WHEN documents.type IS NOT NULL THEN documents.type END) as document_type"),
-                DB::raw("MAX(dd_meta.downloaded_at) as last_downloaded_at"),
+                DB::raw('MAX(CASE WHEN documents.type IS NOT NULL THEN documents.type END) as document_type'),
+                DB::raw('MAX(dd_meta.downloaded_at) as last_downloaded_at'),
                 // Status dihitung di SELECT dan dipakai untuk display + export
                 DB::raw("CASE
                             WHEN MAX(CASE WHEN dd_meta.source = 'live_tracked' THEN 1 ELSE 0 END) = 1 THEN 'downloaded'
@@ -227,10 +232,10 @@ class Datatable extends Component
 
         // Server-side PIC scoping
         $query->where(function ($q) use ($pic) {
-            if (!$this->isCanGetAll) {
+            if (! $this->isCanGetAll) {
                 $q->where('clients.pic', $pic);
             } elseif ($this->bulkPic && $this->bulkPic !== 'all') {
-                $q->where('clients.pic', 'ILIKE', '%' . $this->bulkPic . '%');
+                $q->where('clients.pic', 'ILIKE', '%'.$this->bulkPic.'%');
             }
         });
 
@@ -285,18 +290,18 @@ class Datatable extends Component
     {
         // Keterbatasan PostgreSQL: alias 'status' dari SELECT tidak bisa dirujuk langsung di HAVING
         return $query->havingRaw(match ($this->filterStatus) {
-            'downloaded'     => "COALESCE(MAX(CASE WHEN dd_meta.source = 'live_tracked' THEN 1 ELSE 0 END), 0) = 1",
-            'seeded'         => "COALESCE(MAX(CASE WHEN dd_meta.source = 'live_tracked' THEN 1 ELSE 0 END), 0) = 0
+            'downloaded' => "COALESCE(MAX(CASE WHEN dd_meta.source = 'live_tracked' THEN 1 ELSE 0 END), 0) = 1",
+            'seeded' => "COALESCE(MAX(CASE WHEN dd_meta.source = 'live_tracked' THEN 1 ELSE 0 END), 0) = 0
                                  AND COALESCE(MAX(CASE WHEN dd_meta.source IS NOT NULL THEN 1 ELSE 0 END), 0) = 1",
-            'not_downloaded' => "COALESCE(MAX(CASE WHEN dd_meta.source IS NOT NULL THEN 1 ELSE 0 END), 0) = 0",
-            default          => '1=1',
+            'not_downloaded' => 'COALESCE(MAX(CASE WHEN dd_meta.source IS NOT NULL THEN 1 ELSE 0 END), 0) = 0',
+            default => '1=1',
         });
     }
 
     #[On('export')]
     public function export($type)
     {
-        $fileName = "Monitoring Bukti Transfer " . \Carbon\Carbon::now()->format('Y-m-d H_i_s');
+        $fileName = 'Monitoring Bukti Transfer '.Carbon::now()->format('Y-m-d H_i_s');
         $query = $this->datatableGetProcessedQuery();
 
         $request = [
@@ -306,7 +311,7 @@ class Datatable extends Component
             'pic' => $this->bulkPic,
         ];
 
-        return \App\Helpers\ExportHelper::export(
+        return ExportHelper::export(
             $type,
             $fileName,
             $query,

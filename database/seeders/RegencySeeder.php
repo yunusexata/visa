@@ -11,8 +11,9 @@ class RegencySeeder extends Seeder
     {
         $file = storage_path('app/regencies.csv');
 
-        if (!file_exists($file)) {
+        if (! file_exists($file)) {
             $this->command->warn("File 'regencies.csv' not found at: {$file}. Skipping Regency data seeding.");
+
             return;
         }
 

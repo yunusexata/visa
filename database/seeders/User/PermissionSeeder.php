@@ -5,6 +5,7 @@ namespace Database\Seeders\User;
 use App\Helpers\PermissionHelper;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class PermissionSeeder extends Seeder
 {
@@ -14,7 +15,7 @@ class PermissionSeeder extends Seeder
     public function run(): void
     {
         // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // create permissions
         foreach (PermissionHelper::ACCESS_TYPE_ALL as $access => $types) {

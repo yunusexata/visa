@@ -14,11 +14,11 @@ class VisaFormLinkController extends Controller
 
     public function create()
     {
-        return view('app.form.visa-form-link.detail', ["objId" => null]);
+        return view('app.form.visa-form-link.detail', ['objId' => null]);
     }
 
     public function edit(Request $request)
     {
-        return view('app.form.visa-form-link.detail', ["objId" => $request->id]);
+        return view('app.form.visa-form-link.detail', ['objId' => $request->id]);
     }
 }

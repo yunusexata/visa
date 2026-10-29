@@ -1,19 +1,21 @@
 <?php
 
+use App\Enums\Service\EmailLogStatus;
+use App\Mail\DocumentAvailableNotification;
 use App\Models\Client\Client;
 use App\Models\Document;
-use App\Models\User;
 use App\Models\Service\SendEmailLog;
-use App\Mail\DocumentAvailableNotification;
-use App\Enums\Service\EmailLogStatus;
+use App\Models\User;
+use Database\Seeders\User\PermissionSeeder;
+use Database\Seeders\User\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 test('notifications are only sent when all 3 required documents are present', function () {
     // Run seeders to set up roles and permissions
-    (new \Database\Seeders\User\PermissionSeeder())->run();
-    (new \Database\Seeders\User\RoleSeeder())->run();
+    (new PermissionSeeder)->run();
+    (new RoleSeeder)->run();
 
     // Create sales user for the PIC requirement
     $sales = User::create([

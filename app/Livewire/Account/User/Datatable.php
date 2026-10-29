@@ -4,12 +4,10 @@ namespace App\Livewire\Account\User;
 
 use App\Helpers\Alert;
 use App\Helpers\PermissionHelper;
-use App\Models\User;
 use App\Repositories\Account\UserRepository;
 use App\Traits\Livewire\WithDatatable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Crypt;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -18,6 +16,7 @@ class Datatable extends Component
     use WithDatatable;
 
     public $isCanUpdate;
+
     public $isCanDelete;
 
     // Filter
@@ -36,7 +35,7 @@ class Datatable extends Component
     #[On('on-delete-dialog-confirm')]
     public function onDialogDeleteConfirm()
     {
-        if (!$this->isCanDelete || $this->targetDeleteId == null) {
+        if (! $this->isCanDelete || $this->targetDeleteId == null) {
             return;
         }
 
@@ -57,12 +56,12 @@ class Datatable extends Component
         Alert::confirmation(
             $this,
             Alert::ICON_QUESTION,
-            "Hapus Data",
-            "Apakah Anda Yakin Ingin Menghapus Data Ini ?",
-            "on-delete-dialog-confirm",
-            "on-delete-dialog-cancel",
-            "Hapus",
-            "Batal",
+            'Hapus Data',
+            'Apakah Anda Yakin Ingin Menghapus Data Ini ?',
+            'on-delete-dialog-confirm',
+            'on-delete-dialog-cancel',
+            'Hapus',
+            'Batal',
         );
     }
 
@@ -74,7 +73,7 @@ class Datatable extends Component
                 'sortable' => false,
                 'searchable' => false,
                 'render' => function ($item) {
-                    $editHtml = "";
+                    $editHtml = '';
                     if ($this->isCanUpdate) {
 
                         $editUrl = route('user.edit', $item->id);
@@ -85,8 +84,8 @@ class Datatable extends Component
                         </div>";
                     }
 
-                    $destroyHtml = "";
-                    $destroyHtml = "";
+                    $destroyHtml = '';
+                    $destroyHtml = '';
                     if ($this->isCanDelete) {
                         $destroyHtml = "<div class='col-auto'>
                             <button type='button' class='inline-flex items-center justify-center font-medium gap-2 rounded-lg transition px-2 py-1 text-sm bg-red-500 text-white shadow-theme-xs hover:bg-red-600 disabled:bg-brand-300' wire:click=\"showDeleteDialog($item->id)\">
@@ -118,8 +117,8 @@ class Datatable extends Component
                 'searchable' => false,
                 'name' => 'Role',
                 'render' => function ($item) {
-                    return count($item->roles) > 0 ? $item->roles[0]->name : "";
-                }
+                    return count($item->roles) > 0 ? $item->roles[0]->name : '';
+                },
             ],
         ];
 
@@ -131,12 +130,13 @@ class Datatable extends Component
                     'name' => 'Verifikasi Email',
                     'render' => function ($item) {
                         if ($item->email_verified_at) {
-                            $verifiedAt = Carbon::parse($item->email_verified_at)->isoFormat("DD MMMM Y, HH:mm");
+                            $verifiedAt = Carbon::parse($item->email_verified_at)->isoFormat('DD MMMM Y, HH:mm');
+
                             return "<div class='badge badge-success'>$verifiedAt</div>";
                         } else {
                             return "<div class='badge badge-secondary'>Belum Verifikasi</div>";
                         }
-                    }
+                    },
                 ];
         }
 

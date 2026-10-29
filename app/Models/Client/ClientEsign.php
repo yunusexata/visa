@@ -3,14 +3,16 @@
 namespace App\Models\Client;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Muhammadyunus1072\TrackHistory\HasTrackHistory;
+use setasign\Fpdi\Fpdi;
 
 class ClientEsign extends Model
 {
-    use HasFactory, SoftDeletes, HasTrackHistory;
+    use HasFactory, HasTrackHistory, SoftDeletes;
 
     protected $table = 'client_esigns';
 
@@ -37,7 +39,6 @@ class ClientEsign extends Model
         'signed_at' => 'datetime',
     ];
 
-
     protected static function onBoot()
     {
         self::created(function ($model) {
@@ -54,10 +55,10 @@ class ClientEsign extends Model
         return $this->belongsTo(Client::class);
     }
 
-    public static function generatePdfForUser(\App\Models\User $user): string
+    public static function generatePdfForUser(User $user): string
     {
         $imagePath = public_path('assets/pdf/perjanjian_nenkin_20.pdf');
-        $pdf = new \setasign\Fpdi\Fpdi();
+        $pdf = new Fpdi;
 
         $pageWidth = 1130;
         $pageHeight = 1680;
@@ -79,16 +80,16 @@ class ClientEsign extends Model
         // NO SURAT
         $pdf->Text(508, 300, str_pad($user->client_id, 4, '0', STR_PAD_LEFT));
         // HARI
-        $pdf->Text(450, 356, \Carbon\Carbon::parse($user->client->esign->signed_at)->locale('id')
+        $pdf->Text(450, 356, Carbon::parse($user->client->esign->signed_at)->locale('id')
             ->translatedFormat('l'));
-        $pdf->Text(600, 356, \Carbon\Carbon::parse($user->client->esign->signed_at)->locale('id')
+        $pdf->Text(600, 356, Carbon::parse($user->client->esign->signed_at)->locale('id')
             ->translatedFormat('d F Y'));
         // NO Nama
         $pdf->Text(585, 440, $user->name);
         // NIK
         $pdf->Text(585, 462, $user->client->esign->nik);
         // Tgl Lahir
-        $pdf->Text(585, 484, \Carbon\Carbon::parse($user->client->dob)->locale('id')
+        $pdf->Text(585, 484, Carbon::parse($user->client->dob)->locale('id')
             ->translatedFormat('d F Y'));
         // Alamat
         $clientModel = $user->client;
@@ -98,7 +99,6 @@ class ClientEsign extends Model
         // $line1 = (string) substr($address, 0, 40);
         // $line2 = strlen($address) > 40 ? (string) substr($address, 40, 50) : '';
         // $line3 = strlen($address) > 90 ? (string) substr($address, 90, 50) : '';
-
 
         // $lines = [
         //     $line1,
@@ -138,10 +138,10 @@ class ClientEsign extends Model
         );
 
         // Create temporary file
-        $tempFile = storage_path('app/temp-signature-' . uniqid() . '.png');
+        $tempFile = storage_path('app/temp-signature-'.uniqid().'.png');
 
         $tempDir = storage_path('app');
-        if (!file_exists($tempDir)) {
+        if (! file_exists($tempDir)) {
             mkdir($tempDir, 0755, true);
         }
 
@@ -188,10 +188,12 @@ class ClientEsign extends Model
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
     }
+
     public function updator()
     {
         return $this->belongsTo(User::class, 'updated_by', 'id');
     }
+
     public function deletor()
     {
         return $this->belongsTo(User::class, 'deleted_by', 'id');

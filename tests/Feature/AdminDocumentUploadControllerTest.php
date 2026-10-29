@@ -1,17 +1,19 @@
 <?php
 
+use App\Jobs\ProcessDocumentChunk;
 use App\Models\Client\Client;
 use App\Models\DocumentUploadBatch;
-use App\Models\DocumentUploadFailure;
 use App\Models\User;
-use App\Jobs\ProcessDocumentChunk;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Cache;
+use Database\Seeders\User\PermissionSeeder;
+use Database\Seeders\User\RoleSeeder;
+use Illuminate\Bus\PendingBatch;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
-    (new \Database\Seeders\User\PermissionSeeder())->run();
-    (new \Database\Seeders\User\RoleSeeder())->run();
+    (new PermissionSeeder)->run();
+    (new RoleSeeder)->run();
 });
 
 test('confirmAndUpload creates batch, chunks matched files, and dispatches Bus batch', function () {
@@ -36,7 +38,7 @@ test('confirmAndUpload creates batch, chunks matched files, and dispatches Bus b
 
     // Setup matching preview cache data
     $tempBatchId = 'temp_123';
-    
+
     // Simulate 3 matched files and 1 failed file
     $matchedFiles = [
         [
@@ -62,7 +64,7 @@ test('confirmAndUpload creates batch, chunks matched files, and dispatches Bus b
             'client_id' => $client->id,
             'confidence' => 0.97,
             'manually_assigned' => false,
-        ]
+        ],
     ];
 
     $failedFiles = [
@@ -72,7 +74,7 @@ test('confirmAndUpload creates batch, chunks matched files, and dispatches Bus b
             'folder_type' => 'ichijikin',
             'confidence' => 0.40,
             'best_candidate' => ['name' => 'Siti Aminah'],
-        ]
+        ],
     ];
 
     // Put temp files on local disk
@@ -89,7 +91,7 @@ test('confirmAndUpload creates batch, chunks matched files, and dispatches Bus b
     putenv('DOCUMENT_CHUNK_SIZE=2');
 
     $response = $this->post(route('admin.documents.confirmUpload'), [
-        'temp_batch_id' => $tempBatchId
+        'temp_batch_id' => $tempBatchId,
     ]);
 
     $batch = DocumentUploadBatch::first();
@@ -101,8 +103,8 @@ test('confirmAndUpload creates batch, chunks matched files, and dispatches Bus b
     expect($batch->laravel_batch_id)->not->toBeNull();
 
     // Verify Bus::batch was dispatched with 2 chunks (since matched count is 3 and size is 2)
-    Bus::assertBatched(function (\Illuminate\Bus\PendingBatch $pendingBatch) use ($batch) {
-        return $pendingBatch->jobs->count() === 2 
+    Bus::assertBatched(function (PendingBatch $pendingBatch) {
+        return $pendingBatch->jobs->count() === 2
             && $pendingBatch->jobs->first() instanceof ProcessDocumentChunk;
     });
 

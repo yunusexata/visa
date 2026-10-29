@@ -2,19 +2,25 @@
 
 namespace App\Livewire\Client;
 
-use Livewire\Component;
 use App\Models\Document;
 use App\Models\Review;
+use App\Models\UpodSubmission;
 use App\Services\ReviewService;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class ReviewForm extends Component
 {
     public $rating = 0;
+
     public $message = '';
+
     public $hasSubmitted = false;
+
     public $submittedMessage = '';
+
     public $redirectUrl = null;
+
     public bool $popupMode = false;
 
     public function mount(bool $popupMode = false)
@@ -25,7 +31,7 @@ class ReviewForm extends Component
         if ($user && $user->client_id) {
             $this->hasSubmitted = Review::where('client_id', $user->client_id)->exists();
             if ($this->hasSubmitted) {
-                $this->submittedMessage = "Terima kasih, ulasan Anda sudah kami terima.";
+                $this->submittedMessage = 'Terima kasih, ulasan Anda sudah kami terima.';
             }
         }
     }
@@ -38,18 +44,19 @@ class ReviewForm extends Component
     public function submit(ReviewService $reviewService)
     {
         $user = Auth::user();
-        if (!$user || !$user->client_id) {
+        if (! $user || ! $user->client_id) {
             return;
         }
 
         $client = $user->client;
-        if (!$client) {
+        if (! $client) {
             return;
         }
 
         // Validate rating is chosen
         if ($this->rating < 1 || $this->rating > 5) {
             $this->addError('rating', 'Harap pilih rating terlebih dahulu.');
+
             return;
         }
 
@@ -59,15 +66,17 @@ class ReviewForm extends Component
             ->distinct('type')
             ->count('type') === 3;
 
-        if (!$hasAllDocuments) {
+        if (! $hasAllDocuments) {
             $this->addError('general', 'Form ulasan belum tersedia karena dokumen Anda belum lengkap.');
+
             return;
         }
 
         // Double check unique constraint
         if (Review::where('client_id', $client->id)->exists()) {
             $this->hasSubmitted = true;
-            $this->submittedMessage = "Terima kasih, ulasan Anda sudah kami terima.";
+            $this->submittedMessage = 'Terima kasih, ulasan Anda sudah kami terima.';
+
             return;
         }
 
@@ -75,7 +84,7 @@ class ReviewForm extends Component
         $result = $reviewService->submitReview($client, $this->rating, $this->message);
 
         // Record UPOD submission guard
-        \App\Models\UpodSubmission::updateOrCreate(
+        UpodSubmission::updateOrCreate(
             ['client_id' => $client->id],
             [
                 'upod_type' => 'google_review',
@@ -91,10 +100,10 @@ class ReviewForm extends Component
         $this->dispatch('SwalInformation', [
             'success',
             'Ulasan Terkirim',
-            $result['message']
+            $result['message'],
         ]);
 
-        if (!empty($this->redirectUrl)) {
+        if (! empty($this->redirectUrl)) {
             $this->dispatch('open-new-tab', ['url' => $this->redirectUrl]);
         }
     }
@@ -103,7 +112,7 @@ class ReviewForm extends Component
     {
         $user = Auth::user();
         $client = $user ? $user->client : null;
-        
+
         $showForm = false;
         $hasAllDocuments = false;
 
@@ -120,9 +129,9 @@ class ReviewForm extends Component
         }
 
         return view('livewire.client.review-form', [
-            'showForm'       => $showForm,
+            'showForm' => $showForm,
             'hasAllDocuments' => $hasAllDocuments,
-            'popupMode'      => $this->popupMode,
+            'popupMode' => $this->popupMode,
         ]);
     }
 }

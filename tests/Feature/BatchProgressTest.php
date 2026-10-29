@@ -1,16 +1,19 @@
 <?php
 
+use App\Livewire\Admin\BatchProgress;
 use App\Models\Client\Client;
+use App\Models\Document;
 use App\Models\DocumentUploadBatch;
 use App\Models\User;
-use App\Livewire\Admin\BatchProgress;
-use Livewire\Livewire;
+use Database\Seeders\User\PermissionSeeder;
+use Database\Seeders\User\RoleSeeder;
+use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 
 beforeEach(function () {
-    (new \Database\Seeders\User\PermissionSeeder())->run();
-    (new \Database\Seeders\User\RoleSeeder())->run();
+    (new PermissionSeeder)->run();
+    (new RoleSeeder)->run();
 });
 
 test('BatchProgress Livewire component loads, displays progress, and handles fallback', function () {
@@ -40,7 +43,7 @@ test('BatchProgress Livewire component loads, displays progress, and handles fal
             'pic' => 'sg',
         ]);
 
-        \App\Models\Document::create([
+        Document::create([
             'client_id' => $client->id,
             'type' => 'ichijikin',
             'original_filename' => "file_{$i}.png",
@@ -88,7 +91,7 @@ test('BatchProgress component reads real Laravel Bus batch progress', function (
     ]);
 
     // Mock the Bus::findBatch method
-    $mockLaravelBatch = Mockery::mock(\Illuminate\Bus\Batch::class);
+    $mockLaravelBatch = Mockery::mock(Batch::class);
     $mockLaravelBatch->shouldReceive('progress')->andReturn(75);
     $mockLaravelBatch->shouldReceive('finished')->andReturn(false);
     $mockLaravelBatch->totalJobs = 4;

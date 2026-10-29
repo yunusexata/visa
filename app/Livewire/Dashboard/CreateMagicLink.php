@@ -4,6 +4,7 @@ namespace App\Livewire\Dashboard;
 
 use App\Models\Form\VisaFormLink;
 use Carbon\Carbon;
+use Illuminate\View\View;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Vinkla\Hashids\Facades\Hashids;
@@ -56,14 +57,14 @@ class CreateMagicLink extends Component
         $this->validate();
 
         $link = VisaFormLink::create([
-            'name'       => $this->name,
-            'password'   => $this->password ?: null,
-            'max_usage'  => $this->max_usage,
+            'name' => $this->name,
+            'password' => $this->password ?: null,
+            'max_usage' => $this->max_usage,
             'expired_at' => Carbon::parse($this->expired_at)->endOfDay(),
             'created_by' => auth()->id(),
         ]);
 
-        $url = url('/form/' . Hashids::encode($link->id));
+        $url = url('/form/'.Hashids::encode($link->id));
 
         $this->showModal = false;
         $this->resetValidation();
@@ -74,7 +75,7 @@ class CreateMagicLink extends Component
         $this->dispatch('magic-link-created', url: $url);
     }
 
-    public function render(): \Illuminate\View\View
+    public function render(): View
     {
         return view('livewire.dashboard.create-magic-link');
     }

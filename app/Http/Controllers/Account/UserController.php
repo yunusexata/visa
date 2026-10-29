@@ -14,11 +14,11 @@ class UserController extends Controller
 
     public function create()
     {
-        return view('app.account.user.detail', ["objId" => null]);
+        return view('app.account.user.detail', ['objId' => null]);
     }
 
     public function edit(Request $request)
     {
-        return view('app.account.user.detail', ["objId" => $request->id]);
+        return view('app.account.user.detail', ['objId' => $request->id]);
     }
 }

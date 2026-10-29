@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class ExcelImportBulk implements ToCollection, WithHeadingRow, WithChunkReading
+class ExcelImportBulk implements ToCollection, WithChunkReading, WithHeadingRow
 {
     public $rows;
 

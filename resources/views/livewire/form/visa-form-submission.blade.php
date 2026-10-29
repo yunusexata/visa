@@ -277,7 +277,8 @@
             </div>
 
             <!-- Form Content Area (Autosave triggers on change & blur only) -->
-            <form @submit.prevent="confirmSubmit()" 
+            <form novalidate 
+                  @submit.prevent="confirmSubmit()" 
                   @change="saveDraft()" 
                   @blur.capture="saveDraft()"
                   class="p-5 sm:p-8">
@@ -971,8 +972,9 @@
                         </button>
 
                         <!-- Final Submit Button (Step 5) -->
-                        <button type="submit" 
+                        <button type="button" 
                                 x-show="step === totalSteps" 
+                                @click="confirmSubmit()"
                                 wire:loading.attr="disabled"
                                 class="inline-flex items-center gap-2 px-7 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-emerald-600/25 active:scale-98 transition-all disabled:opacity-60 disabled:cursor-not-allowed">
                             <span wire:loading.remove class="material-symbols-outlined text-lg">send</span>

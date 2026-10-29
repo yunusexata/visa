@@ -3,43 +3,45 @@
 namespace App\Livewire\Client;
 
 use App\Helpers\Alert;
-use App\Models\Client\Client;
 use App\Models\Client\ClientMagicLink;
 use App\Models\User;
 use App\Repositories\Account\UserRepository;
 use App\Repositories\Client\ClientMagicLinkRepository;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use Livewire\Component;
-use Livewire\WithFileUploads;
-use Maatwebsite\Excel\Facades\Excel;
-use Livewire\Attributes\Validate;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Component;
 
 class CreateUser extends Component
 {
-
     public $token;
+
     public $name;
+
     public $dob;
+
     public $tanggal;
+
     public $bulan;
+
     public $tahun;
+
     public $email;
+
     public $password_dob;
 
     public $is_verified = false;
 
     public function mount()
     {
-        if (!$this->token) {
+        if (! $this->token) {
             return redirect()->route('login');
         }
         $magicLink = ClientMagicLinkRepository::findBy([
-            ['token', $this->token]
+            ['token', $this->token],
         ]);
-        if (!$magicLink) {
+        if (! $magicLink) {
             return redirect()->route('login');
         }
         if ($magicLink->used_at && $magicLink->email) {
@@ -65,21 +67,23 @@ class CreateUser extends Component
         $this->dob = sprintf('%04d-%02d-%02d', $this->tahun, $this->bulan, $this->tanggal);
 
         $magicLink = ClientMagicLinkRepository::findBy([
-            ['token', $this->token]
+            ['token', $this->token],
         ]);
 
-        if (!$magicLink || !$magicLink->client) {
+        if (! $magicLink || ! $magicLink->client) {
             Alert::fail($this, 'Register Gagal', 'Token tidak valid.');
+
             return;
         }
 
         $client = $magicLink->client;
 
         $nameMatched = mb_strtolower(trim($client->name)) === mb_strtolower(trim($this->name));
-        $dobMatched = \Carbon\Carbon::parse($client->dob)->isSameDay(\Carbon\Carbon::parse($this->dob));
+        $dobMatched = Carbon::parse($client->dob)->isSameDay(Carbon::parse($this->dob));
 
         if (! $nameMatched || ! $dobMatched) {
             Alert::fail($this, 'Register Gagal', 'Akun Tidak Sesuai, hubungi PIC');
+
             return;
         }
 
@@ -88,9 +92,9 @@ class CreateUser extends Component
         session([
             'pending_magic_link_data' => [
                 'token' => $this->token,
-                'name'  => $this->name,
-                'dob'   => $this->dob,
-            ]
+                'name' => $this->name,
+                'dob' => $this->dob,
+            ],
         ]);
 
         $this->is_verified = true;
@@ -116,7 +120,7 @@ class CreateUser extends Component
                         'yahoo.co.id',
                         'ymail.com',
                         'icloud.com',
-                        'live.com'
+                        'live.com',
                     ];
 
                     // Split by '@' and get the last part (the domain)
@@ -124,11 +128,11 @@ class CreateUser extends Component
                     $domain = end($parts);
 
                     // strtolower ensures it works even if they type "GMAIL.COM"
-                    if (!in_array(strtolower($domain), $allowedDomains)) {
+                    if (! in_array(strtolower($domain), $allowedDomains)) {
                         $domainText = $domain ?: 'tidak valid';
                         $fail("Domain email \"{$domainText}\" tidak diperbolehkan. Gunakan email yang valid !");
                     }
-                }
+                },
             ],
         ], [
             'email.required' => 'Email Harus Diisi',
@@ -136,7 +140,7 @@ class CreateUser extends Component
         ]);
 
         $client = ClientMagicLinkRepository::findBy([
-            ['token', $this->token]
+            ['token', $this->token],
         ])->client;
 
         $nameMatched =
@@ -158,15 +162,16 @@ class CreateUser extends Component
         }
 
         $user = UserRepository::findByEmail($this->email);
-        if (!empty($user)) {
+        if (! empty($user)) {
             Alert::fail($this, 'Register Gagal', 'Email Sudah Digunakan');
+
             return;
         }
         try {
             DB::beginTransaction();
 
             $magicLink = ClientMagicLinkRepository::findBy([
-                ['token', $this->token]
+                ['token', $this->token],
             ]);
 
             $magicLink->update([
@@ -196,7 +201,7 @@ class CreateUser extends Component
             Alert::information($this, 'Data berhasil disimpan');
         } catch (\Exception $e) {
             DB::rollBack();
-            Alert::fail($this, "Gagal", $e->getMessage());
+            Alert::fail($this, 'Gagal', $e->getMessage());
         }
     }
 

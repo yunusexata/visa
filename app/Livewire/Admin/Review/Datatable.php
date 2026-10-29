@@ -5,31 +5,36 @@ namespace App\Livewire\Admin\Review;
 use App\Helpers\Alert;
 use App\Helpers\PermissionHelper;
 use App\Models\Client\Client;
-use App\Models\GensenForm\GensenFormLink;
+use App\Models\UpodSubmission;
+use App\Models\UpodSurveyResponse;
 use App\Models\User;
 use App\Repositories\Account\UserRepository;
 use App\Repositories\Client\ClientRepository;
-use App\Repositories\Exata\ExataFormCandidateRepository;
-use App\Repositories\GensenForm\GensenFormLinkRepository;
 use App\Traits\Livewire\WithDatatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Component;
-
 
 class Datatable extends Component
 {
     use WithDatatable;
 
     public $isCanUpdate;
+
     public $isCanDelete;
+
     public $isCanUpdateBookingTime;
+
     public $isCanUpdateDetail;
 
     public $status;
+
     public $selectedBatch = 'all';
+
     public $filter_claim_type;
+
     public $batches = [];
 
     // Delete Dialog
@@ -37,7 +42,9 @@ class Datatable extends Component
 
     // UPOD Control Panel fields
     public bool $upodMode = false;
+
     public $bulkPic;
+
     public $bulkUpodType;
 
     public function selectBatch($batchName)
@@ -55,10 +62,10 @@ class Datatable extends Component
 
     public function loadBatches()
     {
-        $this->batches = \App\Models\Client\Client::select('source_file_name as name', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+        $this->batches = Client::select('source_file_name as name', DB::raw('count(*) as total'))
             ->whereNotNull('source_file_name')
             ->groupBy('source_file_name')
-            ->orderByDesc(\Illuminate\Support\Facades\DB::raw('MAX(imported_at)'))
+            ->orderByDesc(DB::raw('MAX(imported_at)'))
             ->get()
             ->toArray();
     }
@@ -84,11 +91,12 @@ class Datatable extends Component
     {
         if (empty($this->bulkPic) || empty($this->bulkUpodType)) {
             Alert::fail($this, 'Gagal', 'Silakan pilih PIC dan tipe UPOD terlebih dahulu.');
+
             return;
         }
 
         $pic = strtolower($this->bulkPic);
-        $users = \App\Models\Client\Client::where('pic', $pic)
+        $users = Client::where('pic', $pic)
             ->when($this->selectedBatch != 'all', function ($q) {
                 $q->where('source_file_name', $this->selectedBatch);
             })
@@ -101,7 +109,8 @@ class Datatable extends Component
             ->get();
 
         if ($users->isEmpty()) {
-            Alert::fail($this, 'Gagal', 'Tidak ada user dengan PIC: ' . $this->bulkPic);
+            Alert::fail($this, 'Gagal', 'Tidak ada user dengan PIC: '.$this->bulkPic);
+
             return;
         }
 
@@ -110,7 +119,7 @@ class Datatable extends Component
             $user->save(); // maintains track history
         }
 
-        Alert::success($this, 'Berhasil', 'Default UPOD untuk PIC ' . $this->bulkPic . ' berhasil diperbarui.');
+        Alert::success($this, 'Berhasil', 'Default UPOD untuk PIC '.$this->bulkPic.' berhasil diperbarui.');
     }
 
     public function resetUpodSubmission($clientId)
@@ -118,18 +127,18 @@ class Datatable extends Component
         $client = Client::findOrFail($clientId);
 
         // Delete submission guard
-        \App\Models\UpodSubmission::where('client_id', $clientId)->delete();
+        UpodSubmission::where('client_id', $clientId)->delete();
 
         // Delete survey response if any
-        \App\Models\UpodSurveyResponse::where('client_id', $clientId)->delete();
+        UpodSurveyResponse::where('client_id', $clientId)->delete();
 
-        Alert::success($this, 'Berhasil', 'Status pengisian UPOD untuk klien ' . $client->name . ' berhasil direset.');
+        Alert::success($this, 'Berhasil', 'Status pengisian UPOD untuk klien '.$client->name.' berhasil direset.');
     }
 
     #[On('on-delete-dialog-confirm')]
     public function onDialogDeleteConfirm()
     {
-        if (!$this->isCanDelete || $this->targetDeleteId == null) {
+        if (! $this->isCanDelete || $this->targetDeleteId == null) {
             return;
         }
 
@@ -150,12 +159,12 @@ class Datatable extends Component
         Alert::confirmation(
             $this,
             Alert::ICON_QUESTION,
-            "Hapus Data",
-            "Apakah Anda Yakin Ingin Menghapus Data Ini ?",
-            "on-delete-dialog-confirm",
-            "on-delete-dialog-cancel",
-            "Hapus",
-            "Batal",
+            'Hapus Data',
+            'Apakah Anda Yakin Ingin Menghapus Data Ini ?',
+            'on-delete-dialog-confirm',
+            'on-delete-dialog-cancel',
+            'Hapus',
+            'Batal',
         );
     }
 
@@ -173,7 +182,6 @@ class Datatable extends Component
         $this->resetPage();
     }
 
-
     public function getColumns(): array
     {
         if ($this->upodMode) {
@@ -182,22 +190,22 @@ class Datatable extends Component
                     'key' => 'no_jp',
                     'name' => 'No Input JPN',
                     'render' => function ($item) {
-                        return '<span class="font-mono text-gray-900 dark:text-white">' . $item->no_jp . '</span>';
-                    }
+                        return '<span class="font-mono text-gray-900 dark:text-white">'.$item->no_jp.'</span>';
+                    },
                 ],
                 [
                     'key' => 'name',
                     'name' => 'Nama',
                     'render' => function ($item) {
-                        return '<span class="font-semibold text-gray-900 dark:text-white">' . $item->name . '</span>';
-                    }
+                        return '<span class="font-semibold text-gray-900 dark:text-white">'.$item->name.'</span>';
+                    },
                 ],
                 [
                     'key' => 'pic',
                     'name' => 'PIC',
                     'render' => function ($item) {
-                        return '<span class="text-gray-600 dark:text-gray-400">' . ($item->pic ? ucfirst($item->pic) : '-') . '</span>';
-                    }
+                        return '<span class="text-gray-600 dark:text-gray-400">'.($item->pic ? ucfirst($item->pic) : '-').'</span>';
+                    },
                 ],
                 [
                     'key' => 'upod_type',
@@ -210,8 +218,9 @@ class Datatable extends Component
                         if (is_null($item->upod_type)) {
                             $label .= ' (Default)';
                         }
-                        return '<span class="px-2 py-1 bg-' . $style . '-50 text-' . $style . '-700 text-[11px] font-bold rounded-md border border-' . $style . '-100 dark:bg-' . $style . '-500/15 dark:text-' . $style . '-400 dark:border-' . $style . '-500/30">' . $label . '</span>';
-                    }
+
+                        return '<span class="px-2 py-1 bg-'.$style.'-50 text-'.$style.'-700 text-[11px] font-bold rounded-md border border-'.$style.'-100 dark:bg-'.$style.'-500/15 dark:text-'.$style.'-400 dark:border-'.$style.'-500/30">'.$label.'</span>';
+                    },
                 ],
                 [
                     'key' => 'upod_type',
@@ -220,14 +229,15 @@ class Datatable extends Component
                         $selectedDefault = is_null($item->upod_type) ? 'selected' : '';
                         $selectedGoogle = $item->upod_type === User::UPOD_TYPE_GOOGLE ? 'selected' : '';
                         $selectedSurvey = $item->upod_type === User::UPOD_TYPE_RISET ? 'selected' : '';
+
                         return '
-                            <select wire:change="changeClientOverride(' . $item->id . ', $event.target.value)" class="text-[12px] border-slate-200 rounded py-1 pl-2 pr-6 bg-transparent focus:ring-primary focus:border-primary dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-                                <option value="default" ' . $selectedDefault . '>Default</option>
-                                <option value="' . User::UPOD_TYPE_GOOGLE . '" ' . $selectedGoogle . '>Google Review</option>
-                                <option value="' . User::UPOD_TYPE_RISET . '" ' . $selectedSurvey . '>Riset Kepuasan</option>
+                            <select wire:change="changeClientOverride('.$item->id.', $event.target.value)" class="text-[12px] border-slate-200 rounded py-1 pl-2 pr-6 bg-transparent focus:ring-primary focus:border-primary dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                                <option value="default" '.$selectedDefault.'>Default</option>
+                                <option value="'.User::UPOD_TYPE_GOOGLE.'" '.$selectedGoogle.'>Google Review</option>
+                                <option value="'.User::UPOD_TYPE_RISET.'" '.$selectedSurvey.'>Riset Kepuasan</option>
                             </select>
                         ';
-                    }
+                    },
                 ],
                 [
                     'key' => 'upod_submitted',
@@ -243,13 +253,14 @@ class Datatable extends Component
                                 </span>
                             ';
                         }
+
                         return '
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-100 dark:bg-amber-500/15 dark:text-amber-400 dark:border-amber-500/30">
                                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                                 PENDING
                             </span>
                         ';
-                    }
+                    },
                 ],
                 [
                     'key' => 'action',
@@ -259,14 +270,15 @@ class Datatable extends Component
                     'render' => function ($item) {
                         if ($item->upod_submitted) {
                             return '
-                                <button wire:click="resetUpodSubmission(' . $item->id . ')" class="text-rose-500 hover:text-rose-700 font-bold text-label-md transition-colors flex items-center gap-1 ml-auto">
+                                <button wire:click="resetUpodSubmission('.$item->id.')" class="text-rose-500 hover:text-rose-700 font-bold text-label-md transition-colors flex items-center gap-1 ml-auto">
                                     <span class="material-symbols-outlined text-[16px]">restart_alt</span>
                                     Reset UPOD
                                 </button>
                             ';
                         }
+
                         return '<span class="text-slate-300 text-label-md dark:text-gray-600">None</span>';
-                    }
+                    },
                 ],
             ];
         }
@@ -303,7 +315,6 @@ class Datatable extends Component
             //             $editHtml $destroyHtml
             //         </div>";
 
-
             //         return $html;
             //     },
             // ],
@@ -312,7 +323,7 @@ class Datatable extends Component
                 'name' => 'No Input JPN',
                 'render' => function ($item) {
                     return $item->no_jp;
-                }
+                },
             ],
             [
                 'key' => 'name',
@@ -363,11 +374,12 @@ class Datatable extends Component
                             break;
 
                         default:
-                            # code...
+                            // code...
                             break;
                     }
-                    return '<span class="bg-' . $style . '-50 dark:bg-' . $style . '-500/15 text-' . $style . '-600 dark:text-' . $style . '-500 text-theme-xs rounded-full px-2 py-0.5 font-medium">' . strtoupper($item->claim_type) . '</span>';
-                }
+
+                    return '<span class="bg-'.$style.'-50 dark:bg-'.$style.'-500/15 text-'.$style.'-600 dark:text-'.$style.'-500 text-theme-xs rounded-full px-2 py-0.5 font-medium">'.strtoupper($item->claim_type).'</span>';
+                },
             ],
             [
                 'searchable' => false,
@@ -387,11 +399,12 @@ class Datatable extends Component
                             break;
 
                         default:
-                            # code...
+                            // code...
                             break;
                     }
-                    return '<span class="bg-' . $style . '-50 dark:bg-' . $style . '-500/15 text-' . $style . '-700 dark:text-' . $style . '-500 text-theme-xs rounded-full px-2 py-0.5 font-medium">' . strtoupper($text) . '</span>';
-                }
+
+                    return '<span class="bg-'.$style.'-50 dark:bg-'.$style.'-500/15 text-'.$style.'-700 dark:text-'.$style.'-500 text-theme-xs rounded-full px-2 py-0.5 font-medium">'.strtoupper($text).'</span>';
+                },
             ],
 
         ];
@@ -406,9 +419,9 @@ class Datatable extends Component
 
     public function getQuery(): Builder
     {
-        return \App\Models\Client\Client::query()
+        return Client::query()
             ->select('clients.*')
-            ->selectRaw("
+            ->selectRaw('
                 EXISTS (
                     SELECT 1
                     FROM users
@@ -419,7 +432,7 @@ class Datatable extends Component
                     FROM upod_submissions
                     WHERE upod_submissions.client_id = clients.id
                 ) as upod_submitted
-            ")
+            ')
             ->when($this->selectedBatch != 'all', function ($q) {
                 $q->where('source_file_name', $this->selectedBatch);
             })

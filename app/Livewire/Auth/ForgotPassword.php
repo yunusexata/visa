@@ -4,9 +4,9 @@ namespace App\Livewire\Auth;
 
 use App\Helpers\Alert;
 use App\Repositories\Account\UserRepository;
-use Livewire\Component;
 use Illuminate\Support\Facades\Password;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class ForgotPassword extends Component
 {
@@ -25,15 +25,18 @@ class ForgotPassword extends Component
         $user = UserRepository::findByEmail($this->email);
         if (empty($user)) {
             Alert::fail($this, 'Gagal', 'Email Belum Terdaftar');
+
             return;
         }
 
         $status = Password::sendResetLink(['email' => $this->email]);
         if ($status === Password::RESET_LINK_SENT) {
             Alert::success($this, 'Berhasil', 'Email Reset Password Telah Dikirim. Silahkan Periksa Email Anda');
+
             return;
         } else {
             Alert::fail($this, 'Gagal', 'Email Gagal Dikirim');
+
             return;
         }
     }

@@ -4,25 +4,24 @@ namespace App\Livewire\MasterClient;
 
 use App\Helpers\Alert;
 use App\Helpers\PermissionHelper;
-use App\Models\GensenForm\GensenFormLink;
 use App\Repositories\Account\UserRepository;
 use App\Repositories\Client\ClientRepository;
-use App\Repositories\Exata\ExataFormCandidateRepository;
-use App\Repositories\GensenForm\GensenFormLinkRepository;
 use App\Traits\Livewire\WithDatatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
-
 class Datatable extends Component
 {
     use WithDatatable;
 
     public $isCanUpdate;
+
     public $isCanDelete;
+
     public $isCanUpdateBookingTime;
+
     public $isCanUpdateDetail;
 
     public $status;
@@ -40,7 +39,7 @@ class Datatable extends Component
     #[On('on-delete-dialog-confirm')]
     public function onDialogDeleteConfirm()
     {
-        if (!$this->isCanDelete || $this->targetDeleteId == null) {
+        if (! $this->isCanDelete || $this->targetDeleteId == null) {
             return;
         }
 
@@ -61,12 +60,12 @@ class Datatable extends Component
         Alert::confirmation(
             $this,
             Alert::ICON_QUESTION,
-            "Hapus Data",
-            "Apakah Anda Yakin Ingin Menghapus Data Ini ?",
-            "on-delete-dialog-confirm",
-            "on-delete-dialog-cancel",
-            "Hapus",
-            "Batal",
+            'Hapus Data',
+            'Apakah Anda Yakin Ingin Menghapus Data Ini ?',
+            'on-delete-dialog-confirm',
+            'on-delete-dialog-cancel',
+            'Hapus',
+            'Batal',
         );
     }
 
@@ -75,7 +74,6 @@ class Datatable extends Component
     {
         $this->resetPage();
     }
-
 
     public function getColumns(): array
     {
@@ -111,7 +109,6 @@ class Datatable extends Component
             //             $editHtml $destroyHtml
             //         </div>";
 
-
             //         return $html;
             //     },
             // ],
@@ -120,7 +117,7 @@ class Datatable extends Component
                 'name' => 'No Input JPN',
                 'render' => function ($item) {
                     return $item->no_jp;
-                }
+                },
             ],
             [
                 'key' => 'name',

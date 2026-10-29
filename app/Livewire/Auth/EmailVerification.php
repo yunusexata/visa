@@ -4,8 +4,8 @@ namespace App\Livewire\Auth;
 
 use App\Helpers\Alert;
 use App\Repositories\Account\UserRepository;
-use Livewire\Component;
 use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class EmailVerification extends Component
 {
@@ -23,12 +23,14 @@ class EmailVerification extends Component
         $user = UserRepository::findByEmail($this->email);
         if (empty($user)) {
             Alert::fail($this, 'Kirim Ulang Email Gagal', 'Email Belum Terdaftar');
+
             return;
         }
 
         if ($user->email_verified_at) {
             Alert::success($this, 'Berhasil', 'Email Telah Terverifikasi');
             $this->redirectRoute('login');
+
             return;
         }
 

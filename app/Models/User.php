@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\Service\EmailLogStatus;
+use App\Mail\ResetPasswordMail;
+use App\Models\Client\Client;
+use App\Repositories\Service\SendEmailLogRepository;
 use App\Traits\Models\LowercaseAttributes;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +18,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, HasTrackHistory, LowercaseAttributes;
+    use HasApiTokens, HasFactory, HasRoles, HasTrackHistory, LowercaseAttributes, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -33,6 +37,7 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     const ROLE_SUPERADMIN = 'SUPERADMIN';
+
     const ROLE_ADMIN = 'ADMIN';
 
     /**
@@ -56,10 +61,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected static function onBoot() {}
 
-
     public function sendPasswordResetNotification($token)
     {
-        \App\Repositories\Service\SendEmailLogRepository::create([
+        SendEmailLogRepository::create([
             'subject_type' => self::class,
             'subject_id' => $this->id,
             'data' => json_encode([
@@ -67,15 +71,15 @@ class User extends Authenticatable implements MustVerifyEmail
                 'email' => $this->email,
             ], true),
             'email' => $this->email,
-            'mailable' => \App\Mail\ResetPasswordMail::class,
-            'subject_line' => "Reset Password Anda",
-            'status' => \App\Enums\Service\EmailLogStatus::PENDING,
+            'mailable' => ResetPasswordMail::class,
+            'subject_line' => 'Reset Password Anda',
+            'status' => EmailLogStatus::PENDING,
         ]);
     }
 
     public function client()
     {
-        return $this->belongsTo(\App\Models\Client\Client::class, 'client_id');
+        return $this->belongsTo(Client::class, 'client_id');
     }
 
     public function creator()

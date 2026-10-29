@@ -1,15 +1,15 @@
 <?php
 
+use App\Helpers\PermissionHelper;
+use App\Livewire\MonitoringBuktiTransfer\Datatable;
 use App\Models\Client\Client;
 use App\Models\Document;
 use App\Models\DocumentDownload;
-use App\Models\User;
-use App\Helpers\PermissionHelper;
 use App\Models\DocumentUploadBatch;
+use App\Models\User;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
-use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 beforeEach(function () {
     // Create roles
@@ -22,7 +22,7 @@ beforeEach(function () {
             Permission::findOrCreate(PermissionHelper::transform($access, $type), 'web');
         }
     }
-    
+
     // Assign to roles
     $superAdminRole = Role::findByName(User::ROLE_SUPER_ADMIN);
     foreach (Permission::all() as $perm) {
@@ -30,7 +30,7 @@ beforeEach(function () {
     }
 
     $salesRole = Role::findByName(User::ROLE_SALES);
-    $salesRole->givePermissionTo(PermissionHelper::ACCESS_MONITORING_BUKTI_TRANSFER . '.read');
+    $salesRole->givePermissionTo(PermissionHelper::ACCESS_MONITORING_BUKTI_TRANSFER.'.read');
 });
 
 test('unauthorized user cannot access monitoring page', function () {
@@ -64,32 +64,32 @@ test('pic scoping restricts sales to their own clients', function () {
     $clientSlamet = Client::create([
         'no_jp' => 'JP001', 'name' => 'Client Slamet', 'name_normalized' => 'CLIENT SLAMET',
         'dob' => '1990-01-01', 'claim_type' => 'speed', 'status' => 'active', 'raw_data' => '{}',
-        'pic' => 'slamet', 'source_file_name' => 'batch1.xlsx', 'imported_at' => now()
+        'pic' => 'slamet', 'source_file_name' => 'batch1.xlsx', 'imported_at' => now(),
     ]);
     Document::create([
         'client_id' => $clientSlamet->id, 'type' => 'resi', 'original_filename' => 'r.jpg',
-        'bucket_path' => 'a.jpg', 'uploaded_by' => $salesSlamet->id
+        'bucket_path' => 'a.jpg', 'uploaded_by' => $salesSlamet->id,
     ]);
 
     $clientAinul = Client::create([
         'no_jp' => 'JP002', 'name' => 'Client Ainul', 'name_normalized' => 'CLIENT AINUL',
         'dob' => '1990-01-01', 'claim_type' => 'speed', 'status' => 'active', 'raw_data' => '{}',
-        'pic' => 'ainul', 'source_file_name' => 'batch1.xlsx', 'imported_at' => now()
+        'pic' => 'ainul', 'source_file_name' => 'batch1.xlsx', 'imported_at' => now(),
     ]);
     Document::create([
         'client_id' => $clientAinul->id, 'type' => 'kwitansi', 'original_filename' => 'k.jpg',
-        'bucket_path' => 'b.jpg', 'uploaded_by' => $salesAinul->id
+        'bucket_path' => 'b.jpg', 'uploaded_by' => $salesAinul->id,
     ]);
 
     // Test Livewire component under Slamet
     Livewire::actingAs($salesSlamet)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->assertSee('Client Slamet')
         ->assertDontSee('Client Ainul');
 
     // Test Livewire component under Ainul
     Livewire::actingAs($salesAinul)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->assertSee('Client Ainul')
         ->assertDontSee('Client Slamet');
 });
@@ -110,7 +110,7 @@ test('status mapping translates downloads logs correctly', function () {
     $c1 = Client::create([
         'no_jp' => 'JP101', 'name' => 'Client Live', 'name_normalized' => 'CLIENT LIVE',
         'dob' => '1990-01-01', 'claim_type' => 'speed', 'status' => 'active', 'raw_data' => '{}',
-        'pic' => 'slamet', 'source_file_name' => 'b1.xlsx', 'imported_at' => now()
+        'pic' => 'slamet', 'source_file_name' => 'b1.xlsx', 'imported_at' => now(),
     ]);
     $d1 = Document::create(['client_id' => $c1->id, 'type' => 'resi', 'original_filename' => 'a.jpg', 'bucket_path' => 'a.jpg', 'uploaded_by' => $admin->id, 'batch_id' => $batch->id]);
     DocumentDownload::create(['client_id' => $c1->id, 'document_id' => $d1->id, 'batch_id' => $batch->id, 'source' => 'live_tracked', 'downloaded_at' => now()]);
@@ -119,7 +119,7 @@ test('status mapping translates downloads logs correctly', function () {
     $c2 = Client::create([
         'no_jp' => 'JP102', 'name' => 'Client Seeded', 'name_normalized' => 'CLIENT SEEDED',
         'dob' => '1990-01-01', 'claim_type' => 'speed', 'status' => 'active', 'raw_data' => '{}',
-        'pic' => 'slamet', 'source_file_name' => 'b1.xlsx', 'imported_at' => now()
+        'pic' => 'slamet', 'source_file_name' => 'b1.xlsx', 'imported_at' => now(),
     ]);
     $d2 = Document::create(['client_id' => $c2->id, 'type' => 'kwitansi', 'original_filename' => 'b.jpg', 'bucket_path' => 'b.jpg', 'uploaded_by' => $admin->id, 'batch_id' => $batch->id]);
     DocumentDownload::create(['client_id' => $c2->id, 'document_id' => $d2->id, 'batch_id' => $batch->id, 'source' => 'notified_only', 'downloaded_at' => now()]);
@@ -128,17 +128,18 @@ test('status mapping translates downloads logs correctly', function () {
     $c3 = Client::create([
         'no_jp' => 'JP103', 'name' => 'Client None', 'name_normalized' => 'CLIENT NONE',
         'dob' => '1990-01-01', 'claim_type' => 'speed', 'status' => 'active', 'raw_data' => '{}',
-        'pic' => 'slamet', 'source_file_name' => 'b1.xlsx', 'imported_at' => now()
+        'pic' => 'slamet', 'source_file_name' => 'b1.xlsx', 'imported_at' => now(),
     ]);
     Document::create(['client_id' => $c3->id, 'type' => 'ichijikin', 'original_filename' => 'c.jpg', 'bucket_path' => 'c.jpg', 'uploaded_by' => $admin->id, 'batch_id' => $batch->id]);
 
     Livewire::actingAs($admin)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->assertViewHas('data', function ($data) {
             $mapped = collect($data->items())->pluck('status', 'name')->toArray();
             expect($mapped['Client Live'])->toBe('downloaded');
             expect($mapped['Client Seeded'])->toBe('seeded');
             expect($mapped['Client None'])->toBe('not_downloaded');
+
             return true;
         });
 });
@@ -168,7 +169,7 @@ test('select and having status sync matches client records precisely', function 
 
     // Test filter 'downloaded'
     Livewire::actingAs($admin)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->set('filterStatus', 'downloaded')
         ->assertSee('Client A')
         ->assertDontSee('Client B')
@@ -176,7 +177,7 @@ test('select and having status sync matches client records precisely', function 
 
     // Test filter 'seeded'
     Livewire::actingAs($admin)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->set('filterStatus', 'seeded')
         ->assertSee('Client B')
         ->assertDontSee('Client A')
@@ -184,7 +185,7 @@ test('select and having status sync matches client records precisely', function 
 
     // Test filter 'not_downloaded'
     Livewire::actingAs($admin)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->set('filterStatus', 'not_downloaded')
         ->assertSee('Client C')
         ->assertDontSee('Client A')
@@ -202,13 +203,13 @@ test('document type filter correctly restricts records', function () {
     Document::create(['client_id' => $c2->id, 'type' => 'kwitansi', 'original_filename' => 'b.jpg', 'bucket_path' => 'b.jpg', 'uploaded_by' => $admin->id]);
 
     Livewire::actingAs($admin)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->set('documentType', 'resi')
         ->assertSee('Client ResiOnly')
         ->assertDontSee('Client KwitansiOnly');
 
     Livewire::actingAs($admin)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->set('documentType', 'kwitansi')
         ->assertSee('Client KwitansiOnly')
         ->assertDontSee('Client ResiOnly');
@@ -225,13 +226,13 @@ test('excel export respects pic scoping and contains consistent status', functio
     Document::create(['client_id' => $c2->id, 'type' => 'resi', 'original_filename' => 'b.jpg', 'bucket_path' => 'b.jpg', 'uploaded_by' => $sales->id]);
 
     Livewire::actingAs($sales)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->call('export', 'excel')
         ->assertStatus(200);
 
     // Verify through direct query invocation matching export
     $exportedData = Livewire::actingAs($sales)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->instance()
         ->getQuery()
         ->get();
@@ -242,7 +243,7 @@ test('excel export respects pic scoping and contains consistent status', functio
     // Assert that the compiled export view contains the data (not empty due to array cast bug)
     $viewHtml = view('app.monitoring-bukti-transfer.export', [
         'collection' => $exportedData,
-        'request' => ['documentType' => 'all']
+        'request' => ['documentType' => 'all'],
     ])->render();
 
     expect($viewHtml)->toContain('Client Ainul');
@@ -261,20 +262,20 @@ test('admin can filter datatable by pic', function () {
 
     // When bulkPic is empty, both appear
     Livewire::actingAs($admin)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->assertSee('Client AinulFilter')
         ->assertSee('Client SlametFilter');
 
     // When bulkPic is ainul, only Ainul appears
     Livewire::actingAs($admin)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->set('bulkPic', 'ainul')
         ->assertSee('Client AinulFilter')
         ->assertDontSee('Client SlametFilter');
 
     // When bulkPic is slamet, only Slamet appears
     Livewire::actingAs($admin)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->set('bulkPic', 'slamet')
         ->assertSee('Client SlametFilter')
         ->assertDontSee('Client AinulFilter');
@@ -291,7 +292,7 @@ test('admin excel export respects bulk pic filter', function () {
     Document::create(['client_id' => $cSlamet->id, 'type' => 'resi', 'original_filename' => 'b.jpg', 'bucket_path' => 'b.jpg', 'uploaded_by' => $admin->id]);
 
     $component = Livewire::actingAs($admin)
-        ->test(\App\Livewire\MonitoringBuktiTransfer\Datatable::class)
+        ->test(Datatable::class)
         ->set('bulkPic', 'ainul');
 
     $exportedData = $component->instance()->getQuery()->get();
@@ -301,7 +302,7 @@ test('admin excel export respects bulk pic filter', function () {
 
     $viewHtml = view('app.monitoring-bukti-transfer.export', [
         'collection' => $exportedData,
-        'request' => ['documentType' => 'all', 'pic' => 'ainul']
+        'request' => ['documentType' => 'all', 'pic' => 'ainul'],
     ])->render();
 
     expect($viewHtml)->toContain('Export Client Ainul');

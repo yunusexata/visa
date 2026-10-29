@@ -6,13 +6,14 @@ use App\Enums\Form\VisaFormLinkStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use Muhammadyunus1072\TrackHistory\HasTrackHistory;
 
 class VisaFormLink extends Model
 {
-    use HasFactory, SoftDeletes, HasTrackHistory;
+    use HasFactory, HasTrackHistory, SoftDeletes;
 
     protected $fillable = [
         // optional password protection
@@ -33,13 +34,16 @@ class VisaFormLink extends Model
     ];
 
     protected $casts = [
-        'status'     => VisaFormLinkStatus::class,
+        'status' => VisaFormLinkStatus::class,
         'expired_at' => 'datetime',
     ];
 
     const STATUS_ACTIVE = 'ACTIVE';
+
     const STATUS_INACTIVE = 'INACTIVE';
+
     const STATUS_EXPIRED = 'EXPIRED';
+
     const STATUS_SUCCESS = 'SUCCESS';
 
     const STATUS_CHOICE = [
@@ -67,7 +71,7 @@ class VisaFormLink extends Model
             $model->token = Str::uuid();
             $model->status = VisaFormLinkStatus::STATUS_ACTIVE;
 
-            if ($model->created_by && !$model->pic_code) {
+            if ($model->created_by && ! $model->pic_code) {
                 $model->pic_code = $model->creator?->pic_code;
             }
         });
@@ -108,6 +112,7 @@ class VisaFormLink extends Model
 
         $this->save(); // ✅ trigger updating event
     }
+
     public function decrementUsedCount()
     {
         $this->used_count--;
@@ -118,6 +123,11 @@ class VisaFormLink extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by', 'id');
+    }
+
+    public function visaForms(): HasMany
+    {
+        return $this->hasMany(VisaForm::class, 'visa_form_link_id');
     }
 
     public function gensenForms()

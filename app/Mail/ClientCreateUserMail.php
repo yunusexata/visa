@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\Models\GensenForm\GensenForm;
 use App\Models\Service\SendEmailLog;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -37,6 +36,7 @@ class ClientCreateUserMail extends Mailable
     public function content(): Content
     {
         logger('mail created');
+
         return new Content(
             view: 'app.emails.client_create_user',
             with: [

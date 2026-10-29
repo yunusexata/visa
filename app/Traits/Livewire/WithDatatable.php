@@ -2,30 +2,40 @@
 
 namespace App\Traits\Livewire;
 
-use Livewire\WithPagination;
 use Livewire\Attributes\On;
 use Livewire\WithoutUrlPagination;
+use Livewire\WithPagination;
 
 trait WithDatatable
 {
-    use WithPagination, WithoutUrlPagination;
+    use WithoutUrlPagination, WithPagination;
 
     protected $paginationTheme = 'tailwind';
 
-    public $pageName = "";
+    public $pageName = '';
+
     public $lengthOptions = [10, 25, 50, 100];
+
     public $length = 50;
+
     public $search;
+
     public $sortBy = '';
+
     public $sortDirection = 'asc';
+
     public $keyword_filter = true;
+
     public $show_filter = true;
 
     public $showLoadingIndicator = true;
-    public $loadingIndicatorTarget = "";
+
+    public $loadingIndicatorTarget = '';
 
     abstract public function getColumns(): array;
+
     abstract public function getQuery();
+
     abstract public function getView(): string;
 
     public function onMount() {}
@@ -35,9 +45,9 @@ trait WithDatatable
         $this->onMount();
 
         $columns = $this->getColumns();
-        if ('' == $this->sortBy && count($columns) > 0) {
+        if ($this->sortBy == '' && count($columns) > 0) {
             foreach ($columns as $col) {
-                if (!isset($col['sortable']) || $col['sortable']) {
+                if (! isset($col['sortable']) || $col['sortable']) {
                     $this->sortBy = $col['key'];
                     break;
                 }
@@ -76,7 +86,7 @@ trait WithDatatable
     public function datatableSort($field)
     {
         if ($this->sortBy === $field) {
-            $this->sortDirection = 'asc' === $this->sortDirection
+            $this->sortDirection = $this->sortDirection === 'asc'
                 ? 'desc'
                 : 'asc';
         } else {
@@ -99,7 +109,7 @@ trait WithDatatable
                 foreach ($columns as $col) {
                     if (
                         isset($col['key'])
-                        && (!isset($col['searchable']) || (isset($col['searchable']) && $col['searchable']))
+                        && (! isset($col['searchable']) || (isset($col['searchable']) && $col['searchable']))
                     ) {
                         $query->orWhere($col['key'], 'ILIKE', "%$search%");
                     }

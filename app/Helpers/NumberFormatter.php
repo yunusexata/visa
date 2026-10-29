@@ -48,8 +48,13 @@ class NumberFormatter
         // KONDISI A: User secara eksplisit menggunakan tanda '+'
         // Pasti format internasional, langsung cek kode negaranya.
         if ($hasPlus) {
-            if (preg_match('/^62\d{8,13}$/', $clean)) return $clean;
-            if (preg_match('/^81[789]0\d{8}$/', $clean)) return $clean;
+            if (preg_match('/^62\d{8,13}$/', $clean)) {
+                return $clean;
+            }
+            if (preg_match('/^81[789]0\d{8}$/', $clean)) {
+                return $clean;
+            }
+
             // Jika pakai '+' tapi bukan 62/81 (mungkin negara lain), biarkan apa adanya
             return $clean;
         }
@@ -59,22 +64,22 @@ class NumberFormatter
             // Cek Lokal Jepang (Awalnya 070, 080, 090 - sekarang jadi 70, 80, 90 + 8 digit)
             // Aman dari bentrok karena Indo tidak ada awalan 070/080/090 untuk HP
             if (preg_match('/^[789]0\d{8}$/', $clean)) {
-                return '81' . $clean;
+                return '81'.$clean;
             }
 
             // Cek Lokal Indonesia (Awalnya 08 - sekarang jadi 8 + 7 s.d 12 digit)
             if (preg_match('/^8\d{7,12}$/', $clean)) {
-                return '62' . $clean;
+                return '62'.$clean;
             }
 
             // Fallback untuk lokal selain di atas (misal landline Jakarta 021)
-            return '62' . $clean;
+            return '62'.$clean;
         }
 
         // KONDISI C: Ambiguitas (User tidak mengetik '+' dan tidak mengetik '0')
         // Contoh input: "628123..." atau "819012..." atau "817012..."
         if (preg_match('/^[789]0\d{8}$/', $clean)) {
-            return '81' . $clean;
+            return '81'.$clean;
         }
         // Cek format murni Jepang
         if (preg_match('/^81[789]0\d{8}$/', $clean)) {
@@ -87,13 +92,14 @@ class NumberFormatter
         }
 
         // Default Fallback
-        return '62' . $clean;
+        return '62'.$clean;
     }
 
     public static function format($number, $decimalPoin = self::DECIMAL_POIN)
     {
         $decimalPoin = fmod($number, 1) !== 0.00 ? $decimalPoin : 0;
-        return number_format($number, $decimalPoin, ",", ".");
+
+        return number_format($number, $decimalPoin, ',', '.');
     }
 
     public static function imaskToValue($data)
@@ -130,29 +136,30 @@ class NumberFormatter
     public static function denominator($nilai)
     {
         $nilai = abs($nilai);
-        $huruf = array("", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas");
-        $temp = "";
+        $huruf = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+        $temp = '';
         if ($nilai < 12) {
-            $temp = " " . $huruf[$nilai];
-        } else if ($nilai < 20) {
-            $temp = self::denominator($nilai - 10) . " Belas";
-        } else if ($nilai < 100) {
-            $temp = self::denominator($nilai / 10) . " Puluh" . self::denominator($nilai % 10);
-        } else if ($nilai < 200) {
-            $temp = " Seratus" . self::denominator($nilai - 100);
-        } else if ($nilai < 1000) {
-            $temp = self::denominator($nilai / 100) . " Ratus" . self::denominator($nilai % 100);
-        } else if ($nilai < 2000) {
-            $temp = " Seribu" . self::denominator($nilai - 1000);
-        } else if ($nilai < 1000000) {
-            $temp = self::denominator($nilai / 1000) . " Ribu" . self::denominator($nilai % 1000);
-        } else if ($nilai < 1000000000) {
-            $temp = self::denominator($nilai / 1000000) . " Juta" . self::denominator($nilai % 1000000);
-        } else if ($nilai < 1000000000000) {
-            $temp = self::denominator($nilai / 1000000000) . " Milyar" . self::denominator(fmod($nilai, 1000000000));
-        } else if ($nilai < 1000000000000000) {
-            $temp = self::denominator($nilai / 1000000000000) . " Trilyun" . self::denominator(fmod($nilai, 1000000000000));
+            $temp = ' '.$huruf[$nilai];
+        } elseif ($nilai < 20) {
+            $temp = self::denominator($nilai - 10).' Belas';
+        } elseif ($nilai < 100) {
+            $temp = self::denominator($nilai / 10).' Puluh'.self::denominator($nilai % 10);
+        } elseif ($nilai < 200) {
+            $temp = ' Seratus'.self::denominator($nilai - 100);
+        } elseif ($nilai < 1000) {
+            $temp = self::denominator($nilai / 100).' Ratus'.self::denominator($nilai % 100);
+        } elseif ($nilai < 2000) {
+            $temp = ' Seribu'.self::denominator($nilai - 1000);
+        } elseif ($nilai < 1000000) {
+            $temp = self::denominator($nilai / 1000).' Ribu'.self::denominator($nilai % 1000);
+        } elseif ($nilai < 1000000000) {
+            $temp = self::denominator($nilai / 1000000).' Juta'.self::denominator($nilai % 1000000);
+        } elseif ($nilai < 1000000000000) {
+            $temp = self::denominator($nilai / 1000000000).' Milyar'.self::denominator(fmod($nilai, 1000000000));
+        } elseif ($nilai < 1000000000000000) {
+            $temp = self::denominator($nilai / 1000000000000).' Trilyun'.self::denominator(fmod($nilai, 1000000000000));
         }
+
         return $temp;
     }
 }

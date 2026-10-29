@@ -3,13 +3,12 @@
 namespace App\Imports;
 
 use App\Models\GensenForm\GensenForm;
-use App\Repositories\GensenForm\GensenFormRepository;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class ExcelImportTarikData implements ToCollection, WithHeadingRow, WithChunkReading
+class ExcelImportTarikData implements ToCollection, WithChunkReading, WithHeadingRow
 {
     public $rows;
 

@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Auth;
 
-use Livewire\Component;
-use Livewire\Attributes\Validate;
 use App\Helpers\Alert;
 use App\Repositories\Account\UserRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Validate;
+use Livewire\Component;
 
 class Register extends Component
 {
@@ -18,7 +18,7 @@ class Register extends Component
     public $username;
 
     #[Validate('required', message: 'Email Harus Diisi', onUpdate: false)]
-    #[Validate('email', message: "Format Email Tidak Sesuai", onUpdate: false)]
+    #[Validate('email', message: 'Format Email Tidak Sesuai', onUpdate: false)]
     public $email;
 
     #[Validate('required', message: 'Password Harus Diisi', onUpdate: false)]
@@ -33,18 +33,21 @@ class Register extends Component
 
         if ($this->password != $this->retypePassword) {
             Alert::fail($this, 'Register Gagal', 'Pengetikan Ulang Password Tidak Sama');
+
             return;
         }
 
         $user = UserRepository::findByEmail($this->email);
-        if (!empty($user)) {
+        if (! empty($user)) {
             Alert::fail($this, 'Register Gagal', 'Email Sudah Digunakan');
+
             return;
         }
 
         $user = UserRepository::findByUsername($this->username);
-        if (!empty($user)) {
+        if (! empty($user)) {
             Alert::fail($this, 'Register Gagal', 'Username Sudah Digunakan');
+
             return;
         }
 
@@ -59,6 +62,7 @@ class Register extends Component
         if (config('template.email_verification_route')) {
             $user->sendEmailVerificationNotification();
             $this->redirectRoute('verification.index', ['email' => $this->email]);
+
             return;
         }
 

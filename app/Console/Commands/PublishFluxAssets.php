@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Flux\Flux;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 
@@ -31,6 +32,7 @@ class PublishFluxAssets extends Command
 
         if (! $files->isDirectory($source)) {
             $this->error("Flux dist directory not found at [{$source}]. Ensure livewire/flux is installed.");
+
             return self::FAILURE;
         }
 
@@ -40,19 +42,18 @@ class PublishFluxAssets extends Command
         $files->copyDirectory($source, $destination);
 
         // When not Flux Pro, Flux\AssetManager serves flux-lite.min.js for both flux.js and flux.min.js
-        $isPro = class_exists(\Flux\Flux::class) && method_exists(\Flux\Flux::class, 'pro') && \Flux\Flux::pro();
+        $isPro = class_exists(Flux::class) && method_exists(Flux::class, 'pro') && Flux::pro();
         $targetScript = $isPro
             ? base_path('vendor/livewire/flux-pro/dist/flux.min.js')
-            : $destination . '/flux-lite.min.js';
+            : $destination.'/flux-lite.min.js';
 
         if ($files->exists($targetScript)) {
-            $files->copy($targetScript, $destination . '/flux.min.js');
-            $files->copy($targetScript, $destination . '/flux.js');
+            $files->copy($targetScript, $destination.'/flux.min.js');
+            $files->copy($targetScript, $destination.'/flux.js');
         }
 
-        $this->info('Flux assets published successfully to [' . $destination . '].');
+        $this->info('Flux assets published successfully to ['.$destination.'].');
 
         return self::SUCCESS;
     }
 }
-

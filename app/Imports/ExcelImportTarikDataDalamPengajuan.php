@@ -2,14 +2,12 @@
 
 namespace App\Imports;
 
-use App\Models\GensenForm\GensenForm;
-use App\Repositories\GensenForm\GensenFormRepository;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class ExcelImportTarikDataDalamPengajuan implements ToCollection, WithHeadingRow, WithChunkReading
+class ExcelImportTarikDataDalamPengajuan implements ToCollection, WithChunkReading, WithHeadingRow
 {
     public $rows;
 
@@ -28,8 +26,7 @@ class ExcelImportTarikDataDalamPengajuan implements ToCollection, WithHeadingRow
                 })
 
                 ->filter(
-                    fn($row) =>
-                    filled($row['no_input_jepang'])
+                    fn ($row) => filled($row['no_input_jepang'])
                 )
 
                 ->values()

@@ -2,9 +2,15 @@
 
 namespace App\Livewire\Form;
 
+use App\Enums\Form\VisaAttachmenStatus;
+use App\Enums\Form\VisaAttachmentType;
+use App\Enums\Form\VisaFormStatus;
 use App\Helpers\Alert;
+use App\Models\Form\VisaForm;
+use App\Models\Form\VisaFormAttachment;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Vinkla\Hashids\Facades\Hashids;
 
 class UploadDocument extends Component
 {
@@ -12,14 +18,20 @@ class UploadDocument extends Component
 
     // Slot berkas dokumen
     public $coe = [];
+
     public $e_ktln = [];
+
     public $ktp = [];
+
     public $paspor = [];
+
     public $tiket = [];
+
     public $pas_photo = [];
 
     // Buffer upload incremental dari Alpine.js (mencegah overwrite saat multiple upload)
     public ?string $incomingSlot = null;
+
     public $incomingFile = null;
 
     // Tracking slot yang sudah memiliki file tersimpan
@@ -28,24 +40,45 @@ class UploadDocument extends Component
     // Status form akhir
     public bool $is_submitted = false;
 
-    // Magic link reference
-    public ?string $link = null;
+    // Reference Hashid & VisaForm
+    public string $hashid = '';
+
+    public ?int $formId = null;
+
+    public ?VisaForm $visaForm = null;
 
     public ?string $clientName = null;
 
-    public function mount(?string $link = null): void
-    {
-        $this->link = $link ?: request()->query('link');
+    public ?string $link = null;
 
-        if ($this->link) {
-            $decoded = \Vinkla\Hashids\Facades\Hashids::decode($this->link);
-            if (! empty($decoded)) {
-                $linkModel = \App\Models\Form\VisaFormLink::find($decoded[0]);
-                if ($linkModel) {
-                    $this->clientName = $linkModel->name;
-                }
-            }
+    public function mount(string $hashid)
+    {
+        $this->hashid = $hashid;
+        $decoded = Hashids::decode($hashid);
+        $this->formId = $decoded[0] ?? null;
+
+        if (! $this->formId) {
+            abort(404, 'Formulir pengajuan tidak ditemukan.');
         }
+
+        $form = VisaForm::with('link')->find($this->formId);
+
+        if (! $form) {
+            abort(404, 'Formulir pengajuan tidak ditemukan.');
+        }
+
+        // Access guard: hanya bisa diakses saat status DRAFT, selain itu redirect ke success page
+        $statusValue = $form->status instanceof VisaFormStatus
+            ? $form->status->value
+            : $form->status;
+
+        if ($statusValue !== VisaFormStatus::DRAFT->value && $statusValue !== 'DRAFT') {
+            return redirect()->route('form.success', ['hashid' => $this->hashid]);
+        }
+
+        $this->visaForm = $form;
+        $this->clientName = $form->nama_lengkap;
+        $this->link = $form->visa_form_link_id ? Hashids::encode($form->visa_form_link_id) : null;
     }
 
     /**
@@ -54,52 +87,52 @@ class UploadDocument extends Component
      */
     public array $slotConfig = [
         'coe' => [
-            'label'       => 'Photo COE (Certificate of Eligibility)',
+            'label' => 'Photo COE (Certificate of Eligibility)',
             'description' => 'Dokumen Certificate of Eligibility asli dari imigrasi Jepang.',
-            'icon'        => 'card_membership',
-            'required'    => false,
-            'multiple'    => true,
-            'accept_pdf'  => true,
+            'icon' => 'card_membership',
+            'required' => false,
+            'multiple' => true,
+            'accept_pdf' => true,
         ],
         'e_ktln' => [
-            'label'       => 'E-KTLN (Tenaga Kerja Luar Negeri)',
+            'label' => 'E-KTLN (Tenaga Kerja Luar Negeri)',
             'description' => 'Elektronik Kartu Tenaga Kerja Luar Negeri yang diterbitkan BP2MI.',
-            'icon'        => 'badge',
-            'required'    => false,
-            'multiple'    => true,
-            'accept_pdf'  => true,
+            'icon' => 'badge',
+            'required' => false,
+            'multiple' => true,
+            'accept_pdf' => true,
         ],
         'ktp' => [
-            'label'       => 'KTP Indonesia',
+            'label' => 'KTP Indonesia',
             'description' => 'Foto e-KTP Indonesia asli, terbaca jelas, tidak terpotong dan tidak buram.',
-            'icon'        => 'credit_card',
-            'required'    => false,
-            'multiple'    => true,
-            'accept_pdf'  => false,
+            'icon' => 'credit_card',
+            'required' => false,
+            'multiple' => true,
+            'accept_pdf' => false,
         ],
         'paspor' => [
-            'label'       => 'Photo Paspor',
+            'label' => 'Photo Paspor',
             'description' => 'Halaman identitas diri serta halaman visa/stempel kunjungan jika ada.',
-            'icon'        => 'menu_book',
-            'required'    => false,
-            'multiple'    => true,
-            'accept_pdf'  => true,
+            'icon' => 'menu_book',
+            'required' => false,
+            'multiple' => true,
+            'accept_pdf' => true,
         ],
         'tiket' => [
-            'label'       => 'Berkas Tiket Penerbangan (Opsional)',
+            'label' => 'Berkas Tiket Penerbangan (Opsional)',
             'description' => 'E-tiket penerbangan atau bukti booking tiket ke bandara Jepang.',
-            'icon'        => 'flight_takeoff',
-            'required'    => false,
-            'multiple'    => true,
-            'accept_pdf'  => true,
+            'icon' => 'flight_takeoff',
+            'required' => false,
+            'multiple' => true,
+            'accept_pdf' => true,
         ],
         'pas_photo' => [
-            'label'       => 'Pas Photo Latar Putih',
+            'label' => 'Pas Photo Latar Putih',
             'description' => 'Pas foto formal terbaru dengan pakaian berkerah/kemeja, latar putih polos.',
-            'icon'        => 'portrait',
-            'required'    => false,
-            'multiple'    => true,
-            'accept_pdf'  => false,
+            'icon' => 'portrait',
+            'required' => false,
+            'multiple' => true,
+            'accept_pdf' => false,
         ],
     ];
 
@@ -127,7 +160,7 @@ class UploadDocument extends Component
     {
         if ($this->incomingFile && $this->incomingSlot) {
             $slot = $this->incomingSlot;
-            if (!isset($this->slotConfig[$slot])) {
+            if (! isset($this->slotConfig[$slot])) {
                 return;
             }
 
@@ -147,12 +180,35 @@ class UploadDocument extends Component
         }
     }
 
-    public function updatedCoe()      { $this->processSlot('coe'); }
-    public function updatedEKtln()    { $this->processSlot('e_ktln'); }
-    public function updatedKtp()      { $this->processSlot('ktp'); }
-    public function updatedPaspor()   { $this->processSlot('paspor'); }
-    public function updatedTiket()    { $this->processSlot('tiket'); }
-    public function updatedPasPhoto() { $this->processSlot('pas_photo'); }
+    public function updatedCoe()
+    {
+        $this->processSlot('coe');
+    }
+
+    public function updatedEKtln()
+    {
+        $this->processSlot('e_ktln');
+    }
+
+    public function updatedKtp()
+    {
+        $this->processSlot('ktp');
+    }
+
+    public function updatedPaspor()
+    {
+        $this->processSlot('paspor');
+    }
+
+    public function updatedTiket()
+    {
+        $this->processSlot('tiket');
+    }
+
+    public function updatedPasPhoto()
+    {
+        $this->processSlot('pas_photo');
+    }
 
     public function processSlot(string $type): void
     {
@@ -174,7 +230,9 @@ class UploadDocument extends Component
         $mimes = $acceptPdf ? 'jpg,jpeg,png,webp,pdf' : 'jpg,jpeg,png,webp';
 
         foreach ($fileList as $index => $file) {
-            if (!$file) continue;
+            if (! $file) {
+                continue;
+            }
 
             $isPdf = strtolower($file->getClientOriginalExtension()) === 'pdf'
                 || $file->getMimeType() === 'application/pdf';
@@ -188,7 +246,7 @@ class UploadDocument extends Component
 
             $messages = [
                 "{$type}.{$index}.mimes" => "Format file {$file->getClientOriginalName()} tidak didukung.",
-                "{$type}.{$index}.max"   => $isPdf
+                "{$type}.{$index}.max" => $isPdf
                     ? "Ukuran file PDF {$file->getClientOriginalName()} melebihi batas 2MB."
                     : "Ukuran file {$file->getClientOriginalName()} melebihi batas 10MB.",
             ];
@@ -203,7 +261,7 @@ class UploadDocument extends Component
     protected function handleSlotUploaded(string $type): void
     {
         // Normalisasi ke array
-        if (!is_array($this->$type)) {
+        if (! is_array($this->$type)) {
             $this->$type = [$this->$type];
         }
 
@@ -214,19 +272,19 @@ class UploadDocument extends Component
         foreach ($files as $file) {
             if ($file) {
                 $meta[] = [
-                    'name'    => $file->getClientOriginalName(),
-                    'mime'    => $file->getMimeType(),
+                    'name' => $file->getClientOriginalName(),
+                    'mime' => $file->getMimeType(),
                     'size_kb' => round($file->getSize() / 1024, 2),
                 ];
             }
         }
 
-        if (!in_array($type, $this->uploadedTypes)) {
+        if (! in_array($type, $this->uploadedTypes)) {
             $this->uploadedTypes[] = $type;
         }
 
         Alert::consoleLog($this, "Attachment Uploaded [{$type}]", [
-            'type'  => $type,
+            'type' => $type,
             'count' => count($files),
             'files' => $meta,
         ]);
@@ -249,13 +307,13 @@ class UploadDocument extends Component
             if (empty($this->$type)) {
                 $this->uploadedTypes = array_values(array_diff($this->uploadedTypes, [$type]));
             }
-        } elseif (isset($this->$type) && !is_array($this->$type)) {
+        } elseif (isset($this->$type) && ! is_array($this->$type)) {
             $this->$type = [];
             $this->uploadedTypes = array_values(array_diff($this->uploadedTypes, [$type]));
         }
 
         Alert::consoleLog($this, "File Removed [{$type}][{$index}]", [
-            'type'  => $type,
+            'type' => $type,
             'index' => $index,
         ]);
 
@@ -265,12 +323,12 @@ class UploadDocument extends Component
     /**
      * Submit seluruh dokumen yang telah diunggah
      */
-    public function submitAllDocuments(): void
+    public function submitAllDocuments()
     {
         // Cek slot yang wajib tapi belum diupload
         $missingRequired = [];
         foreach ($this->slotConfig as $slot => $cfg) {
-            if (!empty($cfg['required'])) {
+            if (! empty($cfg['required'])) {
                 $files = $this->$slot ?? [];
                 if (empty($files) || (is_array($files) && count(array_filter($files)) === 0)) {
                     $missingRequired[] = $cfg['label'];
@@ -278,31 +336,79 @@ class UploadDocument extends Component
             }
         }
 
-        if (!empty($missingRequired)) {
+        if (! empty($missingRequired)) {
             Alert::fail(
                 $this,
                 'Dokumen Wajib Belum Lengkap',
-                'Harap lengkapi dokumen wajib: ' . implode(', ', $missingRequired)
+                'Harap lengkapi dokumen wajib: '.implode(', ', $missingRequired)
             );
-            return;
+
+            return null;
         }
 
-        Alert::consoleLog($this, [
-            'Submit All Documents Success',
-            'uploadedSlots' => $this->uploadedTypes,
-            'totalFiles'    => collect(['coe', 'e_ktln', 'ktp', 'paspor', 'tiket', 'pas_photo'])
-                ->mapWithKeys(fn($s) => [$s => is_array($this->$s) ? count($this->$s) : ($this->$s ? 1 : 0)])
-                ->toArray(),
+        // Simpan setiap berkas ke VisaFormAttachment
+        $slots = ['coe', 'e_ktln', 'ktp', 'paspor', 'tiket', 'pas_photo'];
+        $typeMapping = [
+            'coe' => VisaAttachmentType::COE,
+            'e_ktln' => VisaAttachmentType::E_KTLN,
+            'ktp' => VisaAttachmentType::KTP,
+            'paspor' => VisaAttachmentType::PASPOR,
+            'tiket' => VisaAttachmentType::TIKET,
+            'pas_photo' => VisaAttachmentType::PAS_PHOTO,
+        ];
+
+        foreach ($slots as $slot) {
+            $files = $this->$slot ?? [];
+            if (! is_array($files)) {
+                $files = $files ? [$files] : [];
+            }
+
+            foreach ($files as $index => $file) {
+                if (! $file) {
+                    continue;
+                }
+
+                $originalName = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension() ?: pathinfo($originalName, PATHINFO_EXTENSION);
+                $mimeType = $file->getMimeType() ?: 'application/octet-stream';
+                $size = $file->getSize() ?: 0;
+
+                // Store file in public disk under visa-documents/{visa_form_id}/{slot}
+                $storedPath = $file->store("visa-documents/{$this->visaForm->id}/{$slot}", 'public');
+                $storedFilename = basename($storedPath);
+
+                VisaFormAttachment::create([
+                    'visa_form_id' => $this->visaForm->id,
+                    'jenis_dokumen' => $typeMapping[$slot] ?? VisaAttachmentType::COE,
+                    'nama_file_asli' => $originalName,
+                    'nama_file_tersimpan' => $storedFilename,
+                    'jalur_file' => $storedPath,
+                    'disk' => 'public',
+                    'ekstensi' => $extension,
+                    'tipe_mime' => $mimeType,
+                    'ukuran_file' => $size,
+                    'status' => VisaAttachmenStatus::STATUS_STORED,
+                    'urutan' => $index + 1,
+                ]);
+            }
+        }
+
+        // Update VisaForm status menjadi DIAJUKAN dan tanggal_diajukan
+        $this->visaForm->update([
+            'status' => VisaFormStatus::DIAJUKAN,
+            'tanggal_diajukan' => now(),
         ]);
 
         $this->is_submitted = true;
         $this->dispatch('documents-submitted');
 
-        Alert::success(
-            $this,
-            'Dokumen Berhasil Diajukan!',
-            'Seluruh berkas dokumen pengajuan visa Anda telah berhasil diunggah.'
-        );
+        Alert::consoleLog($this, [
+            'Submit All Documents Success',
+            'visaFormId' => $this->visaForm->id,
+            'uploadedSlots' => $this->uploadedTypes,
+        ]);
+
+        return redirect()->route('form.success', ['hashid' => $this->hashid]);
     }
 
     public function render()
@@ -310,6 +416,7 @@ class UploadDocument extends Component
         return view('livewire.form.upload-document', [
             'slotConfig' => $this->slotConfig,
             'clientName' => $this->clientName,
+            'link' => $this->link,
         ])->extends('layouts.fullscreen-layout')->section('content');
     }
 }

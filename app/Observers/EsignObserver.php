@@ -2,13 +2,13 @@
 
 namespace App\Observers;
 
-use App\Models\Client\ClientEsign;
-use App\Models\Client\Client;
-use App\Models\Service\SendEmailLog;
-use App\Repositories\Service\SendEmailLogRepository;
-use App\Mail\SpeedServiceConfirmation;
 use App\Enums\Service\EmailLogStatus;
+use App\Mail\SpeedServiceConfirmation;
+use App\Models\Client\Client;
+use App\Models\Client\ClientEsign;
+use App\Models\Service\SendEmailLog;
 use App\Models\User;
+use App\Repositories\Service\SendEmailLogRepository;
 
 class EsignObserver
 {
@@ -31,20 +31,21 @@ class EsignObserver
         }
 
         $client = $esign->client;
-        if (!$client) {
+        if (! $client) {
             return;
         }
 
         $claimType = $client->claim_type;
-        if (!in_array($claimType, [Client::CLAIM_TYPE_SPEED, Client::CLAIM_TYPE_ADJUSTMENT])) {
+        if (! in_array($claimType, [Client::CLAIM_TYPE_SPEED, Client::CLAIM_TYPE_ADJUSTMENT])) {
             return;
         }
 
         $user = User::where('client_id', $client->id)->first();
-        if (!$user || !$user->email) {
-            logger()->warning("Cannot notify client of esign: client user or email not found", [
+        if (! $user || ! $user->email) {
+            logger()->warning('Cannot notify client of esign: client user or email not found', [
                 'client_id' => $client->id,
             ]);
+
             return;
         }
 
@@ -55,7 +56,7 @@ class EsignObserver
             ->whereIn('status', [
                 EmailLogStatus::PENDING,
                 EmailLogStatus::SENDING,
-                EmailLogStatus::SENT
+                EmailLogStatus::SENT,
             ])
             ->exists();
 
@@ -72,7 +73,7 @@ class EsignObserver
             ]),
             'email' => $user->email,
             'mailable' => SpeedServiceConfirmation::class,
-            'subject_line' => "🎉 Tanda Tangan Diterima — Speed Service Kamu Resmi Aktif!",
+            'subject_line' => '🎉 Tanda Tangan Diterima — Speed Service Kamu Resmi Aktif!',
             'status' => EmailLogStatus::PENDING,
         ]);
     }

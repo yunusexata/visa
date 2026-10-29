@@ -24,11 +24,12 @@ class Modal extends Component
     //     return view('components.ui.modal');
     // }
 
-
-
     public $isOpen;
+
     public $showCloseButton;
+
     public $isFullscreen;
+
     public $modalId;
 
     /**
@@ -43,7 +44,7 @@ class Modal extends Component
         $this->isOpen = $isOpen;
         $this->showCloseButton = $showCloseButton;
         $this->isFullscreen = $isFullscreen;
-        $this->modalId = $modalId ?? 'modal-' . uniqid();
+        $this->modalId = $modalId ?? 'modal-'.uniqid();
     }
 
     /**

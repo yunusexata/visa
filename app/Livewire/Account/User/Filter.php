@@ -8,6 +8,7 @@ use Livewire\Component;
 class Filter extends Component
 {
     public $roles = [];
+
     public $role;
 
     public function mount()
@@ -18,7 +19,7 @@ class Filter extends Component
     public function updated()
     {
         $this->dispatch('datatable-add-filter', [
-            'role' => $this->role
+            'role' => $this->role,
         ]);
     }
 

@@ -2,17 +2,23 @@
 
 namespace App\Livewire\Admin;
 
-use Livewire\Component;
+use App\Models\Document;
 use App\Models\DocumentUploadBatch;
 use Illuminate\Support\Facades\Bus;
+use Livewire\Component;
 
 class BatchProgress extends Component
 {
     public $batchId;
+
     public $progress = 0;
+
     public $status = 'processing';
+
     public $totalJobs = 0;
+
     public $pendingJobs = 0;
+
     public $failedJobs = 0;
 
     public function mount($batchId)
@@ -24,10 +30,11 @@ class BatchProgress extends Component
     public function checkProgress()
     {
         $batch = DocumentUploadBatch::find($this->batchId);
-        
-        if (!$batch) {
+
+        if (! $batch) {
             $this->status = 'failed';
             $this->progress = 100;
+
             return;
         }
 
@@ -61,10 +68,10 @@ class BatchProgress extends Component
 
         // Auto-redirect jika proses selesai
         if (in_array($this->status, ['completed', 'failed', 'partial_failed'])) {
-            $message = $this->status === 'completed' 
-                ? 'Upload dokumen selesai.' 
-                : ($this->status === 'partial_failed' 
-                    ? 'Upload selesai dengan beberapa kegagalan.' 
+            $message = $this->status === 'completed'
+                ? 'Upload dokumen selesai.'
+                : ($this->status === 'partial_failed'
+                    ? 'Upload selesai dengan beberapa kegagalan.'
                     : 'Seluruh upload dalam batch gagal.');
 
             return redirect()->route('admin.documents.batchDetail', $this->batchId)
@@ -75,7 +82,7 @@ class BatchProgress extends Component
     protected function fallbackProgress($batch)
     {
         if ($batch->status === 'processing') {
-            $successCount = \App\Models\Document::where('batch_id', $batch->id)->count();
+            $successCount = Document::where('batch_id', $batch->id)->count();
             $totalMatched = $batch->matched_files;
 
             if ($totalMatched > 0) {

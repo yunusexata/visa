@@ -13,7 +13,7 @@ use Muhammadyunus1072\TrackHistory\HasTrackHistory;
 class SendEmailLog extends Model
 {
     // php artisan reverb:start
-    use HasFactory, SoftDeletes, HasTrackHistory;
+    use HasFactory, HasTrackHistory, SoftDeletes;
 
     protected $fillable = [
 
@@ -58,6 +58,7 @@ class SendEmailLog extends Model
             SendEmailJob::dispatch($model);
         });
     }
+
     public function subject()
     {
         return $this->morphTo();

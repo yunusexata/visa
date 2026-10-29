@@ -16,13 +16,13 @@ test('validation rejects document uploads exceeding 3MB', function () {
 
     // Try posting the large file to each type
     $response = $this->post(route('admin.documents.upload'), [
-        'ichijikin_files' => [$largeFile]
+        'ichijikin_files' => [$largeFile],
     ]);
 
     $response->assertSessionHasErrors([
-        'ichijikin_files.0'
+        'ichijikin_files.0',
     ]);
-    
+
     // Check that we get our custom error message
     $errors = session('errors')->get('ichijikin_files.0');
     expect($errors[0])->toBe('Ukuran file Ichijikin tidak boleh lebih dari 3MB.');
@@ -39,7 +39,7 @@ test('validation accepts document uploads within 3MB', function () {
     $validFile = UploadedFile::fake()->create('1_John Doe.png', 2048, 'image/png');
 
     $response = $this->post(route('admin.documents.upload'), [
-        'ichijikin_files' => [$validFile]
+        'ichijikin_files' => [$validFile],
     ]);
 
     // It should NOT have validation errors on 'ichijikin_files'

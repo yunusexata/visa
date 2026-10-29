@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Redis;
 
 // Define a simple job within the test file to keep it self-contained
 class DummyRedisIntegrationJob implements ShouldQueue
@@ -25,25 +25,37 @@ class DummyRedisIntegrationJob implements ShouldQueue
 class DummyUploadQueueJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, SerializesModels;
+
     public $queue = 'upload';
+
     public static $processed = false;
-    public function handle() { self::$processed = true; }
+
+    public function handle()
+    {
+        self::$processed = true;
+    }
 }
 
 class DummyEmailQueueJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, SerializesModels;
+
     public $queue = 'email';
+
     public static $processed = false;
-    public function handle() { self::$processed = true; }
+
+    public function handle()
+    {
+        self::$processed = true;
+    }
 }
 
 test('real redis queue integration pushes job to redis and worker processes it', function () {
     // 1. Verify Redis is accessible before proceeding
     try {
         Redis::connection()->ping();
-    } catch (\Exception $e) {
-        $this->markTestSkipped('Redis server is not running or accessible: ' . $e->getMessage());
+    } catch (Exception $e) {
+        $this->markTestSkipped('Redis server is not running or accessible: '.$e->getMessage());
     }
 
     // 2. Set queue driver to redis dynamically for this test
@@ -79,8 +91,8 @@ test('real redis queue integration pushes job to redis and worker processes it',
 test('real redis queue prioritizes and processes separated queues', function () {
     try {
         Redis::connection()->ping();
-    } catch (\Exception $e) {
-        $this->markTestSkipped('Redis server is not running or accessible: ' . $e->getMessage());
+    } catch (Exception $e) {
+        $this->markTestSkipped('Redis server is not running or accessible: '.$e->getMessage());
     }
 
     Config::set('queue.default', 'redis');

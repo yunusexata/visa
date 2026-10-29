@@ -2,13 +2,16 @@
 
 namespace App\Mail;
 
+use App\Models\Client\Client;
 use App\Models\Service\SendEmailLog;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class SpeedServiceConfirmation extends Mailable
 {
@@ -41,7 +44,7 @@ class SpeedServiceConfirmation extends Mailable
     {
         $data = json_decode($this->log->data, true);
         $clientName = $data['client_name'] ?? 'Klien';
-        
+
         $esign = $this->log->subject;
         $signedAt = null;
         if ($esign && isset($esign->signed_at)) {
@@ -56,17 +59,17 @@ class SpeedServiceConfirmation extends Mailable
         $waRaw = config('exata.admin_wa_number', '6281199896308');
         // Format as +62-811-9989-6308
         if (strlen($waRaw) === 13 && str_starts_with($waRaw, '62')) {
-            $formattedWa = '+' . substr($waRaw, 0, 2) . '-' . substr($waRaw, 2, 3) . '-' . substr($waRaw, 5, 4) . '-' . substr($waRaw, 9);
+            $formattedWa = '+'.substr($waRaw, 0, 2).'-'.substr($waRaw, 2, 3).'-'.substr($waRaw, 5, 4).'-'.substr($waRaw, 9);
         } else {
-            $formattedWa = '+' . $waRaw;
+            $formattedWa = '+'.$waRaw;
         }
 
         $client = $esign ? $esign->client : null;
         $serviceTypeLabel = 'Speed Service';
         if ($client) {
-            if ($client->claim_type === \App\Models\Client\Client::CLAIM_TYPE_SPEED) {
+            if ($client->claim_type === Client::CLAIM_TYPE_SPEED) {
                 $serviceTypeLabel = 'Speed Service';
-            } elseif ($client->claim_type === \App\Models\Client\Client::CLAIM_TYPE_ADJUSTMENT) {
+            } elseif ($client->claim_type === Client::CLAIM_TYPE_ADJUSTMENT) {
                 $serviceTypeLabel = 'Klaim Adjustment';
             } else {
                 $serviceTypeLabel = 'Klaim Normal';
@@ -79,8 +82,8 @@ class SpeedServiceConfirmation extends Mailable
                 'clientName' => $clientName,
                 'signedAtFormatted' => $signedAtFormatted,
                 'estimatedDateFormatted' => $estimatedDateFormatted,
-                'dashboardUrl' => config('app.url') . '/client/dashboard',
-                'whatsappUrl' => 'https://wa.me/' . $waRaw,
+                'dashboardUrl' => config('app.url').'/client/dashboard',
+                'whatsappUrl' => 'https://wa.me/'.$waRaw,
                 'formattedWa' => $formattedWa,
                 'client' => $client,
                 'signedAt' => $signedAt,
@@ -95,30 +98,32 @@ class SpeedServiceConfirmation extends Mailable
         $esign = $this->log->subject;
         if ($esign && $esign->path) {
             try {
-                if (\Illuminate\Support\Facades\Storage::disk('local')->exists($esign->path)) {
-                    $fullPath = \Illuminate\Support\Facades\Storage::disk('local')->path($esign->path);
+                if (Storage::disk('local')->exists($esign->path)) {
+                    $fullPath = Storage::disk('local')->path($esign->path);
+
                     return [
-                        \Illuminate\Mail\Mailables\Attachment::fromPath($fullPath)
+                        Attachment::fromPath($fullPath)
                             ->as('Dokumen_Perjanjian_Exata_Indonesia.pdf')
                             ->withMime('application/pdf'),
                     ];
                 } else {
-                    logger()->error("Attachment file not found on local disk", ['path' => $esign->path]);
+                    logger()->error('Attachment file not found on local disk', ['path' => $esign->path]);
                     // Flag the missing file in SendEmailLog
                     $this->log->update([
-                        'error_message' => trim(($this->log->error_message ?? '') . ' | Attachment file not found: ' . $esign->path, ' | ')
+                        'error_message' => trim(($this->log->error_message ?? '').' | Attachment file not found: '.$esign->path, ' | '),
                     ]);
                 }
             } catch (\Throwable $e) {
-                logger()->error("Failed to attach file to email", [
+                logger()->error('Failed to attach file to email', [
                     'exception' => $e->getMessage(),
                     'path' => $esign->path,
                 ]);
                 $this->log->update([
-                    'error_message' => trim(($this->log->error_message ?? '') . ' | Failed to attach: ' . $e->getMessage(), ' | ')
+                    'error_message' => trim(($this->log->error_message ?? '').' | Failed to attach: '.$e->getMessage(), ' | '),
                 ]);
             }
         }
+
         return [];
     }
 }

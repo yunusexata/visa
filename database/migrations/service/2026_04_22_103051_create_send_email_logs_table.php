@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\Gensen\JobStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -70,9 +69,9 @@ return new class extends Migration
         $table->timestamp('started_at')->nullable();
         $table->timestamp('finished_at')->nullable();
 
-        $table->bigInteger("created_by")->unsigned()->nullable();
-        $table->bigInteger("updated_by")->unsigned()->nullable();
-        $table->bigInteger("deleted_by")->unsigned()->nullable()->default(null);
+        $table->bigInteger('created_by')->unsigned()->nullable();
+        $table->bigInteger('updated_by')->unsigned()->nullable();
+        $table->bigInteger('deleted_by')->unsigned()->nullable()->default(null);
         $table->softDeletes();
         $table->timestamps();
     }

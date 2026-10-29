@@ -78,35 +78,35 @@ class HistoricalDocumentDownloadsSeeder extends Seeder
                 // Check if survey/review was submitted post-notification
                 if ($surveyReviewAt && $surveyReviewAt >= $notifSentAt) {
                     DB::table('document_downloads')->insert([
-                        'client_id'     => $clientId,
-                        'document_id'   => null,
-                        'batch_id'      => $batchId,
-                        'ip_address'    => null,
-                        'user_agent'    => null,
+                        'client_id' => $clientId,
+                        'document_id' => null,
+                        'batch_id' => $batchId,
+                        'ip_address' => null,
+                        'user_agent' => null,
                         'downloaded_at' => $surveyReviewAt,
-                        'source'        => 'proof_high',
-                        'created_at'    => $now,
-                        'updated_at'    => $now,
+                        'source' => 'proof_high',
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ]);
                     $proofHighCount++;
                 } else {
                     DB::table('document_downloads')->insert([
-                        'client_id'     => $clientId,
-                        'document_id'   => null,
-                        'batch_id'      => $batchId,
-                        'ip_address'    => null,
-                        'user_agent'    => null,
+                        'client_id' => $clientId,
+                        'document_id' => null,
+                        'batch_id' => $batchId,
+                        'ip_address' => null,
+                        'user_agent' => null,
                         'downloaded_at' => $notifSentAt,
-                        'source'        => 'notified_only',
-                        'created_at'    => $now,
-                        'updated_at'    => $now,
+                        'source' => 'notified_only',
+                        'created_at' => $now,
+                        'updated_at' => $now,
                     ]);
                     $notifiedOnlyCount++;
                 }
             }
 
             $totalInserted = $proofHighCount + $notifiedOnlyCount;
-            $this->command->info("Seeding completed successfully.");
+            $this->command->info('Seeding completed successfully.');
             $this->command->info("Inserted 'proof_high': {$proofHighCount}");
             $this->command->info("Inserted 'notified_only': {$notifiedOnlyCount}");
             $this->command->info("Total rows inserted: {$totalInserted}");

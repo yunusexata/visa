@@ -10,7 +10,7 @@ use Muhammadyunus1072\TrackHistory\HasTrackHistory;
 
 class Review extends Model
 {
-    use HasFactory, SoftDeletes, HasTrackHistory;
+    use HasFactory, HasTrackHistory, SoftDeletes;
 
     protected $fillable = [
         'client_id',

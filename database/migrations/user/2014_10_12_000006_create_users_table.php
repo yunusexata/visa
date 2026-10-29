@@ -47,9 +47,9 @@ return new class extends Migration
         $table->boolean('is_active')->default(false);
         $table->rememberToken();
 
-        $table->bigInteger("created_by")->unsigned()->nullable();
-        $table->bigInteger("updated_by")->unsigned()->nullable();
-        $table->bigInteger("deleted_by")->unsigned()->nullable()->default(null);
+        $table->bigInteger('created_by')->unsigned()->nullable();
+        $table->bigInteger('updated_by')->unsigned()->nullable();
+        $table->bigInteger('deleted_by')->unsigned()->nullable()->default(null);
         $table->softDeletes();
         $table->timestamps();
     }

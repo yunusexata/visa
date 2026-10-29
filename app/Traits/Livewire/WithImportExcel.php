@@ -3,10 +3,9 @@
 namespace App\Traits\Livewire;
 
 use App\Imports\ImportExcel;
-use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Log;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
+use Livewire\WithFileUploads;
+use Maatwebsite\Excel\Facades\Excel;
 
 trait WithImportExcel
 {
@@ -21,11 +20,9 @@ trait WithImportExcel
         $this->onMount();
     }
 
-
     public function storeImport()
     {
-        foreach($this->import_excel as $import_excel)
-        {
+        foreach ($this->import_excel as $import_excel) {
             $path = $import_excel['data']->store('temp');
 
             $formatFunction = $this->{$import_excel['format']}();

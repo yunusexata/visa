@@ -44,6 +44,7 @@ enum VisaAttachmentType: string
                 return $case;
             }
         }
+
         return null;
     }
 
@@ -63,7 +64,7 @@ enum VisaAttachmentType: string
     public static function options(): array
     {
         return collect(self::cases())
-            ->mapWithKeys(fn($case) => [
+            ->mapWithKeys(fn ($case) => [
                 $case->value => $case->label(),
             ])
             ->toArray();
