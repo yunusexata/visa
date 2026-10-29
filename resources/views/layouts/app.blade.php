@@ -11,9 +11,9 @@
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    @livewireStyles
+    
     @fluxStyles
+    @livewireStyles
 
     @stack('css')
 
@@ -140,9 +140,8 @@
     </div>
 
 </body>
-
-    @livewireScripts
     @fluxScripts
+    @livewireScripts
 <script>
     
         Livewire.on("{{ Alert::EVENT_INFO }}", (event) => {
