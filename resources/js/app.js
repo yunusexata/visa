@@ -17,9 +17,6 @@ import { processUploadFile, validateFile, isPdf, isHeic, ready } from './upload-
 
 window.Swal = Swal;
 
-// 2. DAFTARKAN ALPINE KE WINDOW SEBELUM PLUGIN/START
-window.Alpine = Alpine;
-
 window.ApexCharts = ApexCharts;
 window.flatpickr = flatpickr;
 window.FullCalendar = Calendar;
@@ -38,6 +35,3 @@ window.UploadCompressReady = true;
 if (typeof window.dispatchEvent === 'function') {
     window.dispatchEvent(new CustomEvent('upload-compress:ready'));
 }
-
-// 3. START ALPINE (Pastikan dipanggil paling akhir setelah semua komponen/plugin terdaftar)
-Alpine.start();

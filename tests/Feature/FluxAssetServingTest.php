@@ -5,7 +5,8 @@ use Illuminate\Support\Facades\File;
 
 test('flux assets exist physically in public flux directory', function () {
     expect(File::exists(public_path('flux/flux.min.js')))->toBeTrue();
-    expect(File::size(public_path('flux/flux.min.js')))->toBeGreaterThan(1000);
+    expect(File::size(public_path('flux/flux.min.js')))->toBeGreaterThan(100000);
+    expect(File::get(public_path('flux/flux.min.js')))->toContain('fluxModal');
 
     expect(File::exists(public_path('flux/flux.css')))->toBeTrue();
     expect(File::isDirectory(public_path('flux/flags')))->toBeTrue();
