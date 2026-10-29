@@ -1,0 +1,13 @@
+[
+  {
+    "event_message": "GET | 200 | https://utjtgnzjgdusisquzhue.storage.supabase.co/storage/v1/s3/speed-service/documents/985/ichijikin/YOGI%20SUHADA_4190118580.jpg | aws-sdk-php/3.384.4 ua/2.1 OS/Linux#6.18.5+deb13-cloud-amd64 lang/php#8.3.32 m/P,Z,e,N,b GuzzleHttp/7",
+    "id": "4f801cdc-f2f5-4015-ac96-c040fa484d26",
+    "identifier": "utjtgnzjgdusisquzhue",
+    "method": "GET",
+    "path": "/storage/v1/s3/speed-service/documents/985/ichijikin/YOGI%20SUHADA_4190118580.jpg",
+    "status_code": 200,
+    "timestamp": 1784691277580000,
+    "iso_datetime": "2026-07-22T11:34:37.580Z",
+    "source": "supabase_api_log"
+  }
+]
