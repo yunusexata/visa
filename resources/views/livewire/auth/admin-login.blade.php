@@ -122,7 +122,7 @@
         <div class="bg-brand-navy relative hidden h-full w-full items-center lg:flex lg:w-1/2 justify-center p-12">
             <div class="z-1 flex flex-col items-center justify-center text-center max-w-md">
                 <div class="mb-6">
-                    <h1 class="text-white font-black text-5xl tracking-tight uppercase">Nenkin Portal</h1>
+                    <h1 class="text-white font-black text-5xl tracking-tight uppercase">Visa Japan</h1>
                     <p class="text-[#0049FF] font-bold text-lg mt-1">by Exata Indonesia</p>
                     {{-- Brand shortform: legal name is PT Sumber Rezeki Exata Indonesia --}}
                 </div>
