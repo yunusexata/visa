@@ -13,7 +13,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @livewireStyles
-    @fluxAppearance
+    @fluxStyles
 
     @stack('css')
 
@@ -142,6 +142,7 @@
 </body>
 
     @livewireScripts
+    @fluxScripts
 <script>
     
         Livewire.on("{{ Alert::EVENT_INFO }}", (event) => {
@@ -265,7 +266,6 @@
             });
         }
 </script>
-@fluxScripts
 @stack('scripts')
 
 </html>
