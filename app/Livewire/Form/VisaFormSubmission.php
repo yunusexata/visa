@@ -94,8 +94,6 @@ class VisaFormSubmission extends Component
 
     public $telepon_penanggung_jawab = '';
 
-    public bool $declaration_agreed = false;
-
     public $is_submitted = false;
 
     // Step History Storage
@@ -229,14 +227,6 @@ class VisaFormSubmission extends Component
      */
     public function submit()
     {
-        if (! $this->declaration_agreed) {
-            $this->addError('declaration_agreed', 'Harap centang persetujuan keabsahan data sebelum mengirim.');
-            Alert::fail($this, 'Persetujuan Diperlukan', 'Harap centang pernyataan kebenaran data formulir.');
-
-            return null;
-        }
-
-        $this->resetErrorBag('declaration_agreed');
 
         $link = VisaFormLink::find($this->linkId);
 
@@ -264,7 +254,7 @@ class VisaFormSubmission extends Component
         // Simpan data formulir visa pemohon ke database dengan status DRAFT
         $visaForm = VisaForm::create([
             'visa_form_link_id' => $link->id,
-            'nomor_registrasi' => 'VISA-'.date('Ymd').'-'.strtoupper(Str::random(4)),
+            'nomor_registrasi' => 'VISA-' . date('Ymd') . '-' . strtoupper(Str::random(4)),
             'status' => VisaFormStatus::DRAFT,
             'pic_code' => $link->pic_code,
 
