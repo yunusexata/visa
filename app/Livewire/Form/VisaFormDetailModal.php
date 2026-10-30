@@ -116,11 +116,7 @@ class VisaFormDetailModal extends Component
         $this->nik_ktp = $visaForm->nik_ktp ?? '';
         $this->alamat_indonesia = $visaForm->alamat_indonesia ?? '';
         $this->kode_pos_indonesia = $visaForm->kode_pos_indonesia;
-
-        // Bersihkan kode negara +62 / 62 / awalan 0 untuk input group Indonesia
-        $rawTel = (string) ($visaForm->telepon_indonesia ?? '');
-        $this->telepon_indonesia = ltrim(preg_replace('/^(\+?62)/', '', $rawTel), '0');
-
+        $this->telepon_indonesia = (string) ($visaForm->telepon_indonesia ?? '');
         $this->email_aktif = $visaForm->email_aktif ?? '';
 
         $this->nomor_paspor = $visaForm->nomor_paspor ?? '';
@@ -139,10 +135,7 @@ class VisaFormDetailModal extends Component
         $this->nama_kaisha = $visaForm->nama_kaisha ?? '';
         $this->alamat_jepang = $visaForm->alamat_jepang ?? '';
         $this->kode_pos_jepang = $visaForm->kode_pos_jepang;
-
-        // Bersihkan kode negara +81 / 81 / awalan 0 untuk input group Jepang
-        $rawJpTel = (string) ($visaForm->telepon_jepang ?? '');
-        $this->telepon_jepang = ltrim(preg_replace('/^(\+?81)/', '', $rawJpTel), '0');
+        $this->telepon_jepang = (string) ($visaForm->telepon_jepang ?? '');
 
         // Normalisasi pernah kerja jepang ('ya', 'pernah' => 'pernah')
         $rawPernah = strtolower((string) ($visaForm->pernah_kerja_jepang ?? ''));
@@ -163,10 +156,7 @@ class VisaFormDetailModal extends Component
 
         $this->nama_penanggung_jawab = $visaForm->nama_penanggung_jawab ?? '';
         $this->alamat_penanggung_jawab = $visaForm->alamat_penanggung_jawab ?? '';
-
-        // Bersihkan kode negara +81 / 81 / awalan 0 untuk penanggung jawab
-        $rawGpJpTel = (string) ($visaForm->telepon_penanggung_jawab ?? '');
-        $this->telepon_penanggung_jawab = ltrim(preg_replace('/^(\+?81)/', '', $rawGpJpTel), '0');
+        $this->telepon_penanggung_jawab = (string) ($visaForm->telepon_penanggung_jawab ?? '');
 
         $this->attachments = $visaForm->attachments ? $visaForm->attachments->toArray() : [];
         $this->isOpen = true;
@@ -187,7 +177,7 @@ class VisaFormDetailModal extends Component
             'tanggal_lahir' => ['required', 'date'],
             'nik_ktp' => ['required', 'string', 'max:20'],
             'alamat_indonesia' => ['required', 'string'],
-            'telepon_indonesia' => ['required', 'string', 'max:30'],
+            'telepon_indonesia' => ['required', 'string', 'max:30', 'regex:/^[0-9\-]+$/'],
             'email_aktif' => ['required', 'email', 'max:255'],
             'nomor_paspor' => ['required', 'string', 'max:50'],
             'kantor_paspor' => ['required', 'string', 'max:100'],
@@ -197,10 +187,14 @@ class VisaFormDetailModal extends Component
             'tanggal_kedatangan' => ['required', 'date'],
             'nama_kaisha' => ['required', 'string', 'max:255'],
             'alamat_jepang' => ['required', 'string'],
-            'telepon_jepang' => ['required', 'string', 'max:30'],
+            'telepon_jepang' => ['required', 'string', 'max:30', 'regex:/^[0-9\-]+$/'],
             'nama_penanggung_jawab' => ['required', 'string', 'max:255'],
             'alamat_penanggung_jawab' => ['required', 'string', 'max:255'],
-            'telepon_penanggung_jawab' => ['required', 'string', 'max:30'],
+            'telepon_penanggung_jawab' => ['required', 'string', 'max:30', 'regex:/^[0-9\-]+$/'],
+        ], [
+            'telepon_indonesia.regex' => 'Nomor telepon Indonesia hanya boleh memuat angka dan tanda minus (-).',
+            'telepon_jepang.regex' => 'Nomor telepon Jepang hanya boleh memuat angka dan tanda minus (-).',
+            'telepon_penanggung_jawab.regex' => 'Nomor telepon penanggung jawab hanya boleh memuat angka dan tanda minus (-).',
         ]);
 
         $visaForm = VisaForm::findOrFail($this->visaFormId);

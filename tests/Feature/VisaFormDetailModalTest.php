@@ -96,9 +96,9 @@ test('detail modal normalizes real input for regency, phone codes, month inputs,
 
     $form = VisaForm::factory()->create([
         'tempat_lahir' => 'KABUPATEN BANJAR',
-        'telepon_indonesia' => '+6281234567890',
-        'telepon_jepang' => '+818012345678',
-        'telepon_penanggung_jawab' => '819012345678',
+        'telepon_indonesia' => '0812-3456-7890',
+        'telepon_jepang' => '03-3423-1111',
+        'telepon_penanggung_jawab' => '080-1234-5678',
         'status_kependudukan_jepang' => 'Student (Ryugaku)',
         'lama_stay_jepang' => '1 Tahun',
         'bandara_tujuan' => 'Narita (NRT)',
@@ -111,10 +111,10 @@ test('detail modal normalizes real input for regency, phone codes, month inputs,
         ->test(VisaFormDetailModal::class)
         ->dispatch('open-visa-form-detail', id: $form->id);
 
-    // Verify phone sanitation
-    $component->assertSet('telepon_indonesia', '81234567890')
-        ->assertSet('telepon_jepang', '8012345678')
-        ->assertSet('telepon_penanggung_jawab', '9012345678')
+    // Verify phone retains number and hyphen format
+    $component->assertSet('telepon_indonesia', '0812-3456-7890')
+        ->assertSet('telepon_jepang', '03-3423-1111')
+        ->assertSet('telepon_penanggung_jawab', '080-1234-5678')
         // Verify pernah kerja auto-select normalization
         ->assertSet('pernah_kerja_jepang', 'pernah')
         // Verify month input format (YYYY-MM)
@@ -124,11 +124,34 @@ test('detail modal normalizes real input for regency, phone codes, month inputs,
         ->assertSet('status_kependudukan_jepang', 'Student (Ryugaku)')
         ->assertSet('lama_stay_jepang', '1 Tahun')
         ->assertSet('bandara_tujuan', 'Narita (NRT)')
-        // Verify HTML displays country code badges and input month
-        ->assertSeeHtml('+62')
-        ->assertSeeHtml('+81')
+        // Verify HTML does not contain country code badges (+62 and +81)
+        ->assertDontSeeHtml('🇮🇩 +62')
+        ->assertDontSeeHtml('🇯🇵 +81')
         ->assertSeeHtml('type="month"');
 
     // Test loadRegencies method
     expect($component->instance()->loadRegencies())->toBeArray();
+});
+
+test('detail modal validates phone numbers allow only digits and hyphens', function () {
+    $superadmin = User::factory()->create();
+    $superadmin->assignRole(User::ROLE_SUPERADMIN);
+
+    $form = VisaForm::factory()->create();
+
+    $component = Livewire::actingAs($superadmin)
+        ->test(VisaFormDetailModal::class)
+        ->dispatch('open-visa-form-detail', id: $form->id);
+
+    // Invalid phone with letters or invalid symbols
+    $component->set('telepon_indonesia', '0812ABCD')
+        ->call('save')
+        ->assertHasErrors(['telepon_indonesia']);
+
+    // Valid phone with digits and hyphens
+    $component->set('telepon_indonesia', '0812-3456-7890')
+        ->set('telepon_jepang', '03-3423-1111')
+        ->set('telepon_penanggung_jawab', '080-1234-5678')
+        ->call('save')
+        ->assertHasNoErrors(['telepon_indonesia', 'telepon_jepang', 'telepon_penanggung_jawab']);
 });

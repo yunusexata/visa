@@ -57,6 +57,7 @@
             return {
                 tanggal_kedatangan: $wire.tanggal_kedatangan,
                 bandara_tujuan: $wire.bandara_tujuan,
+                bandara_lainnya: $wire.bandara_lainnya,
                 maskapai: $wire.maskapai,
                 nama_kaisha: $wire.nama_kaisha,
                 alamat_jepang: $wire.alamat_jepang,
@@ -334,18 +335,17 @@
                             <label for="telepon_indonesia" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                                 Nomor Telepon / WhatsApp Indonesia <span class="text-rose-500">*</span>
                             </label>
-                            <div class="flex rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 overflow-hidden focus-within:border-[#0049FF] focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
-                                <span class="inline-flex items-center gap-1 px-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border-r border-slate-200 dark:border-slate-700">
-                                    🇮🇩 +62
-                                </span>
-                                <input type="tel" 
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">call</span>
+                                <input type="text" 
                                        id="telepon_indonesia" 
+                                       name="telepon_indonesia" 
                                        wire:model="telepon_indonesia" 
-                                       inputmode="numeric"
-                                       x-on:input="$el.value = $el.value.replace(/^[0]+/, '').replace(/[^0-9]/g, '')"
-                                       placeholder="81234567890 (tanpa awalan 0)"
+                                       inputmode="tel"
+                                       x-on:input="$el.value = $el.value.replace(/[^0-9\-]/g, '')"
+                                       placeholder="Contoh: 0812-3456-7890"
                                        required
-                                       class="flex-1 px-4 py-3 bg-white dark:bg-slate-800 text-sm font-medium outline-none">
+                                       class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
                             </div>
                         </div>
 
@@ -499,7 +499,7 @@
                                        id="nomor_coe" 
                                        wire:model="nomor_coe" 
                                        x-on:input="$el.value = $el.value.toUpperCase()"
-                                       placeholder="Nomor COE yang tertera pada pojok kanan atas lembar COE"
+                                       placeholder="Yang diawali dengan Huruf V / P / Y / R (contoh V26-002611)"
                                        required
                                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono tracking-wider focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
                             </div>
@@ -533,9 +533,10 @@
                                     wire:model="lama_stay_jepang" 
                                     required
                                     class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
-                                <option value="1 Tahun">1 Tahun (1 Year)</option>
-                                <option value="3 Tahun">3 Tahun (3 Years)</option>
-                                <option value="5 Tahun">5 Tahun (5 Years)</option>
+                                <option value="1 YEARS">1 Tahun (1 Year)</option>
+                                <option value="2 YEARS">2 Tahun (2 Year)</option>
+                                <option value="3 YEARS">3 Tahun (3 Years)</option>
+                                <option value="5 YEARS">5 Tahun (5 Years)</option>
                                 <option value="6 Bulan">6 Bulan (6 Months)</option>
                                 <option value="Lainnya">Lainnya</option>
                             </select>
@@ -597,31 +598,41 @@
 
                         <!-- 12. Masuk Bandara Jepang -->
                         <div class="md:col-span-2">
-                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-2">
+                            <label for="bandara_tujuan" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                                 Bandara Kedatangan di Jepang <span class="text-rose-500">*</span>
                             </label>
-                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
-                                @foreach([
-                                    'Haneda (HND)' => 'Haneda',
-                                    'Narita (NRT)' => 'Narita',
-                                    'Fukuoka (FUK)' => 'Fukuoka',
-                                    'Osaka / Kansai (KIX)' => 'Osaka',
-                                    'Lainnya' => 'Lainnya'
-                                ] as $val => $label)
-                                    <label class="flex flex-col items-center justify-center p-3 rounded-xl border cursor-pointer transition-all text-center has-[:checked]:bg-blue-50/80 dark:has-[:checked]:bg-blue-950/60 has-[:checked]:border-[#0049FF] has-[:checked]:text-[#0049FF] has-[:checked]:font-bold has-[:checked]:shadow-xs"
-                                           :class="$wire.bandara_tujuan === '{{ $val }}' 
-                                                ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#0049FF] text-[#0049FF] font-bold shadow-xs' 
-                                                : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'">
-                                        <input type="radio" 
-                                               id="bandara_tujuan_{{ Str::slug($val) }}"
-                                               name="bandara_tujuan"
-                                               wire:model="bandara_tujuan" 
-                                               value="{{ $val }}" 
-                                               class="sr-only">
-                                        <span class="text-xs">{{ $label }}</span>
-                                        <span class="text-[10px] opacity-75 font-mono">{{ Str::between($val, '(', ')') ?: '' }}</span>
-                                    </label>
-                                @endforeach
+                            @php
+                                $airportOptions = ['Haneda', 'Narita', 'Osaka', 'Nagoya', 'Fukuoka', 'Sapporo', 'Okinawa'];
+                            @endphp
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">flight_land</span>
+                                <select id="bandara_tujuan" 
+                                        name="bandara_tujuan" 
+                                        wire:model.live="bandara_tujuan" 
+                                        required
+                                        class="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none appearance-none cursor-pointer">
+                                    @if ($bandara_tujuan && !in_array($bandara_tujuan, $airportOptions))
+                                        <option value="{{ $bandara_tujuan }}">{{ $bandara_tujuan }}</option>
+                                    @endif
+                                    @foreach ($airportOptions as $opt)
+                                        <option value="{{ $opt }}">{{ $opt }}</option>
+                                    @endforeach
+                                </select>
+                                <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-lg">expand_more</span>
+                            </div>
+
+                            <!-- Input jika bandara lainnya -->
+                            <div x-show="$wire.bandara_tujuan === 'Lainnya'" 
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 -translate-y-2"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 class="mt-2.5">
+                                <input type="text" 
+                                       id="bandara_lainnya" 
+                                       name="bandara_lainnya" 
+                                       wire:model="bandara_lainnya" 
+                                       placeholder="Sebutkan nama bandara tujuan lainnya di Jepang..." 
+                                       class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none" />
                             </div>
                         </div>
 
@@ -671,18 +682,17 @@
                             <label for="telepon_jepang" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                                 Nomor Telepon Kaisha / Kontak di Jepang <span class="text-rose-500">*</span>
                             </label>
-                            <div class="flex rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 overflow-hidden focus-within:border-[#0049FF] focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
-                                <span class="inline-flex items-center gap-1 px-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border-r border-slate-200 dark:border-slate-700">
-                                    🇯🇵 +81
-                                </span>
-                                <input type="tel" 
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">call</span>
+                                <input type="text" 
                                        id="telepon_jepang" 
+                                       name="telepon_jepang" 
                                        wire:model="telepon_jepang" 
-                                       inputmode="numeric"
-                                       x-on:input="$el.value = $el.value.replace(/^[0]+/, '').replace(/[^0-9]/g, '')"
-                                       placeholder="8012345678 (tanpa awalan 0)"
+                                       inputmode="tel"
+                                       x-on:input="$el.value = $el.value.replace(/[^0-9\-]/g, '')"
+                                       placeholder="Contoh: 03-3423-1111"
                                        required
-                                       class="flex-1 px-4 py-3 bg-white dark:bg-slate-800 text-sm font-medium outline-none">
+                                       class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
                             </div>
                         </div>
 
@@ -762,18 +772,17 @@
                             <label for="telepon_penanggung_jawab" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                                 Nomor Telepon Penanggung Jawab <span class="text-rose-500">*</span>
                             </label>
-                            <div class="flex rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 overflow-hidden focus-within:border-[#0049FF] focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
-                                <span class="inline-flex items-center gap-1 px-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs border-r border-slate-200 dark:border-slate-700">
-                                    🇯🇵 +81
-                                </span>
-                                <input type="tel" 
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">call</span>
+                                <input type="text" 
                                        id="telepon_penanggung_jawab" 
+                                       name="telepon_penanggung_jawab" 
                                        wire:model="telepon_penanggung_jawab" 
-                                       inputmode="numeric"
-                                       x-on:input="$el.value = $el.value.replace(/^[0]+/, '').replace(/[^0-9]/g, '')"
-                                       placeholder="Nomor Telepon Penanggung Jawab"
+                                       inputmode="tel"
+                                       x-on:input="$el.value = $el.value.replace(/[^0-9\-]/g, '')"
+                                       placeholder="Contoh: 03-3423-1111"
                                        required
-                                       class="flex-1 px-4 py-3 bg-white dark:bg-slate-800 text-sm font-medium outline-none">
+                                       class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
                             </div>
                         </div>
 
@@ -828,7 +837,7 @@
                                 <div><dt class="text-slate-400">Nama Lengkap:</dt><dd class="font-bold text-slate-800 dark:text-white" x-text="$wire.nama_lengkap || '-'"></dd></div>
                                 <div><dt class="text-slate-400">Tempat, Tanggal Lahir:</dt><dd class="font-medium" x-text="`${$wire.tempat_lahir || '-'}, ${$wire.tanggal_lahir || '-'}`"></dd></div>
                                 <div><dt class="text-slate-400">NIK KTP:</dt><dd class="font-mono font-medium" x-text="$wire.nik_ktp || '-'"></dd></div>
-                                <div><dt class="text-slate-400">Telepon & Email:</dt><dd class="font-medium" x-text="`+62 ${$wire.telepon_indonesia || '-'} • ${$wire.email_aktif || '-'}`"></dd></div>
+                                <div><dt class="text-slate-400">Telepon & Email:</dt><dd class="font-medium" x-text="`${$wire.telepon_indonesia || '-'} • ${$wire.email_aktif || '-'}`"></dd></div>
                             </dl>
                         </div>
 
@@ -881,7 +890,7 @@
                                 <div><dt class="text-slate-400">Kedatangan:</dt><dd class="font-medium" x-text="`${$wire.tanggal_kedatangan || '-'} (${$wire.bandara_tujuan || '-'})`"></dd></div>
                                 <div><dt class="text-slate-400">Maskapai:</dt><dd class="font-medium" x-text="$wire.maskapai || '-'"></dd></div>
                                 <div><dt class="text-slate-400">Nama Kaisha:</dt><dd class="font-bold text-slate-800 dark:text-white" x-text="$wire.nama_kaisha || '-'"></dd></div>
-                                <div><dt class="text-slate-400">Penanggung Jawab:</dt><dd class="font-medium" x-text="`${$wire.nama_penanggung_jawab || '-'} (+81 ${$wire.telepon_penanggung_jawab || '-'})`"></dd></div>
+                                <div><dt class="text-slate-400">Penanggung Jawab:</dt><dd class="font-medium" x-text="`${$wire.nama_penanggung_jawab || '-'} (${$wire.telepon_penanggung_jawab || '-'})`"></dd></div>
                             </dl>
                         </div>
 

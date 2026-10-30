@@ -321,7 +321,7 @@ class VisaFormSubmission extends Component
             // Step 4: Rencana Kedatangan & Kaisha di Jepang
             'tanggal_kedatangan' => $this->tanggal_kedatangan,
             'bandara_tujuan' => $this->bandara_tujuan,
-            'bandara_lainnya' => $this->bandara_lainnya,
+            'bandara_lainnya' => $this->bandara_tujuan === 'Lainnya' ? $this->bandara_lainnya : null,
             'maskapai' => $this->maskapai,
             'nama_kaisha' => $this->nama_kaisha,
             'alamat_jepang' => $this->alamat_jepang,

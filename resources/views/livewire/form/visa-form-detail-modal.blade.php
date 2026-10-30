@@ -197,18 +197,13 @@
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                             No. Telepon / WhatsApp <span class="text-rose-500">*</span>
                         </label>
-                        <div class="flex rounded-xl shadow-xs border border-slate-300 dark:border-slate-700 overflow-hidden focus-within:border-[#0049FF] focus-within:ring-4 focus-within:ring-blue-500/10 transition-all bg-white dark:bg-slate-800">
-                            <span class="inline-flex items-center gap-1 px-3.5 bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 font-bold text-xs border-r border-slate-300 dark:border-slate-700 shrink-0">
-                                🇮🇩 +62
-                            </span>
-                            <input type="tel" 
-                                   id="modal_telepon_indonesia" 
-                                   wire:model="telepon_indonesia" 
-                                   inputmode="numeric"
-                                   x-on:input="$el.value = $el.value.replace(/^[0]+/, '').replace(/[^0-9]/g, '')"
-                                   placeholder="81234567890 (tanpa awalan 0)"
-                                   class="flex-1 px-3.5 py-2.5 bg-transparent text-sm font-medium outline-none text-slate-800 dark:text-white">
-                        </div>
+                        <input type="text" 
+                               id="modal_telepon_indonesia" 
+                               wire:model="telepon_indonesia" 
+                               inputmode="tel"
+                               x-on:input="$el.value = $el.value.replace(/[^0-9\-]/g, '')"
+                               placeholder="Contoh: 0812-3456-7890"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
                         @error('telepon_indonesia') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
@@ -431,18 +426,13 @@
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                             No. Telepon Kaisha di Jepang <span class="text-rose-500">*</span>
                         </label>
-                        <div class="flex rounded-xl shadow-xs border border-slate-300 dark:border-slate-700 overflow-hidden focus-within:border-[#0049FF] focus-within:ring-4 focus-within:ring-blue-500/10 transition-all bg-white dark:bg-slate-800">
-                            <span class="inline-flex items-center gap-1 px-3.5 bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 font-bold text-xs border-r border-slate-300 dark:border-slate-700 shrink-0">
-                                🇯🇵 +81
-                            </span>
-                            <input type="tel" 
-                                   id="modal_telepon_jepang" 
-                                   wire:model="telepon_jepang" 
-                                   inputmode="numeric"
-                                   x-on:input="$el.value = $el.value.replace(/^[0]+/, '').replace(/[^0-9]/g, '')"
-                                   placeholder="8012345678 (tanpa awalan 0)"
-                                   class="flex-1 px-3.5 py-2.5 bg-transparent text-sm font-medium outline-none text-slate-800 dark:text-white">
-                        </div>
+                        <input type="text" 
+                               id="modal_telepon_jepang" 
+                               wire:model="telepon_jepang" 
+                               inputmode="tel"
+                               x-on:input="$el.value = $el.value.replace(/[^0-9\-]/g, '')"
+                               placeholder="Contoh: 03-3423-1111"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
                         @error('telepon_jepang') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
@@ -508,18 +498,13 @@
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                             Telepon Penanggung Jawab <span class="text-rose-500">*</span>
                         </label>
-                        <div class="flex rounded-xl shadow-xs border border-slate-300 dark:border-slate-700 overflow-hidden focus-within:border-[#0049FF] focus-within:ring-4 focus-within:ring-blue-500/10 transition-all bg-white dark:bg-slate-800">
-                            <span class="inline-flex items-center gap-1 px-3.5 bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-300 font-bold text-xs border-r border-slate-300 dark:border-slate-700 shrink-0">
-                                🇯🇵 +81
-                            </span>
-                            <input type="tel" 
-                                   id="modal_telepon_penanggung_jawab" 
-                                   wire:model="telepon_penanggung_jawab" 
-                                   inputmode="numeric"
-                                   x-on:input="$el.value = $el.value.replace(/^[0]+/, '').replace(/[^0-9]/g, '')"
-                                   placeholder="Nomor Telepon Penanggung Jawab"
-                                   class="flex-1 px-3.5 py-2.5 bg-transparent text-sm font-medium outline-none text-slate-800 dark:text-white">
-                        </div>
+                        <input type="text" 
+                               id="modal_telepon_penanggung_jawab" 
+                               wire:model="telepon_penanggung_jawab" 
+                               inputmode="tel"
+                               x-on:input="$el.value = $el.value.replace(/[^0-9\-]/g, '')"
+                               placeholder="Contoh: 03-3423-1111"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
                         @error('telepon_penanggung_jawab') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
                     </div>
 

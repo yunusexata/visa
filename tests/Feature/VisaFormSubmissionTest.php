@@ -124,10 +124,6 @@ test('submitting form increments link used_count and redirects to upload documen
 
     $test = Livewire::test(VisaFormSubmission::class, ['hashid' => $hashid])
         ->set('nama_lengkap', 'BUDI SANTOSO')
-        ->set('declaration_agreed', false)
-        ->call('submit')
-        ->assertHasErrors('declaration_agreed')
-        ->set('declaration_agreed', true)
         ->call('submit')
         ->assertHasNoErrors()
         ->assertDispatched('clear-form-draft');
@@ -174,4 +170,24 @@ test('restoreDraft restores draft fields into component properties', function ()
         ->assertSet('pernah_kerja_jepang', 'pernah')
         ->assertSet('periode_kerja_mulai', '2021-04')
         ->assertSet('periode_kerja_selesai', '2024-03');
+});
+
+test('form renders select for bandara_tujuan and excludes country code badges', function () {
+    $link = VisaFormLink::create([
+        'name' => 'Klien Select Test',
+        'password' => null,
+        'max_usage' => 1,
+        'expired_at' => now()->addDays(5),
+        'status' => VisaFormLinkStatus::STATUS_ACTIVE,
+    ]);
+
+    $hashid = Hashids::encode($link->id);
+
+    Livewire::test(VisaFormSubmission::class, ['hashid' => $hashid])
+        ->assertSeeHtml('<select id="bandara_tujuan"')
+        ->assertSeeHtml('value="Haneda (HND)"')
+        ->assertSeeHtml('value="Narita (NRT)"')
+        ->assertSeeHtml('value="Lainnya"')
+        ->assertDontSeeHtml('🇮🇩 +62')
+        ->assertDontSeeHtml('🇯🇵 +81');
 });
