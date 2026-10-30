@@ -29,7 +29,7 @@ class RoleSeeder extends Seeder
     {
 
         // Reset cached roles and permissions
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        // app()[PermissionRegistrar::class]->forgetCachedPermissions();
         // create role
         $role = Role::create(['name' => User::ROLE_SUPERADMIN]);
         foreach (PermissionHelper::ACCESS_TYPE_ALL as $access => $types) {
