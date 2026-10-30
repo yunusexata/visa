@@ -104,14 +104,16 @@ trait WithDatatable
         $sortBy = $this->sortBy;
         $sortDirection = $this->sortDirection;
 
-        $query->when($search, function ($query) use ($search, $columns) {
-            $query->where(function ($query) use ($columns, $search) {
+        $likeOperator = $query->getConnection()->getDriverName() === 'pgsql' ? 'ILIKE' : 'LIKE';
+
+        $query->when($search, function ($query) use ($search, $columns, $likeOperator) {
+            $query->where(function ($query) use ($columns, $search, $likeOperator) {
                 foreach ($columns as $col) {
                     if (
                         isset($col['key'])
                         && (! isset($col['searchable']) || (isset($col['searchable']) && $col['searchable']))
                     ) {
-                        $query->orWhere($col['key'], 'ILIKE', "%$search%");
+                        $query->orWhere($col['key'], $likeOperator, "%$search%");
                     }
                 }
             });

@@ -1,9 +1,12 @@
 <?php
 
+use App\Enums\Form\VisaAttachmenStatus;
+use App\Enums\Form\VisaAttachmentType;
 use App\Enums\Form\VisaFormStatus;
 use App\Helpers\Alert;
 use App\Livewire\Form\UploadDocument;
 use App\Models\Form\VisaForm;
+use App\Models\Form\VisaFormAttachment;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -127,6 +130,22 @@ test('buffer incomingSlot and incomingFile appends to slot without overwriting p
     expect(count($pasporFiles))->toBe(2);
 });
 
+test('slot array preserves multiple uploaded files directly on coe slot', function () {
+    $file1 = UploadedFile::fake()->image('coe_page1.jpg')->size(350);
+    $file2 = UploadedFile::fake()->image('coe_page2.jpg')->size(420);
+    $file3 = UploadedFile::fake()->image('coe_page3.jpg')->size(380);
+
+    $component = Livewire::test(UploadDocument::class, ['hashid' => $this->hashid])
+        ->set('coe', [$file1, $file2, $file3])
+        ->call('processSlot', 'coe')
+        ->assertDispatched('attachment-saved', type: 'coe', count: 3);
+
+    $coeFiles = $component->get('coe');
+    expect($coeFiles)->toBeArray();
+    expect(count($coeFiles))->toBe(3);
+    expect($component->get('uploadedTypes'))->toContain('coe');
+});
+
 test('removeFile removes file from slot and dispatches attachment-removed', function () {
     $file1 = UploadedFile::fake()->image('paspor_hal_1.jpg')->size(300);
     $file2 = UploadedFile::fake()->image('paspor_hal_2.jpg')->size(300);
@@ -169,4 +188,80 @@ test('submitAllDocuments blocks and alerts if required slot has no uploaded file
         ->assertSet('is_submitted', false)
         ->assertNotDispatched('documents-submitted')
         ->assertDispatched('SwalInfo'); // Alert::fail dispatches SwalInfo
+});
+
+test('submitAllDocuments stores files to configured DEFAULT_STORE_DISK and creates VisaFormAttachment records', function () {
+    config(['filesystems.default_store_disk' => 'public']);
+
+    $coeFile = UploadedFile::fake()->image('coe_asli.jpg', 600, 600)->size(500);
+    $pasporFile = UploadedFile::fake()->image('paspor_scan.png', 800, 600)->size(800);
+    $tiketPdf = UploadedFile::fake()->create('tiket_flight.pdf', 1200, 'application/pdf');
+
+    Livewire::test(UploadDocument::class, ['hashid' => $this->hashid])
+        ->set('coe', [$coeFile])
+        ->set('paspor', [$pasporFile])
+        ->set('tiket', [$tiketPdf])
+        ->call('submitAllDocuments')
+        ->assertHasNoErrors()
+        ->assertSet('is_submitted', true)
+        ->assertDispatched('documents-submitted')
+        ->assertRedirect(route('form.success', ['hashid' => $this->hashid]));
+
+    expect($this->visaForm->fresh()->status)->toBe(VisaFormStatus::DIAJUKAN);
+
+    // Verifikasi record di database dengan kolom standar bahasa Inggris
+    $this->assertDatabaseHas('visa_form_attachments', [
+        'visa_form_id' => $this->visaForm->id,
+        'disk' => 'public',
+        'nama_file_asli' => 'coe_asli.jpg',
+        'jenis_dokumen' => VisaAttachmentType::COE->value,
+        'extension' => 'jpg',
+    ]);
+
+    $this->assertDatabaseHas('visa_form_attachments', [
+        'visa_form_id' => $this->visaForm->id,
+        'disk' => 'public',
+        'nama_file_asli' => 'paspor_scan.png',
+        'jenis_dokumen' => VisaAttachmentType::PASPOR->value,
+        'extension' => 'png',
+    ]);
+
+    $this->assertDatabaseHas('visa_form_attachments', [
+        'visa_form_id' => $this->visaForm->id,
+        'disk' => 'public',
+        'nama_file_asli' => 'tiket_flight.pdf',
+        'jenis_dokumen' => VisaAttachmentType::TIKET->value,
+        'extension' => 'pdf',
+    ]);
+
+    $attachment = VisaFormAttachment::where('visa_form_id', $this->visaForm->id)
+        ->where('nama_file_asli', 'coe_asli.jpg')
+        ->first();
+
+    expect($attachment)->not->toBeNull();
+    Storage::disk('public')->assertExists($attachment->path);
+    expect($attachment->getUrl())->toBe(Storage::disk('public')->url($attachment->path));
+    expect($attachment->url)->toBe($attachment->getUrl());
+});
+
+test('VisaFormAttachment getUrl returns direct SUPABASE_PUBLIC_URL for supabase disk', function () {
+    config(['filesystems.disks.supabase.public_url' => 'https://xyz.supabase.co/storage/v1/object/public/visa-bucket']);
+
+    $attachment = VisaFormAttachment::create([
+        'visa_form_id' => $this->visaForm->id,
+        'jenis_dokumen' => VisaAttachmentType::COE,
+        'nama_file_asli' => 'coe_supabase.jpg',
+        'nama_file_tersimpan' => 'stored_coe.jpg',
+        'path' => 'visa-documents/123/coe/stored_coe.jpg',
+        'disk' => 'supabase',
+        'extension' => 'jpg',
+        'mime_type' => 'image/jpeg',
+        'file_size' => 102400,
+        'status' => VisaAttachmenStatus::STATUS_STORED,
+        'urutan' => 1,
+    ]);
+
+    $expectedUrl = 'https://xyz.supabase.co/storage/v1/object/public/visa-bucket/visa-documents/123/coe/stored_coe.jpg';
+    expect($attachment->getUrl())->toBe($expectedUrl);
+    expect($attachment->url)->toBe($expectedUrl);
 });

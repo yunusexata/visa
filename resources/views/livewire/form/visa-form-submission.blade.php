@@ -11,8 +11,6 @@
     draftRestored: false,
 
     init() {
-        this.loadDraft();
-
         // Listen for backend confirmation of step advance
         window.addEventListener('step-advanced', (e) => {
             if (e.detail && e.detail.step) {
@@ -21,75 +19,13 @@
                 this.step++;
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            this.saveDraft();
+            window.dispatchEvent(new CustomEvent('save-visa-draft'));
         });
 
         // Listen for backend confirmation to clear draft after successful submit
         window.addEventListener('clear-form-draft', () => {
-            localStorage.removeItem('visa_form_draft_{{ $hashid }}');
             this.draftRestored = false;
         });
-    },
-
-    loadDraft() {
-        try {
-            const raw = localStorage.getItem('visa_form_draft_{{ $hashid }}');
-            if (!raw) return;
-            const data = JSON.parse(raw);
-            if (data && typeof data === 'object') {
-                Object.keys(data).forEach(key => {
-                    if (key !== '_step' && data[key] !== null && data[key] !== undefined && key in $wire) {
-                        $wire.set(key, data[key]);
-                    }
-                });
-                if (data._step && data._step >= 1 && data._step <= this.totalSteps) {
-                    this.step = data._step;
-                }
-                this.draftRestored = true;
-                setTimeout(() => this.draftRestored = false, 4000);
-            }
-        } catch (e) {
-            console.error('Failed to load draft from localStorage:', e);
-        }
-    },
-
-    saveDraft() {
-        try {
-            const payload = {
-                _step: this.step,
-                nama_lengkap: $wire.nama_lengkap || '',
-                tempat_lahir: $wire.tempat_lahir || '',
-                tanggal_lahir: $wire.tanggal_lahir || '',
-                nik_ktp: $wire.nik_ktp || '',
-                alamat_indonesia: $wire.alamat_indonesia || '',
-                kode_pos_indonesia: $wire.kode_pos_indonesia || '',
-                telepon_indonesia: $wire.telepon_indonesia || '',
-                email_aktif: $wire.email_aktif || '',
-                nomor_paspor: $wire.nomor_paspor || '',
-                kantor_paspor: $wire.kantor_paspor || '',
-                tanggal_pengeluaran_paspor: $wire.tanggal_pengeluaran_paspor || '',
-                tanggal_habis_berlaku_paspor: $wire.tanggal_habis_berlaku_paspor || '',
-                nomor_coe: $wire.nomor_coe || '',
-                status_kependudukan_jepang: $wire.status_kependudukan_jepang || '',
-                lama_stay_jepang: $wire.lama_stay_jepang || '',
-                tanggal_kedatangan: $wire.tanggal_kedatangan || '',
-                bandara_tujuan: $wire.bandara_tujuan || '',
-                maskapai: $wire.maskapai || '',
-                nama_kaisha: $wire.nama_kaisha || '',
-                alamat_jepang: $wire.alamat_jepang || '',
-                kode_pos_jepang: $wire.kode_pos_jepang || '',
-                telepon_jepang: $wire.telepon_jepang || '',
-                pernah_kerja_jepang: $wire.pernah_kerja_jepang || 'tidak',
-                periode_kerja_mulai: $wire.periode_kerja_mulai || '',
-                periode_kerja_selesai: $wire.periode_kerja_selesai || '',
-                nama_penanggung_jawab: $wire.nama_penanggung_jawab || '',
-                alamat_penanggung_jawab: $wire.alamat_penanggung_jawab || '',
-                telepon_penanggung_jawab: $wire.telepon_penanggung_jawab || ''
-            };
-            localStorage.setItem('visa_form_draft_{{ $hashid }}', JSON.stringify(payload));
-        } catch (e) {
-            console.error('Failed to save draft to localStorage:', e);
-        }
     },
 
     getStepPayload(currentStep) {
@@ -147,7 +83,7 @@
         if (this.step > 1) {
             this.step--;
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            this.saveDraft();
+            window.dispatchEvent(new CustomEvent('save-visa-draft'));
         }
     },
 
@@ -155,7 +91,7 @@
         if (target >= 1 && target <= this.totalSteps) {
             this.step = target;
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            this.saveDraft();
+            window.dispatchEvent(new CustomEvent('save-visa-draft'));
         }
     },
 
@@ -276,11 +212,10 @@
                 </div>
             </div>
 
-            <!-- Form Content Area (Autosave triggers on change & blur only) -->
-            <form novalidate 
+            <!-- Form Content Area -->
+            <form id="visaSubmissionForm"
+                  novalidate 
                   @submit.prevent="confirmSubmit()" 
-                  @change="saveDraft()" 
-                  @blur.capture="saveDraft()"
                   class="p-5 sm:p-8">
 
                 <!-- STEP 1: WAJIB ISI DATA DI BAWAH INI (Identitas & Kontak) -->
@@ -673,12 +608,14 @@
                                     'Osaka / Kansai (KIX)' => 'Osaka',
                                     'Lainnya' => 'Lainnya'
                                 ] as $val => $label)
-                                    <label class="flex flex-col items-center justify-center p-3 rounded-xl border cursor-pointer transition-all text-center"
+                                    <label class="flex flex-col items-center justify-center p-3 rounded-xl border cursor-pointer transition-all text-center has-[:checked]:bg-blue-50/80 dark:has-[:checked]:bg-blue-950/60 has-[:checked]:border-[#0049FF] has-[:checked]:text-[#0049FF] has-[:checked]:font-bold has-[:checked]:shadow-xs"
                                            :class="$wire.bandara_tujuan === '{{ $val }}' 
                                                 ? 'bg-blue-50/80 dark:bg-blue-950/60 border-[#0049FF] text-[#0049FF] font-bold shadow-xs' 
                                                 : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'">
                                         <input type="radio" 
-                                               wire:model.live="bandara_tujuan" 
+                                               id="bandara_tujuan_{{ Str::slug($val) }}"
+                                               name="bandara_tujuan"
+                                               wire:model="bandara_tujuan" 
                                                value="{{ $val }}" 
                                                class="sr-only">
                                         <span class="text-xs">{{ $label }}</span>
@@ -757,6 +694,8 @@
                             <div class="flex gap-4">
                                 <label class="flex items-center gap-2 cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-300">
                                     <input type="radio" 
+                                           id="pernah_kerja_jepang_tidak"
+                                           name="pernah_kerja_jepang"
                                            wire:model.live="pernah_kerja_jepang" 
                                            value="tidak" 
                                            class="text-[#0049FF] focus:ring-blue-500">
@@ -764,6 +703,8 @@
                                 </label>
                                 <label class="flex items-center gap-2 cursor-pointer text-sm font-semibold text-slate-700 dark:text-slate-300">
                                     <input type="radio" 
+                                           id="pernah_kerja_jepang_pernah"
+                                           name="pernah_kerja_jepang"
                                            wire:model.live="pernah_kerja_jepang" 
                                            value="pernah" 
                                            class="text-[#0049FF] focus:ring-blue-500">
@@ -780,12 +721,16 @@
                                 <div>
                                     <span class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Dari Bulan / Tahun:</span>
                                     <input type="month" 
+                                           id="periode_kerja_mulai"
+                                           name="periode_kerja_mulai"
                                            wire:model="periode_kerja_mulai" 
                                            class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:border-[#0049FF] outline-none">
                                 </div>
                                 <div>
                                     <span class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 mb-1">Sampai Bulan / Tahun:</span>
                                     <input type="month" 
+                                           id="periode_kerja_selesai"
+                                           name="periode_kerja_selesai"
                                            wire:model="periode_kerja_selesai" 
                                            class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs focus:border-[#0049FF] outline-none">
                                 </div>
@@ -1077,4 +1022,167 @@
             </div>
         </div>
     @endif
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        initVisaFormStorage();
+    });
+
+    document.addEventListener('livewire:navigated', function () {
+        initVisaFormStorage();
+    });
+
+    function initVisaFormStorage() {
+        const storageKey = 'visa_form_draft_{{ $hashid }}';
+        const formElement = document.getElementById('visaSubmissionForm') || document.querySelector('form');
+        let isRestoring = false;
+
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // 1. Memulihkan draf dari LocalStorage
+        function loadDraftFromStorage() {
+            try {
+                const raw = localStorage.getItem(storageKey);
+                if (!raw) return;
+
+                const data = JSON.parse(raw);
+                if (!data || typeof data !== 'object') return;
+
+                isRestoring = true;
+
+                // A. Isi elemen DOM HTML secara instan (0ms tanpa kedip)
+                Object.keys(data).forEach(function (key) {
+                    if (key === '_step') return;
+
+                    // 1. Tangani radio buttons group berdasarkan name
+                    const radios = formElement.querySelectorAll(`input[type="radio"][name="${key}"]`);
+                    if (radios.length > 0) {
+                        radios.forEach(function (radio) {
+                            if (radio.value === data[key]) {
+                                radio.checked = true;
+                                radio.dispatchEvent(new Event('input', { bubbles: true }));
+                                radio.dispatchEvent(new Event('change', { bubbles: true }));
+                            } else {
+                                radio.checked = false;
+                            }
+                        });
+                        return;
+                    }
+
+                    // 2. Tangani input standar, select, textarea, dan hidden input (tempat_lahir)
+                    const input = document.getElementById(key) || document.querySelector(`[name="${key}"]`);
+                    if (input && data[key] !== null && data[key] !== undefined) {
+                        if (input.type === 'checkbox') {
+                            input.checked = Boolean(data[key]);
+                        } else {
+                            input.value = data[key];
+                        }
+
+                        // Dispatch input & change events agar listener Livewire & Alpine menangkap perubahan
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                });
+
+                // B. Pulihkan posisi langkah terakhir pada Alpine Stepper
+                if (data._step && window.Alpine) {
+                    const rootEl = document.querySelector('[x-data]');
+                    if (rootEl) {
+                        const alpineData = Alpine.$data(rootEl);
+                        if (alpineData && typeof alpineData.step !== 'undefined') {
+                            alpineData.step = parseInt(data._step);
+                            alpineData.draftRestored = true;
+                            setTimeout(function () { alpineData.draftRestored = false; }, 4000);
+                        }
+                    }
+                }
+
+                // C. Sinkronisasi batch ke backend Livewire menggunakan @this
+                if (typeof @this !== 'undefined' && typeof @this.restoreDraft === 'function') {
+                    @this.restoreDraft(data).then(function () {
+                        isRestoring = false;
+                    }).catch(function (err) {
+                        console.error('Gagal sinkronisasi draf ke Livewire:', err);
+                        isRestoring = false;
+                    });
+                } else {
+                    isRestoring = false;
+                }
+            } catch (e) {
+                console.error('Gagal memuat draf dari localStorage:', e);
+                isRestoring = false;
+            }
+        }
+
+        // 2. Menyimpan draf ke LocalStorage (Ter-debounce saat input berubah)
+        const saveDraftToStorage = debounce(function () {
+            if (isRestoring || !formElement) return;
+
+            try {
+                const formData = {};
+
+                // Baca step saat ini dari Alpine
+                let currentStep = 1;
+                if (window.Alpine) {
+                    const rootEl = document.querySelector('[x-data]');
+                    if (rootEl) {
+                        const alpineData = Alpine.$data(rootEl);
+                        if (alpineData && alpineData.step) {
+                            currentStep = alpineData.step;
+                        }
+                    }
+                }
+                formData['_step'] = currentStep;
+
+                // Kumpulkan seluruh data dari input form
+                const inputs = formElement.querySelectorAll('input, select, textarea');
+                inputs.forEach(function (input) {
+                    const key = input.name || input.id;
+                    if (!key || key.startsWith('select_regency_') || input.type === 'password') return;
+
+                    if (input.type === 'checkbox') {
+                        formData[key] = input.checked;
+                    } else if (input.type === 'radio') {
+                        if (input.checked) {
+                            formData[key] = input.value;
+                        }
+                    } else {
+                        formData[key] = input.value;
+                    }
+                });
+
+                console.log(formData);
+                localStorage.setItem(storageKey, JSON.stringify(formData));
+            } catch (e) {
+                console.error('Gagal menyimpan draf ke localStorage:', e);
+            }
+        }, 400);
+
+        // Pasang listener input & change pada form
+        if (formElement) {
+            formElement.removeEventListener('input', saveDraftToStorage);
+            formElement.removeEventListener('change', saveDraftToStorage);
+            formElement.addEventListener('input', saveDraftToStorage);
+            formElement.addEventListener('change', saveDraftToStorage);
+        }
+
+        // Listener saat step berganti dari tombol navigasi stepper
+        window.removeEventListener('save-visa-draft', saveDraftToStorage);
+        window.addEventListener('save-visa-draft', saveDraftToStorage);
+
+        // 3. Listener untuk membersihkan draf saat submit formulir berhasil
+        window.addEventListener('clear-form-draft', function () {
+            localStorage.removeItem(storageKey);
+        });
+
+        // 4. Jalankan loadDraft dengan timeout kecil agar DOM & @this siap
+        setTimeout(loadDraftFromStorage, 80);
+    }
+    </script>
 </div>

@@ -171,6 +171,8 @@
   --z-index-999: 999;
   --z-index-9999: 9999;
   --z-index-99999: 99999;
+  --z-index-modal: 100000;
+  --z-index-alert: 110000;
   --z-index-999999: 999999;
 }
 
@@ -869,4 +871,9 @@ pre[class*='language-'] {
   .flatpickr-calendar.static {
     margin-right: -60px !important;
   }
+}
+
+/* SweetAlert2 Global Stacking: Always in front of Modals (100000), Sidebars & Headers (99999) */
+.swal2-container {
+  z-index: 110000 !important;
 }

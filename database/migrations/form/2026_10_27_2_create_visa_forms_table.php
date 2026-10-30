@@ -40,7 +40,7 @@ return new class extends Migration
             $table->index('pic_code', 'visa_forms_pic_code_idx');
             $table->index('nama_lengkap', 'visa_forms_nama_lengkap_idx');
             $table->foreignId('visa_form_link_id')->nullable()->constrained('visa_form_links')->nullOnDelete();
-            $table->string('nomor_registrasi', 50)->nullable()->unique();
+            $table->string('nomor_registrasi', 50)->nullable();
         }
 
         $table->string('status', 30)->default('DIAJUKAN')->index();

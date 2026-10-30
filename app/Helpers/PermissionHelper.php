@@ -28,7 +28,7 @@ class PermissionHelper
 
     const ROUTE_TYPE_CREATE = ['create', 'store'];
 
-    const ROUTE_TYPE_READ = ['index', 'show', 'print', 'export', 'find'];
+    const ROUTE_TYPE_READ = ['index', 'show', 'print', 'export', 'find', 'attachments'];
 
     const ROUTE_TYPE_UPDATE = ['edit', 'update'];
 
@@ -45,6 +45,8 @@ class PermissionHelper
     // Form Gensen
     const ACCESS_VISA_FORM_LINK = 'visa_form_link';
 
+    const ACCESS_VISA_FORM = 'visa_form';
+
     const ACCESS_ALL = [
         self::ACCESS_DASHBOARD,
         self::ACCESS_USER,
@@ -53,6 +55,7 @@ class PermissionHelper
 
         //
         self::ACCESS_VISA_FORM_LINK,
+        self::ACCESS_VISA_FORM,
     ];
 
     const TRANSLATE_ACCESS = [
@@ -63,6 +66,7 @@ class PermissionHelper
 
         //
         self::ACCESS_VISA_FORM_LINK => 'Magic Link Form Visa',
+        self::ACCESS_VISA_FORM => 'Formulir Visa',
     ];
 
     const ACCESS_TYPE_ALL = [
@@ -72,6 +76,7 @@ class PermissionHelper
         self::ACCESS_PERMISSION => self::TYPE_ALL,
 
         self::ACCESS_VISA_FORM_LINK => self::TYPE_ALL,
+        self::ACCESS_VISA_FORM => self::TYPE_ALL,
     ];
 
     /*
@@ -159,6 +164,14 @@ class PermissionHelper
 
         // Pemeriksaan Hak Akses
         $user = $user == null ? User::find(Auth::id()) : $user;
+
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->hasRole(User::ROLE_SUPERADMIN)) {
+            return true;
+        }
 
         return $user->hasPermissionTo(self::transform($access, $type));
     }

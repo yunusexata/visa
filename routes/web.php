@@ -19,6 +19,7 @@ Route::group([], __DIR__.'/web/Dashboard.php');
 Route::group([], __DIR__.'/web/Other.php');
 Route::group([], __DIR__.'/web/Account.php');
 Route::group([], __DIR__.'/web/VisaFormLink.php');
+Route::group([], __DIR__.'/web/VisaForm.php');
 
 Route::post('/lw-test', function (Request $request) {
     logger()->info('LW TEST', [

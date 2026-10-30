@@ -14,10 +14,10 @@ class UserRepository extends MasterDataRepository
         return User::class;
     }
 
-    public static function getPicCodeChoice()
-    {
-        return User::role(User::ROLE_SALES)->pluck('pic_code');
-    }
+    // public static function getPicCodeChoice()
+    // {
+    //     return User::role(User::ROLE_SALES)->pluck('pic_code');
+    // }
 
     public static function update($id, $data)
     {

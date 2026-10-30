@@ -10,7 +10,10 @@
                         icon: 'success',
                         title: title,
                         showConfirmButton: false,
-                        timer: 2000
+                        timer: 2000,
+                        customClass: {
+                            container: '!z-[110000]'
+                        }
                     });
                 }
             };
@@ -98,11 +101,11 @@
             </flux:field>
 
             {{-- Maks. Penggunaan --}}
-            <flux:field>
+            {{-- <flux:field>
                 <flux:label badge="Wajib">Maks. Penggunaan</flux:label>
                 <flux:input wire:model="max_usage" type="number" min="1" step="1" />
                 <flux:error name="max_usage" />
-            </flux:field>
+            </flux:field> --}}
 
             {{-- Kadaluarsa --}}
             <flux:field>

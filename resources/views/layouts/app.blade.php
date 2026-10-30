@@ -148,6 +148,9 @@
                 icon: event[0],
                 title: event[1],
                 text: event[2],
+                customClass: {
+                    container: '!z-[110000]'
+                }
             });
         });
 
@@ -165,6 +168,9 @@
                 cancelButtonColor: "#d33",
                 confirmButtonText: event[3],
                 cancelButtonText: event[4],
+                customClass: {
+                    container: '!z-[110000]'
+                }
             }).then((result) => {
                 if (result.isConfirmed) {
                     Livewire.dispatch(event[5]);
@@ -180,7 +186,10 @@
                 icon: event[0],
                 title: event[1],
                 showConfirmButton: false,
-                timer: 1500
+                timer: 1500,
+                customClass: {
+                    container: '!z-[110000]'
+                }
             });
             // Swal.fire({
             //     icon: event[0],

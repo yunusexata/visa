@@ -8,6 +8,8 @@ use App\Enums\Form\VisaFormStatus;
 use App\Helpers\Alert;
 use App\Models\Form\VisaForm;
 use App\Models\Form\VisaFormAttachment;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Vinkla\Hashids\Facades\Hashids;
@@ -210,6 +212,13 @@ class UploadDocument extends Component
         $this->processSlot('pas_photo');
     }
 
+    public function updated($propertyName): void
+    {
+        if (isset($this->slotConfig[$propertyName])) {
+            $this->processSlot($propertyName);
+        }
+    }
+
     public function processSlot(string $type): void
     {
         $this->handleSlotUploaded($type);
@@ -265,6 +274,12 @@ class UploadDocument extends Component
             $this->$type = [$this->$type];
         }
 
+        // Jika slot single (multiple => false), pertahankan hanya file terbaru
+        $isMultiple = $this->slotConfig[$type]['multiple'] ?? true;
+        if (! $isMultiple && count($this->$type) > 1) {
+            $this->$type = [end($this->$type)];
+        }
+
         $this->validateSlotFiles($type);
 
         $files = $this->$type;
@@ -282,12 +297,6 @@ class UploadDocument extends Component
         if (! in_array($type, $this->uploadedTypes)) {
             $this->uploadedTypes[] = $type;
         }
-
-        Alert::consoleLog($this, "Attachment Uploaded [{$type}]", [
-            'type' => $type,
-            'count' => count($files),
-            'files' => $meta,
-        ]);
 
         $this->dispatch('attachment-saved', type: $type, count: count($files));
     }
@@ -312,11 +321,6 @@ class UploadDocument extends Component
             $this->uploadedTypes = array_values(array_diff($this->uploadedTypes, [$type]));
         }
 
-        Alert::consoleLog($this, "File Removed [{$type}][{$index}]", [
-            'type' => $type,
-            'index' => $index,
-        ]);
-
         $this->dispatch('attachment-removed', type: $type, index: $index);
     }
 
@@ -325,29 +329,69 @@ class UploadDocument extends Component
      */
     public function submitAllDocuments()
     {
-        // Cek slot yang wajib tapi belum diupload
-        $missingRequired = [];
+        // 0. Double submit guard: jika formulir sudah bukan DRAFT, langsung redirect ke success
+        $statusValue = $this->visaForm->status instanceof VisaFormStatus
+            ? $this->visaForm->status->value
+            : $this->visaForm->status;
+
+        if ($statusValue !== VisaFormStatus::DRAFT->value && $statusValue !== 'DRAFT') {
+            return redirect()->route('form.success', ['hashid' => $this->hashid]);
+        }
+
+        $slots = ['coe', 'e_ktln', 'ktp', 'paspor', 'tiket', 'pas_photo'];
+
+        // 1. Validasi Pra-Pemrosesan: Nullable, Required, MIME Type, & File Size
+        $rules = [];
+        $messages = [];
+
         foreach ($this->slotConfig as $slot => $cfg) {
-            if (! empty($cfg['required'])) {
-                $files = $this->$slot ?? [];
-                if (empty($files) || (is_array($files) && count(array_filter($files)) === 0)) {
-                    $missingRequired[] = $cfg['label'];
+            $isRequired = ! empty($cfg['required']);
+            $rules[$slot] = $isRequired ? ['required', 'array', 'min:1'] : ['nullable', 'array'];
+            $messages["{$slot}.required"] = "Berkas {$cfg['label']} wajib diunggah.";
+            $messages["{$slot}.min"] = "Berkas {$cfg['label']} wajib memiliki minimal 1 file.";
+
+            $files = $this->$slot ?? [];
+            if (is_array($files)) {
+                $acceptPdf = ! empty($cfg['accept_pdf']);
+                $mimes = $acceptPdf ? 'jpg,jpeg,png,webp,pdf' : 'jpg,jpeg,png,webp';
+                $mimetypes = $acceptPdf
+                    ? 'image/jpeg,image/png,image/webp,application/pdf'
+                    : 'image/jpeg,image/png,image/webp';
+
+                foreach ($files as $idx => $f) {
+                    if (! $f) {
+                        continue;
+                    }
+
+                    // PDF max 2048KB (2MB), Gambar max 10240KB (10MB), Min 1KB
+                    $isPdf = strtolower($f->getClientOriginalExtension()) === 'pdf'
+                        || $f->getMimeType() === 'application/pdf';
+                    $maxKb = $isPdf ? 2048 : 10240;
+
+                    $rules["{$slot}.*"] = ['nullable', 'file', "mimes:{$mimes}", "max:{$maxKb}", 'min:1'];
+                    $messages["{$slot}.{$idx}.mimes"] = "Format file {$f->getClientOriginalName()} tidak didukung.";
+                    $messages["{$slot}.{$idx}.mimetypes"] = "Tipe MIME file {$f->getClientOriginalName()} tidak valid.";
+                    $messages["{$slot}.{$idx}.max"] = $isPdf
+                        ? "Ukuran PDF {$f->getClientOriginalName()} melebihi batas 2MB."
+                        : "Ukuran file {$f->getClientOriginalName()} melebihi batas 10MB.";
+                    $messages["{$slot}.{$idx}.min"] = "File {$f->getClientOriginalName()} rusak atau kosong (0 KB).";
                 }
             }
         }
+        $validator = Validator::make($this->all(), $rules, $messages);
 
-        if (! empty($missingRequired)) {
-            Alert::fail(
-                $this,
-                'Dokumen Wajib Belum Lengkap',
-                'Harap lengkapi dokumen wajib: '.implode(', ', $missingRequired)
-            );
+        if ($validator->fails()) {
+            // Custom console log or dd your messages
+            Alert::fail($this, 'Gagal upload berkas', $validator->errors()->all()); // or ->messages()
 
-            return null;
+            return;
         }
 
-        // Simpan setiap berkas ke VisaFormAttachment
-        $slots = ['coe', 'e_ktln', 'ktp', 'paspor', 'tiket', 'pas_photo'];
+        $validatedData = $validator->validated();
+
+        // 2. Tentukan target disk penyimpanan dari config/env (DEFAULT_STORE_DISK)
+        $disk = config('filesystems.default_store_disk', env('DEFAULT_STORE_DISK', 'public'));
+
         $typeMapping = [
             'coe' => VisaAttachmentType::COE,
             'e_ktln' => VisaAttachmentType::E_KTLN,
@@ -357,56 +401,60 @@ class UploadDocument extends Component
             'pas_photo' => VisaAttachmentType::PAS_PHOTO,
         ];
 
-        foreach ($slots as $slot) {
-            $files = $this->$slot ?? [];
-            if (! is_array($files)) {
-                $files = $files ? [$files] : [];
-            }
+        try {
+            DB::transaction(function () use ($disk, $slots, $typeMapping) {
+                foreach ($slots as $slot) {
+                    $files = $this->$slot ?? [];
+                    if (! is_array($files)) {
+                        $files = $files ? [$files] : [];
+                    }
 
-            foreach ($files as $index => $file) {
-                if (! $file) {
-                    continue;
+                    foreach ($files as $index => $file) {
+                        if (! $file) {
+                            continue;
+                        }
+
+                        // Validasi keberadaan fisik file dan status valid
+                        if (! method_exists($file, 'isValid') || ! $file->isValid()) {
+                            throw new \RuntimeException("Berkas {$file->getClientOriginalName()} tidak valid atau sesi upload telah kedaluwarsa.");
+                        }
+
+                        $originalName = $file->getClientOriginalName();
+                        $extension = strtolower($file->getClientOriginalExtension() ?: pathinfo($originalName, PATHINFO_EXTENSION));
+                        $mimeType = $file->getMimeType() ?: 'application/octet-stream';
+                        $size = $file->getSize() ?: 0;
+
+                        // Simpan file ke disk yang dikonfigurasi
+                        $storedPath = $file->store("visa-documents/{$this->visaForm->id}/{$slot}", $disk);
+                        $storedFilename = basename($storedPath);
+
+                        // Simpan metadata ke tabel visa_form_attachments menggunakan nama kolom bahasa Inggris
+
+                        VisaFormAttachment::create([
+                            'visa_form_id' => $this->visaForm->id,
+                            'jenis_dokumen' => $typeMapping[$slot] ?? VisaAttachmentType::COE,
+                            'nama_file_asli' => $originalName,
+                            'nama_file_tersimpan' => $storedFilename,
+                            'path' => $storedPath,
+                            'disk' => $disk,
+                            'extension' => $extension,
+                            'mime_type' => $mimeType,
+                            'file_size' => $size,
+                            'status' => VisaAttachmenStatus::STATUS_STORED,
+                            'urutan' => $index + 1,
+                        ]);
+                    }
                 }
+            });
+        } catch (\Throwable $e) {
+            report($e);
+            Alert::fail($this, 'Gagal Menyimpan Berkas', 'Terjadi kesalahan sistem saat menyimpan berkas: '.$e->getMessage());
 
-                $originalName = $file->getClientOriginalName();
-                $extension = $file->getClientOriginalExtension() ?: pathinfo($originalName, PATHINFO_EXTENSION);
-                $mimeType = $file->getMimeType() ?: 'application/octet-stream';
-                $size = $file->getSize() ?: 0;
-
-                // Store file in public disk under visa-documents/{visa_form_id}/{slot}
-                $storedPath = $file->store("visa-documents/{$this->visaForm->id}/{$slot}", 'public');
-                $storedFilename = basename($storedPath);
-
-                VisaFormAttachment::create([
-                    'visa_form_id' => $this->visaForm->id,
-                    'jenis_dokumen' => $typeMapping[$slot] ?? VisaAttachmentType::COE,
-                    'nama_file_asli' => $originalName,
-                    'nama_file_tersimpan' => $storedFilename,
-                    'jalur_file' => $storedPath,
-                    'disk' => 'public',
-                    'ekstensi' => $extension,
-                    'tipe_mime' => $mimeType,
-                    'ukuran_file' => $size,
-                    'status' => VisaAttachmenStatus::STATUS_STORED,
-                    'urutan' => $index + 1,
-                ]);
-            }
+            return null;
         }
-
-        // Update VisaForm status menjadi DIAJUKAN dan tanggal_diajukan
-        $this->visaForm->update([
-            'status' => VisaFormStatus::DIAJUKAN,
-            'tanggal_diajukan' => now(),
-        ]);
 
         $this->is_submitted = true;
         $this->dispatch('documents-submitted');
-
-        Alert::consoleLog($this, [
-            'Submit All Documents Success',
-            'visaFormId' => $this->visaForm->id,
-            'uploadedSlots' => $this->uploadedTypes,
-        ]);
 
         return redirect()->route('form.success', ['hashid' => $this->hashid]);
     }

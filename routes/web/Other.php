@@ -4,6 +4,7 @@ use App\Http\Controllers\Other\CaptchaController;
 use App\Http\Controllers\Other\MenuNotificationController;
 use App\Livewire\Client\ExampleFormSubmission;
 use App\Livewire\Form\UploadDocument;
+use App\Livewire\Form\VisaFormStatusPage;
 use App\Livewire\Form\VisaFormSubmission;
 use App\Livewire\Form\VisaFormSuccess;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,9 @@ Route::get('/example/upload', function () {
 
 // Success Page Pengajuan Visa
 Route::get('/form/success/{hashid}', VisaFormSuccess::class)->name('form.success');
+
+// Status & Detail Submission Page untuk tautan unpassed (not found, expired, exhausted/max submission)
+Route::get('/form/status/{hashid}', VisaFormStatusPage::class)->name('form.status');
 
 // Client Visa Form Submission via Magic Link
 Route::get('/form/{hashid}', VisaFormSubmission::class)->name('form.show');

@@ -159,10 +159,13 @@ class VisaFormSuccess extends Component
                 ? $att->jenis_dokumen->label()
                 : ($att->jenis_dokumen ?: 'Dokumen Pendukung');
 
-            $sizeKb = $att->ukuran_file ? round($att->ukuran_file / 1024, 1) : 0;
+            $fileSize = $att->file_size ?? $att->ukuran_file ?? 0;
+            $sizeKb = $fileSize ? round($fileSize / 1024, 1) : 0;
             $sizeDisplay = $sizeKb >= 1024
                 ? round($sizeKb / 1024, 2).' MB'
                 : "{$sizeKb} KB";
+
+            $ext = $att->extension ?? $att->ekstensi ?? 'FILE';
 
             return [
                 'id' => $att->id,
@@ -170,7 +173,7 @@ class VisaFormSuccess extends Component
                 'label' => $label,
                 'nama_asli' => $att->nama_file_asli,
                 'ukuran' => $sizeDisplay,
-                'ekstensi' => strtoupper((string) ($att->ekstensi ?: 'FILE')),
+                'ekstensi' => strtoupper((string) $ext),
                 'status' => $att->status instanceof VisaAttachmenStatus ? $att->status->label() : 'Tersimpan',
             ];
         })->all();

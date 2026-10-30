@@ -21,12 +21,12 @@ class NumberGenerator
         $className,
     ) {
 
-        $lastModel = $className::withTrashed()->select('id_customer')
+        $lastModel = $className::withTrashed()->select('nomor_registrasi')
             ->orderBy('id', 'DESC')
             ->lockForUpdate()
             ->first();
         if (! empty($lastModel)) {
-            $lastNumber = substr($lastModel->id_customer, 3);
+            $lastNumber = substr($lastModel->nomor_registrasi, 7);
             $lastNumber = $lastNumber ? $lastNumber : 0;
         } else {
             $lastNumber = 0;
@@ -37,7 +37,7 @@ class NumberGenerator
 
         $kode_huruf = strtoupper(Str::random(3));
 
-        return $kode_huruf.$currentNumber;
+        return 'VISA'.$kode_huruf.$currentNumber;
     }
 
     public static function simpleYearCode(

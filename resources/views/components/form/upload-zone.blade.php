@@ -71,6 +71,7 @@
                     }
                 });
                 this.files = [];
+                await $wire.set(this.slotType, []);
             }
 
             for (const rawFile of list) {
@@ -177,37 +178,37 @@
                 return;
             }
 
-            // 4. Auto-upload ke backend Livewire
+            // 4. Auto-upload ke backend Livewire (Promisified & langsung ke slot tujuan untuk mencegah race condition)
             entry.stage = 'uploading';
             entry.stageMessage = 'Mengunggah ke server...';
             entry.progress = 10;
 
             try {
-                // Set buffer slot tujuan terlebih dahulu
-                await $wire.set('incomingSlot', this.slotType, false);
-
-                // Jalankan upload file
-                $wire.upload(
-                    'incomingFile',
-                    fileToUpload,
-                    () => {
-                        entry.stage = 'done';
-                        entry.stageMessage = 'Berhasil diunggah & tersimpan';
-                        entry.progress = 100;
-                        entry.serverIndex = this.files.filter(f => f.stage === 'done').length - 1;
-                    },
-                    (err) => {
-                        entry.stage = 'error';
-                        entry.stageMessage = 'Gagal mengunggah';
-                        entry.error = err || 'Terjadi kesalahan saat mengunggah ke server. Coba ulangi.';
-                    },
-                    (event) => {
-                        if (event && event.detail && typeof event.detail.progress !== 'undefined') {
-                            entry.progress = event.detail.progress;
-                            entry.stageMessage = `Mengunggah... ${event.detail.progress}%`;
+                await new Promise((resolve) => {
+                    $wire.upload(
+                        this.slotType,
+                        fileToUpload,
+                        () => {
+                            entry.stage = 'done';
+                            entry.stageMessage = 'Berhasil diunggah & tersimpan';
+                            entry.progress = 100;
+                            entry.serverIndex = this.files.filter(f => f.stage === 'done').length - 1;
+                            resolve();
+                        },
+                        (err) => {
+                            entry.stage = 'error';
+                            entry.stageMessage = 'Gagal mengunggah';
+                            entry.error = err || 'Terjadi kesalahan saat mengunggah ke server. Coba ulangi.';
+                            resolve();
+                        },
+                        (event) => {
+                            if (event && event.detail && typeof event.detail.progress !== 'undefined') {
+                                entry.progress = event.detail.progress;
+                                entry.stageMessage = `Mengunggah... ${event.detail.progress}%`;
+                            }
                         }
-                    }
-                );
+                    );
+                });
             } catch (uploadErr) {
                 entry.stage = 'error';
                 entry.stageMessage = 'Gagal mengunggah';

@@ -47,11 +47,11 @@ return new class extends Migration
         // Informasi Berkas (Bahasa Indonesia)
         $table->string('nama_file_asli');
         $table->string('nama_file_tersimpan');
-        $table->string('jalur_file');
+        $table->string('path');
         $table->string('disk', 30)->nullable()->default('public');
-        $table->string('ekstensi', 10);
-        $table->string('tipe_mime', 50);
-        $table->unsignedBigInteger('ukuran_file'); // Dalam bytes
+        $table->string('extension', 10);
+        $table->string('mime_type', 50);
+        $table->unsignedBigInteger('file_size'); // Dalam bytes
 
         // Status & Catatan Audit
         $table->string('status', 30)->default('stored')->index();

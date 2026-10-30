@@ -3,6 +3,7 @@
 namespace App\Models\Form;
 
 use App\Enums\Form\VisaFormStatus;
+use App\Helpers\NumberGenerator;
 use App\Models\User;
 use App\Traits\Models\LowercaseAttributes;
 use App\Traits\Models\UppercaseAttributes;
@@ -52,6 +53,15 @@ class VisaForm extends Model
             'tanggal_diajukan' => 'datetime',
             'tanggal_verifikasi' => 'datetime',
         ];
+    }
+
+    protected static function onBoot()
+    {
+        self::creating(function ($model) {
+            $model->nomor_registrasi = $model->nomor_registrasi ?? NumberGenerator::generate(self::class);
+            $model->status = $model->status ?? VisaFormStatus::DRAFT;
+            // $model->created_by = rand(7, 9);
+        });
     }
 
     /**

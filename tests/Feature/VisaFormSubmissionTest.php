@@ -8,13 +8,12 @@ use App\Models\Form\VisaFormLink;
 use Livewire\Livewire;
 use Vinkla\Hashids\Facades\Hashids;
 
-test('invalid hashid displays link not found state', function () {
+test('invalid hashid redirects to form status page', function () {
     Livewire::test(VisaFormSubmission::class, ['hashid' => 'invalid-hash-123'])
-        ->assertSet('linkState', 'not_found')
-        ->assertSee('Tautan Tidak Dikenal');
+        ->assertRedirect(route('form.status', ['hashid' => 'invalid-hash-123']));
 });
 
-test('expired magic link displays expired state', function () {
+test('expired magic link redirects to form status page', function () {
     $link = VisaFormLink::create([
         'name' => 'Klien Kadaluarsa',
         'password' => 'password123',
@@ -26,11 +25,10 @@ test('expired magic link displays expired state', function () {
     $hashid = Hashids::encode($link->id);
 
     Livewire::test(VisaFormSubmission::class, ['hashid' => $hashid])
-        ->assertSet('linkState', 'expired')
-        ->assertSee('Tautan Telah Kadaluarsa');
+        ->assertRedirect(route('form.status', ['hashid' => $hashid]));
 });
 
-test('exhausted magic link displays exhausted state', function () {
+test('exhausted magic link redirects to form status page', function () {
     $link = VisaFormLink::create([
         'name' => 'Klien Selesai',
         'password' => 'password123',
@@ -43,8 +41,7 @@ test('exhausted magic link displays exhausted state', function () {
     $hashid = Hashids::encode($link->id);
 
     Livewire::test(VisaFormSubmission::class, ['hashid' => $hashid])
-        ->assertSet('linkState', 'exhausted')
-        ->assertSee('Kuota Pengisian Telah Selesai');
+        ->assertRedirect(route('form.status', ['hashid' => $hashid]));
 });
 
 test('protected magic link prompts for password and unlocks on correct password', function () {
@@ -143,4 +140,38 @@ test('submitting form increments link used_count and redirects to upload documen
 
     expect($link->fresh()->used_count)->toBe(1);
     expect($visaForm->status)->toBe(VisaFormStatus::DRAFT);
+});
+
+test('restoreDraft restores draft fields into component properties', function () {
+    $link = VisaFormLink::create([
+        'name' => 'Klien Draft Test',
+        'password' => null,
+        'max_usage' => 1,
+        'expired_at' => now()->addDays(5),
+        'status' => VisaFormLinkStatus::STATUS_ACTIVE,
+    ]);
+
+    $hashid = Hashids::encode($link->id);
+
+    Livewire::test(VisaFormSubmission::class, ['hashid' => $hashid])
+        ->call('restoreDraft', [
+            'nama_lengkap' => 'BUDI SANTOSO',
+            'tempat_lahir' => 'KOTA SURABAYA',
+            'nik_ktp' => '3578010101010001',
+            'nomor_paspor' => 'X1234567',
+            'bandara_tujuan' => 'Osaka / Kansai (KIX)',
+            'nama_kaisha' => 'TOYOTA MOTOR CORP',
+            'pernah_kerja_jepang' => 'pernah',
+            'periode_kerja_mulai' => '2021-04',
+            'periode_kerja_selesai' => '2024-03',
+        ])
+        ->assertSet('nama_lengkap', 'BUDI SANTOSO')
+        ->assertSet('tempat_lahir', 'KOTA SURABAYA')
+        ->assertSet('nik_ktp', '3578010101010001')
+        ->assertSet('nomor_paspor', 'X1234567')
+        ->assertSet('bandara_tujuan', 'Osaka / Kansai (KIX)')
+        ->assertSet('nama_kaisha', 'TOYOTA MOTOR CORP')
+        ->assertSet('pernah_kerja_jepang', 'pernah')
+        ->assertSet('periode_kerja_mulai', '2021-04')
+        ->assertSet('periode_kerja_selesai', '2024-03');
 });

@@ -17,6 +17,11 @@ class MenuHelper
                 'path' => 'dashboard.index',
             ],
             [
+                'icon' => 'forms',
+                'name' => 'Formulir Visa',
+                'path' => 'visa_form.index',
+            ],
+            [
                 'icon' => 'magic_link',
                 'name' => 'Magic Link',
                 'path' => 'visa_form_link.index',

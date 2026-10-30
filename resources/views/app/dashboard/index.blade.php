@@ -9,7 +9,7 @@
     </div>
 
     <div class="w-auto flex items-end mb-5">
-        <livewire:dashboard.create-magic-link />
+        <livewire:form.create-visa-magic-link />
     </div>
     
     <x-common.component-card title="">

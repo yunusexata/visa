@@ -3,12 +3,10 @@
 namespace App\Livewire\Form;
 
 use App\Enums\Form\VisaFormLinkStatus;
-use App\Enums\Form\VisaFormStatus;
 use App\Helpers\Alert;
 use App\Models\Form\VisaForm;
 use App\Models\Form\VisaFormLink;
 use App\Models\MasterData\Regency;
-use Illuminate\Support\Str;
 use Livewire\Component;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -99,7 +97,7 @@ class VisaFormSubmission extends Component
     // Step History Storage
     public array $stepHistory = [];
 
-    public function mount(string $hashid): void
+    public function mount(string $hashid)
     {
         $this->hashid = $hashid;
         $decoded = Hashids::decode($hashid);
@@ -108,7 +106,7 @@ class VisaFormSubmission extends Component
         if (! $this->linkId) {
             $this->linkState = 'not_found';
 
-            return;
+            return redirect()->route('form.status', ['hashid' => $hashid]);
         }
 
         $link = VisaFormLink::find($this->linkId);
@@ -116,21 +114,21 @@ class VisaFormSubmission extends Component
         if (! $link) {
             $this->linkState = 'not_found';
 
-            return;
+            return redirect()->route('form.status', ['hashid' => $hashid]);
         }
 
         // Check if expired
         if ($link->expired_at && $link->expired_at->isPast()) {
             $this->linkState = 'expired';
 
-            return;
+            return redirect()->route('form.status', ['hashid' => $hashid]);
         }
 
         // Check if already reached max usage
         if ($link->used_count >= $link->max_usage || $link->status === VisaFormLinkStatus::STATUS_SUCCESS) {
             $this->linkState = 'exhausted';
 
-            return;
+            return redirect()->route('form.status', ['hashid' => $hashid]);
         }
 
         // Check active status
@@ -138,12 +136,12 @@ class VisaFormSubmission extends Component
         if ($statusValue === VisaFormLink::STATUS_EXPIRED) {
             $this->linkState = 'expired';
 
-            return;
+            return redirect()->route('form.status', ['hashid' => $hashid]);
         }
         if ($statusValue !== VisaFormLink::STATUS_ACTIVE && $statusValue !== 'ACTIVE') {
             $this->linkState = 'exhausted';
 
-            return;
+            return redirect()->route('form.status', ['hashid' => $hashid]);
         }
 
         // Link is valid, set info
@@ -223,6 +221,50 @@ class VisaFormSubmission extends Component
     }
 
     /**
+     * Memulihkan data draf dari localStorage secara batch ke dalam properti Livewire
+     */
+    public function restoreDraft(array $draft): void
+    {
+        $allowedFields = [
+            'nama_lengkap',
+            'tempat_lahir',
+            'tanggal_lahir',
+            'nik_ktp',
+            'alamat_indonesia',
+            'kode_pos_indonesia',
+            'telepon_indonesia',
+            'email_aktif',
+            'nomor_paspor',
+            'kantor_paspor',
+            'tanggal_pengeluaran_paspor',
+            'tanggal_habis_berlaku_paspor',
+            'nomor_coe',
+            'status_kependudukan_jepang',
+            'lama_stay_jepang',
+            'tanggal_kedatangan',
+            'bandara_tujuan',
+            'bandara_lainnya',
+            'maskapai',
+            'nama_kaisha',
+            'alamat_jepang',
+            'kode_pos_jepang',
+            'telepon_jepang',
+            'pernah_kerja_jepang',
+            'periode_kerja_mulai',
+            'periode_kerja_selesai',
+            'nama_penanggung_jawab',
+            'alamat_penanggung_jawab',
+            'telepon_penanggung_jawab',
+        ];
+
+        foreach ($allowedFields as $field) {
+            if (array_key_exists($field, $draft) && $draft[$field] !== null && $draft[$field] !== '') {
+                $this->$field = $draft[$field];
+            }
+        }
+    }
+
+    /**
      * Final submission method
      */
     public function submit()
@@ -252,50 +294,48 @@ class VisaFormSubmission extends Component
         }
 
         // Simpan data formulir visa pemohon ke database dengan status DRAFT
-        $visaForm = VisaForm::create([
+        $validatedData = [
             'visa_form_link_id' => $link->id,
-            'nomor_registrasi' => 'VISA-' . date('Ymd') . '-' . strtoupper(Str::random(4)),
-            'status' => VisaFormStatus::DRAFT,
-            'pic_code' => $link->pic_code,
 
             // Step 1: Identitas Diri
-            'nama_lengkap' => $this->nama_lengkap ?: 'PEMOHON VISA',
-            'tempat_lahir' => $this->tempat_lahir ?: 'SURABAYA',
-            'tanggal_lahir' => $this->tanggal_lahir ?: now()->subYears(20)->toDateString(),
-            'nik_ktp' => $this->nik_ktp ?: '3578000000000000',
-            'alamat_indonesia' => $this->alamat_indonesia ?: '-',
+            'nama_lengkap' => $this->nama_lengkap,
+            'tempat_lahir' => $this->tempat_lahir,
+            'tanggal_lahir' => $this->tanggal_lahir,
+            'nik_ktp' => $this->nik_ktp,
+            'alamat_indonesia' => $this->alamat_indonesia,
             'kode_pos_indonesia' => $this->kode_pos_indonesia,
-            'telepon_indonesia' => $this->telepon_indonesia ?: '081200000000',
-            'email_aktif' => $this->email_aktif ?: 'klien@exata.site',
+            'telepon_indonesia' => $this->telepon_indonesia,
+            'email_aktif' => $this->email_aktif,
 
             // Step 2: Data Paspor
-            'nomor_paspor' => $this->nomor_paspor ?: 'C0000000',
-            'kantor_paspor' => $this->kantor_paspor ?: 'KANIM SURABAYA',
-            'tanggal_pengeluaran_paspor' => $this->tanggal_pengeluaran_paspor ?: now()->toDateString(),
-            'tanggal_habis_berlaku_paspor' => $this->tanggal_habis_berlaku_paspor ?: now()->addYears(5)->toDateString(),
+            'nomor_paspor' => $this->nomor_paspor,
+            'kantor_paspor' => $this->kantor_paspor,
+            'tanggal_pengeluaran_paspor' => $this->tanggal_pengeluaran_paspor,
+            'tanggal_habis_berlaku_paspor' => $this->tanggal_habis_berlaku_paspor,
 
             // Step 3: COE
-            'nomor_coe' => $this->nomor_coe ?: 'COE-0000-0000',
+            'nomor_coe' => $this->nomor_coe,
             'status_kependudukan_jepang' => $this->status_kependudukan_jepang,
             'lama_stay_jepang' => $this->lama_stay_jepang,
 
             // Step 4: Rencana Kedatangan & Kaisha di Jepang
-            'tanggal_kedatangan' => $this->tanggal_kedatangan ?: now()->addMonth()->toDateString(),
+            'tanggal_kedatangan' => $this->tanggal_kedatangan,
             'bandara_tujuan' => $this->bandara_tujuan,
             'bandara_lainnya' => $this->bandara_lainnya,
-            'maskapai' => $this->maskapai ?: '-',
-            'nama_kaisha' => $this->nama_kaisha ?: '-',
-            'alamat_jepang' => $this->alamat_jepang ?: '-',
+            'maskapai' => $this->maskapai,
+            'nama_kaisha' => $this->nama_kaisha,
+            'alamat_jepang' => $this->alamat_jepang,
             'kode_pos_jepang' => $this->kode_pos_jepang,
-            'telepon_jepang' => $this->telepon_jepang ?: '08000000000',
+            'telepon_jepang' => $this->telepon_jepang,
             'pernah_kerja_jepang' => $this->pernah_kerja_jepang,
             'periode_kerja_mulai' => $this->periode_kerja_mulai,
             'periode_kerja_selesai' => $this->periode_kerja_selesai,
-            'nama_penanggung_jawab' => $this->nama_penanggung_jawab ?: '-',
-            'alamat_penanggung_jawab' => $this->alamat_penanggung_jawab ?: '-',
-            'telepon_penanggung_jawab' => $this->telepon_penanggung_jawab ?: '08000000000',
+            'nama_penanggung_jawab' => $this->nama_penanggung_jawab,
+            'alamat_penanggung_jawab' => $this->alamat_penanggung_jawab,
+            'telepon_penanggung_jawab' => $this->telepon_penanggung_jawab,
             'tanggal_diajukan' => now(),
-        ]);
+        ];
+        $visaForm = VisaForm::create($validatedData);
 
         // Increment usage count in database
         $link->incrementUsedCount();

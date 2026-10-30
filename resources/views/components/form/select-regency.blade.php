@@ -116,10 +116,15 @@ class="relative w-full"
         </div>
     </div>
 
-    <!-- Hidden Input for standard form fallback if needed -->
+    <!-- Hidden Input for standard form fallback & pure JS LocalStorage integration -->
     <input type="hidden" 
-           {{ $attributes->whereDoesntStartWith('wire:model') }}
-           :value="selected">
+           id="{{ $id }}"
+           name="{{ $id }}"
+           x-ref="hiddenInput"
+           :value="selected"
+           @input="selected = $event.target.value"
+           @change="selected = $event.target.value"
+           {{ $attributes->whereDoesntStartWith('wire:model')->except(['id', 'name']) }}>
 
     <!-- Dropdown Panel (Select2 Searchable Panel) -->
     <div x-show="open" 

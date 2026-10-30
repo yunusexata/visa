@@ -15,6 +15,8 @@ return [
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
+    'default_store_disk' => env('DEFAULT_STORE_DISK', 'public'),
+
     /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
@@ -67,6 +69,7 @@ return [
             'region' => env('SUPABASE_DEFAULT_REGION', 'us-east-1'),
             'bucket' => env('SUPABASE_BUCKET'),
             'endpoint' => env('SUPABASE_ENDPOINT', env('SUPABASE_URL')),
+            'public_url' => env('SUPABASE_PUBLIC_URL'),
             'visibility' => 'private',
             'use_path_style_endpoint' => true,
             'throw' => true,

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Dashboard;
+namespace App\Livewire\Form;
 
 use App\Models\Form\VisaFormLink;
 use Carbon\Carbon;
@@ -9,7 +9,7 @@ use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Vinkla\Hashids\Facades\Hashids;
 
-class CreateMagicLink extends Component
+class CreateVisaMagicLink extends Component
 {
     public bool $showModal = false;
 
@@ -77,6 +77,6 @@ class CreateMagicLink extends Component
 
     public function render(): View
     {
-        return view('livewire.dashboard.create-magic-link');
+        return view('livewire.form.create-visa-magic-link');
     }
 }
