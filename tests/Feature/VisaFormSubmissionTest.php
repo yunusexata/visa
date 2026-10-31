@@ -124,6 +124,9 @@ test('submitting form increments link used_count and redirects to upload documen
 
     $test = Livewire::test(VisaFormSubmission::class, ['hashid' => $hashid])
         ->set('nama_lengkap', 'BUDI SANTOSO')
+        ->set('jenis_kelamin', 'L')
+        ->set('status_kawin', 'kawin')
+        ->set('jenis_kelamin_penanggung_jawab', 'P')
         ->call('submit')
         ->assertHasNoErrors()
         ->assertDispatched('clear-form-draft');
@@ -136,6 +139,9 @@ test('submitting form increments link used_count and redirects to upload documen
 
     expect($link->fresh()->used_count)->toBe(1);
     expect($visaForm->status)->toBe(VisaFormStatus::DRAFT);
+    expect($visaForm->jenis_kelamin)->toBe('L');
+    expect($visaForm->status_kawin)->toBe('kawin');
+    expect($visaForm->jenis_kelamin_penanggung_jawab)->toBe('P');
 });
 
 test('restoreDraft restores draft fields into component properties', function () {
@@ -153,6 +159,8 @@ test('restoreDraft restores draft fields into component properties', function ()
         ->call('restoreDraft', [
             'nama_lengkap' => 'BUDI SANTOSO',
             'tempat_lahir' => 'KOTA SURABAYA',
+            'jenis_kelamin' => 'L',
+            'status_kawin' => 'kawin',
             'nik_ktp' => '3578010101010001',
             'nomor_paspor' => 'X1234567',
             'bandara_tujuan' => 'Osaka / Kansai (KIX)',
@@ -160,19 +168,23 @@ test('restoreDraft restores draft fields into component properties', function ()
             'pernah_kerja_jepang' => 'pernah',
             'periode_kerja_mulai' => '2021-04',
             'periode_kerja_selesai' => '2024-03',
+            'jenis_kelamin_penanggung_jawab' => 'P',
         ])
         ->assertSet('nama_lengkap', 'BUDI SANTOSO')
         ->assertSet('tempat_lahir', 'KOTA SURABAYA')
+        ->assertSet('jenis_kelamin', 'L')
+        ->assertSet('status_kawin', 'kawin')
         ->assertSet('nik_ktp', '3578010101010001')
         ->assertSet('nomor_paspor', 'X1234567')
         ->assertSet('bandara_tujuan', 'Osaka / Kansai (KIX)')
         ->assertSet('nama_kaisha', 'TOYOTA MOTOR CORP')
         ->assertSet('pernah_kerja_jepang', 'pernah')
         ->assertSet('periode_kerja_mulai', '2021-04')
-        ->assertSet('periode_kerja_selesai', '2024-03');
+        ->assertSet('periode_kerja_selesai', '2024-03')
+        ->assertSet('jenis_kelamin_penanggung_jawab', 'P');
 });
 
-test('form renders select for bandara_tujuan and excludes country code badges', function () {
+test('form renders select for bandara_tujuan, gender, and marital status and excludes country code badges', function () {
     $link = VisaFormLink::create([
         'name' => 'Klien Select Test',
         'password' => null,
@@ -188,6 +200,9 @@ test('form renders select for bandara_tujuan and excludes country code badges', 
         ->assertSeeHtml('value="Haneda (HND)"')
         ->assertSeeHtml('value="Narita (NRT)"')
         ->assertSeeHtml('value="Lainnya"')
+        ->assertSeeHtml('<select id="jenis_kelamin"')
+        ->assertSeeHtml('<select id="status_kawin"')
+        ->assertSeeHtml('<select id="jenis_kelamin_penanggung_jawab"')
         ->assertDontSeeHtml('🇮🇩 +62')
         ->assertDontSeeHtml('🇯🇵 +81');
 });

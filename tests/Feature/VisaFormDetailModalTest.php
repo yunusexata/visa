@@ -21,6 +21,9 @@ test('detail modal opens with open-visa-form-detail event and loads data', funct
         'status' => VisaFormStatus::DIAJUKAN,
         'nomor_paspor' => 'PASSPORT123',
         'pic_code' => 'PIC-777',
+        'jenis_kelamin' => 'L',
+        'status_kawin' => 'kawin',
+        'jenis_kelamin_penanggung_jawab' => 'P',
     ]);
 
     Livewire::actingAs($superadmin)
@@ -32,7 +35,10 @@ test('detail modal opens with open-visa-form-detail event and loads data', funct
         ->assertSet('status', VisaFormStatus::DIAJUKAN->value)
         ->assertSet('nama_lengkap', 'KIRITO KAZUTO')
         ->assertSet('nomor_paspor', 'PASSPORT123')
-        ->assertSet('pic_code', 'PIC-777');
+        ->assertSet('pic_code', 'PIC-777')
+        ->assertSet('jenis_kelamin', 'L')
+        ->assertSet('status_kawin', 'kawin')
+        ->assertSet('jenis_kelamin_penanggung_jawab', 'P');
 });
 
 test('detail modal updates visa form status and applicant data and dispatches refresh', function () {
@@ -43,6 +49,9 @@ test('detail modal updates visa form status and applicant data and dispatches re
         'nama_lengkap' => 'ASUNA YUUKI',
         'status' => VisaFormStatus::DIAJUKAN,
         'nomor_paspor' => 'P9999999',
+        'jenis_kelamin' => 'P',
+        'status_kawin' => 'belum kawin',
+        'jenis_kelamin_penanggung_jawab' => 'L',
     ]);
 
     Livewire::actingAs($superadmin)
@@ -50,6 +59,9 @@ test('detail modal updates visa form status and applicant data and dispatches re
         ->dispatch('open-visa-form-detail', id: $form->id)
         ->set('status', VisaFormStatus::SIAP_VERIFIKASI->value)
         ->set('nama_lengkap', 'ASUNA KIRIGAYA')
+        ->set('jenis_kelamin', 'P')
+        ->set('status_kawin', 'kawin')
+        ->set('jenis_kelamin_penanggung_jawab', 'L')
         ->call('save')
         ->assertSet('isOpen', false)
         ->assertDispatched('datatable-refresh')
@@ -57,7 +69,10 @@ test('detail modal updates visa form status and applicant data and dispatches re
 
     $form->refresh();
     expect($form->status)->toBe(VisaFormStatus::SIAP_VERIFIKASI)
-        ->and($form->nama_lengkap)->toBe('ASUNA KIRIGAYA');
+        ->and($form->nama_lengkap)->toBe('ASUNA KIRIGAYA')
+        ->and($form->jenis_kelamin)->toBe('P')
+        ->and($form->status_kawin)->toBe('kawin')
+        ->and($form->jenis_kelamin_penanggung_jawab)->toBe('L');
 });
 
 test('visa form datatable renders edit button and does not render visibility button', function () {

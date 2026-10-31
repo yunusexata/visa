@@ -37,6 +37,10 @@ class VisaFormSubmission extends Component
 
     public $tanggal_lahir = '';
 
+    public $jenis_kelamin = '';
+
+    public $status_kawin = '';
+
     public $nik_ktp = '';
 
     public $alamat_indonesia = '';
@@ -87,6 +91,8 @@ class VisaFormSubmission extends Component
     public $periode_kerja_selesai = '';
 
     public $nama_penanggung_jawab = '';
+
+    public $jenis_kelamin_penanggung_jawab = '';
 
     public $alamat_penanggung_jawab = '';
 
@@ -229,6 +235,8 @@ class VisaFormSubmission extends Component
             'nama_lengkap',
             'tempat_lahir',
             'tanggal_lahir',
+            'jenis_kelamin',
+            'status_kawin',
             'nik_ktp',
             'alamat_indonesia',
             'kode_pos_indonesia',
@@ -253,6 +261,7 @@ class VisaFormSubmission extends Component
             'periode_kerja_mulai',
             'periode_kerja_selesai',
             'nama_penanggung_jawab',
+            'jenis_kelamin_penanggung_jawab',
             'alamat_penanggung_jawab',
             'telepon_penanggung_jawab',
         ];
@@ -301,6 +310,8 @@ class VisaFormSubmission extends Component
             'nama_lengkap' => $this->nama_lengkap,
             'tempat_lahir' => $this->tempat_lahir,
             'tanggal_lahir' => $this->tanggal_lahir,
+            'jenis_kelamin' => $this->jenis_kelamin,
+            'status_kawin' => $this->status_kawin,
             'nik_ktp' => $this->nik_ktp,
             'alamat_indonesia' => $this->alamat_indonesia,
             'kode_pos_indonesia' => $this->kode_pos_indonesia,
@@ -331,6 +342,7 @@ class VisaFormSubmission extends Component
             'periode_kerja_mulai' => $this->periode_kerja_mulai,
             'periode_kerja_selesai' => $this->periode_kerja_selesai,
             'nama_penanggung_jawab' => $this->nama_penanggung_jawab,
+            'jenis_kelamin_penanggung_jawab' => $this->jenis_kelamin_penanggung_jawab,
             'alamat_penanggung_jawab' => $this->alamat_penanggung_jawab,
             'telepon_penanggung_jawab' => $this->telepon_penanggung_jawab,
             'tanggal_diajukan' => now(),

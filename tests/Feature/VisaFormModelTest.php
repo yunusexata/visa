@@ -14,6 +14,8 @@ test('it can create a visa form with indonesian column attributes', function () 
         'nama_lengkap' => 'budi santoso',
         'tempat_lahir' => 'surabaya',
         'tanggal_lahir' => '1998-05-15',
+        'jenis_kelamin' => 'l',
+        'status_kawin' => 'BELUM KAWIN',
         'nik_ktp' => '3578012345670001',
         'alamat_indonesia' => 'Jl. Pemuda No. 10, Surabaya',
         'kode_pos_indonesia' => '60271',
@@ -37,6 +39,7 @@ test('it can create a visa form with indonesian column attributes', function () 
         'telepon_jepang' => '08012345678',
         'pernah_kerja_jepang' => 'tidak',
         'nama_penanggung_jawab' => 'tanaka kenji',
+        'jenis_kelamin_penanggung_jawab' => 'p',
         'alamat_penanggung_jawab' => 'Tokyo, Shinjuku',
         'telepon_penanggung_jawab' => '08098765432',
 
@@ -54,10 +57,13 @@ test('it can create a visa form with indonesian column attributes', function () 
     expect($form->nama_lengkap)->toBe('BUDI SANTOSO')
         ->and($form->tempat_lahir)->toBe('SURABAYA')
         ->and($form->nomor_paspor)->toBe('C1234567')
-        ->and($form->nama_kaisha)->toBe('EXATA JAPAN CO., LTD.');
+        ->and($form->nama_kaisha)->toBe('EXATA JAPAN CO., LTD.')
+        ->and($form->jenis_kelamin)->toBe('L')
+        ->and($form->jenis_kelamin_penanggung_jawab)->toBe('P');
 
     // Verify lowercase attribute mutation
-    expect($form->email_aktif)->toBe('budi.santoso@gmail.com');
+    expect($form->email_aktif)->toBe('budi.santoso@gmail.com')
+        ->and($form->status_kawin)->toBe('belum kawin');
 
     // Verify casts
     expect($form->tanggal_lahir)->toBeInstanceOf(CarbonInterface::class)
@@ -93,11 +99,11 @@ test('it can create and associate attachments in bahasa indonesia', function () 
         'jenis_dokumen' => VisaAttachmentType::KTP,
         'nama_file_asli' => 'KTP_Asli_Budi.jpg',
         'nama_file_tersimpan' => 'ktp_hash_uuid_123.jpg',
-        'jalur_file' => 'visa-documents/ktp/ktp_hash_uuid_123.jpg',
+        'path' => 'visa-documents/ktp/ktp_hash_uuid_123.jpg',
         'disk' => 'public',
-        'ekstensi' => 'jpg',
-        'tipe_mime' => 'image/jpeg',
-        'ukuran_file' => 524288,
+        'extension' => 'jpg',
+        'mime_type' => 'image/jpeg',
+        'file_size' => 524288,
         'status' => VisaAttachmenStatus::STATUS_STORED,
         'urutan' => 1,
     ]);

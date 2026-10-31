@@ -30,6 +30,8 @@ class VisaFormFactory extends Factory
             'nama_lengkap' => fake()->name(),
             'tempat_lahir' => fake()->city(),
             'tanggal_lahir' => fake()->date('Y-m-d', '-20 years'),
+            'jenis_kelamin' => fake()->randomElement(['L', 'P']),
+            'status_kawin' => fake()->randomElement(['belum kawin', 'kawin', 'janda/duda', 'cerai']),
             'nik_ktp' => fake()->numerify('3578############'),
             'alamat_indonesia' => fake()->address(),
             'kode_pos_indonesia' => fake()->numerify('#####'),
@@ -60,6 +62,7 @@ class VisaFormFactory extends Factory
             'periode_kerja_mulai' => null,
             'periode_kerja_selesai' => null,
             'nama_penanggung_jawab' => fake()->name(),
+            'jenis_kelamin_penanggung_jawab' => fake()->randomElement(['L', 'P']),
             'alamat_penanggung_jawab' => 'Tokyo-to, Shinjuku-ku, 1-2-3',
             'telepon_penanggung_jawab' => fake()->numerify('080########'),
 

@@ -80,9 +80,10 @@ class VisaJapanPdfService
         $this->writeField($pdf, 95, 102, $pob, 8.5);
 
         // 3. Jenis Kelamin (Sex)
-        // Standar NIK: digit ke-7 & 8 menunjukkan tanggal lahir. Jika > 40, perempuan (female).
         $isFemale = false;
-        if (strlen((string) $visaForm->nik_ktp) >= 8) {
+        if (! empty($visaForm->jenis_kelamin)) {
+            $isFemale = strtoupper((string) $visaForm->jenis_kelamin) === 'P';
+        } elseif (strlen((string) $visaForm->nik_ktp) >= 8) {
             $dayDigits = (int) substr((string) $visaForm->nik_ktp, 6, 2);
             if ($dayDigits > 40) {
                 $isFemale = true;
@@ -95,7 +96,16 @@ class VisaJapanPdfService
         }
 
         // 4. Status Perkawinan (Marital Status)
-        $this->writeCheckbox($pdf, 137, 106.5); // Married [X]
+        $statusKawin = strtolower((string) ($visaForm->status_kawin ?? ''));
+        if ($statusKawin === 'belum kawin' || $statusKawin === 'single') {
+            $this->writeCheckbox($pdf, 115, 106.5); // Single [X]
+        } elseif ($statusKawin === 'janda/duda' || $statusKawin === 'widowed') {
+            $this->writeCheckbox($pdf, 156, 106.5); // Widowed [X]
+        } elseif ($statusKawin === 'cerai' || $statusKawin === 'divorced') {
+            $this->writeCheckbox($pdf, 176, 106.5); // Divorced [X]
+        } else {
+            $this->writeCheckbox($pdf, 137, 106.5); // Married [X] (default)
+        }
 
         // 5. Kewarganegaraan (Nationality)
         $this->writeField($pdf, 65, 115, 'INDONESIA', 9);
@@ -160,7 +170,7 @@ class VisaJapanPdfService
 
         // 12. Riwayat Tinggal Sebelumnya di Jepang
         if (strtolower((string) $visaForm->pernah_kerja_jepang) === 'ya') {
-            $riwayat = trim($visaForm->periode_kerja_mulai . ' - ' . $visaForm->periode_kerja_selesai);
+            $riwayat = trim($visaForm->periode_kerja_mulai.' - '.$visaForm->periode_kerja_selesai);
             $this->writeField($pdf, 93, 218, $riwayat ?: 'YES', 8.5);
         } else {
             $this->writeField($pdf, 93, 218, 'NO', 8.5);
@@ -169,7 +179,7 @@ class VisaJapanPdfService
         // 13. Alamat Domisili Indonesia, Telepon, & Email
         $alamatIndo = strtoupper((string) $visaForm->alamat_indonesia);
         if ($visaForm->kode_pos_indonesia) {
-            $alamatIndo .= ', ' . $visaForm->kode_pos_indonesia;
+            $alamatIndo .= ', '.$visaForm->kode_pos_indonesia;
         }
         $this->writeField($pdf, 45, 224, $alamatIndo, 8);
 
@@ -197,8 +207,18 @@ class VisaJapanPdfService
         $guarantorTel = (string) ($visaForm->telepon_penanggung_jawab ?: $visaForm->telepon_jepang);
         $this->writeField($pdf, 152, 31, $guarantorTel, 8.5);
 
-        $guarantorAddress = strtoupper(trim(($visaForm->kode_pos_jepang ? $visaForm->kode_pos_jepang . ' ' : '') . ($visaForm->alamat_penanggung_jawab ?: $visaForm->alamat_jepang)));
+        $guarantorAddress = strtoupper(trim(($visaForm->kode_pos_jepang ? $visaForm->kode_pos_jepang.' ' : '').($visaForm->alamat_penanggung_jawab ?: $visaForm->alamat_jepang)));
         $this->writeField($pdf, 45, 41, $guarantorAddress, 8);
+
+        // Jenis Kelamin Penanggung Jawab
+        if (! empty($visaForm->jenis_kelamin_penanggung_jawab)) {
+            $isGuarantorFemale = strtoupper((string) $visaForm->jenis_kelamin_penanggung_jawab) === 'P';
+            if ($isGuarantorFemale) {
+                $this->writeCheckbox($pdf, 155, 36.5); // Female [X]
+            } else {
+                $this->writeCheckbox($pdf, 140, 36.5); // Male [X]
+            }
+        }
 
         // 2. Inviter di Jepang
         $this->writeField($pdf, 45, 70, 'SAME AS ABOVE', 8.5);

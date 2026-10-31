@@ -183,6 +183,34 @@
                         @error('tanggal_lahir') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
                     </div>
 
+                    <!-- Jenis Kelamin -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                            Jenis Kelamin <span class="text-rose-500">*</span>
+                        </label>
+                        <select wire:model="jenis_kelamin" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                            <option value="">Pilih Jenis Kelamin...</option>
+                            <option value="L">Laki-laki (Male)</option>
+                            <option value="P">Perempuan (Female)</option>
+                        </select>
+                        @error('jenis_kelamin') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Status Perkawinan -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                            Status Perkawinan <span class="text-rose-500">*</span>
+                        </label>
+                        <select wire:model="status_kawin" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                            <option value="">Pilih Status Perkawinan...</option>
+                            <option value="belum kawin">Belum Kawin (Single)</option>
+                            <option value="kawin">Kawin (Married)</option>
+                            <option value="janda/duda">Janda / Duda (Widowed)</option>
+                            <option value="cerai">Cerai (Divorced)</option>
+                        </select>
+                        @error('status_kawin') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
                     <!-- NIK KTP -->
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
@@ -494,7 +522,20 @@
                         @error('nama_penanggung_jawab') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
                     </div>
 
+                    <!-- Jenis Kelamin Penanggung Jawab -->
                     <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                            Jenis Kelamin Penanggung Jawab <span class="text-rose-500">*</span>
+                        </label>
+                        <select wire:model="jenis_kelamin_penanggung_jawab" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+                            <option value="">Pilih Jenis Kelamin Penanggung Jawab...</option>
+                            <option value="L">Laki-laki (Male)</option>
+                            <option value="P">Perempuan (Female)</option>
+                        </select>
+                        @error('jenis_kelamin_penanggung_jawab') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="md:col-span-2">
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                             Telepon Penanggung Jawab <span class="text-rose-500">*</span>
                         </label>

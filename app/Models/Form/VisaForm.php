@@ -30,10 +30,13 @@ class VisaForm extends Model
         'nomor_coe',
         'nama_kaisha',
         'nama_penanggung_jawab',
+        'jenis_kelamin',
+        'jenis_kelamin_penanggung_jawab',
     ];
 
     protected array $lowercase = [
         'email_aktif',
+        'status_kawin',
     ];
 
     /**

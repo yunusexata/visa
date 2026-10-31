@@ -33,6 +33,10 @@ class VisaFormDetailModal extends Component
 
     public ?string $tanggal_lahir = null;
 
+    public ?string $jenis_kelamin = null;
+
+    public ?string $status_kawin = null;
+
     public string $nik_ktp = '';
 
     public string $alamat_indonesia = '';
@@ -84,6 +88,8 @@ class VisaFormDetailModal extends Component
 
     public string $nama_penanggung_jawab = '';
 
+    public ?string $jenis_kelamin_penanggung_jawab = null;
+
     public string $alamat_penanggung_jawab = '';
 
     public string $telepon_penanggung_jawab = '';
@@ -113,6 +119,8 @@ class VisaFormDetailModal extends Component
         $this->nama_lengkap = $visaForm->nama_lengkap ?? '';
         $this->tempat_lahir = $visaForm->tempat_lahir ?? '';
         $this->tanggal_lahir = $visaForm->tanggal_lahir ? Carbon::parse($visaForm->tanggal_lahir)->format('Y-m-d') : null;
+        $this->jenis_kelamin = $visaForm->jenis_kelamin;
+        $this->status_kawin = $visaForm->status_kawin;
         $this->nik_ktp = $visaForm->nik_ktp ?? '';
         $this->alamat_indonesia = $visaForm->alamat_indonesia ?? '';
         $this->kode_pos_indonesia = $visaForm->kode_pos_indonesia;
@@ -155,6 +163,7 @@ class VisaFormDetailModal extends Component
         }
 
         $this->nama_penanggung_jawab = $visaForm->nama_penanggung_jawab ?? '';
+        $this->jenis_kelamin_penanggung_jawab = $visaForm->jenis_kelamin_penanggung_jawab;
         $this->alamat_penanggung_jawab = $visaForm->alamat_penanggung_jawab ?? '';
         $this->telepon_penanggung_jawab = (string) ($visaForm->telepon_penanggung_jawab ?? '');
 
@@ -175,6 +184,8 @@ class VisaFormDetailModal extends Component
             'nama_lengkap' => ['required', 'string', 'max:255'],
             'tempat_lahir' => ['required', 'string', 'max:255'],
             'tanggal_lahir' => ['required', 'date'],
+            'jenis_kelamin' => ['required', Rule::in(['L', 'P'])],
+            'status_kawin' => ['required', Rule::in(['belum kawin', 'kawin', 'janda/duda', 'cerai'])],
             'nik_ktp' => ['required', 'string', 'max:20'],
             'alamat_indonesia' => ['required', 'string'],
             'telepon_indonesia' => ['required', 'string', 'max:30', 'regex:/^[0-9\-]+$/'],
@@ -189,6 +200,7 @@ class VisaFormDetailModal extends Component
             'alamat_jepang' => ['required', 'string'],
             'telepon_jepang' => ['required', 'string', 'max:30', 'regex:/^[0-9\-]+$/'],
             'nama_penanggung_jawab' => ['required', 'string', 'max:255'],
+            'jenis_kelamin_penanggung_jawab' => ['required', Rule::in(['L', 'P'])],
             'alamat_penanggung_jawab' => ['required', 'string', 'max:255'],
             'telepon_penanggung_jawab' => ['required', 'string', 'max:30', 'regex:/^[0-9\-]+$/'],
         ], [
@@ -205,6 +217,8 @@ class VisaFormDetailModal extends Component
             'nama_lengkap' => $this->nama_lengkap,
             'tempat_lahir' => $this->tempat_lahir,
             'tanggal_lahir' => $this->tanggal_lahir,
+            'jenis_kelamin' => $this->jenis_kelamin,
+            'status_kawin' => $this->status_kawin,
             'nik_ktp' => $this->nik_ktp,
             'alamat_indonesia' => $this->alamat_indonesia,
             'kode_pos_indonesia' => $this->kode_pos_indonesia,
@@ -229,6 +243,7 @@ class VisaFormDetailModal extends Component
             'periode_kerja_mulai' => $this->pernah_kerja_jepang === 'pernah' ? $this->periode_kerja_mulai : null,
             'periode_kerja_selesai' => $this->pernah_kerja_jepang === 'pernah' ? $this->periode_kerja_selesai : null,
             'nama_penanggung_jawab' => $this->nama_penanggung_jawab,
+            'jenis_kelamin_penanggung_jawab' => $this->jenis_kelamin_penanggung_jawab,
             'alamat_penanggung_jawab' => $this->alamat_penanggung_jawab,
             'telepon_penanggung_jawab' => $this->telepon_penanggung_jawab,
         ]);

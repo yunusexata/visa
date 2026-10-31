@@ -60,6 +60,8 @@
                 nama_lengkap: $wire.nama_lengkap || '',
                 tempat_lahir: $wire.tempat_lahir || '',
                 tanggal_lahir: $wire.tanggal_lahir || '',
+                jenis_kelamin: $wire.jenis_kelamin || '',
+                status_kawin: $wire.status_kawin || '',
                 nik_ktp: $wire.nik_ktp || '',
                 alamat_indonesia: $wire.alamat_indonesia || '',
                 kode_pos_indonesia: $wire.kode_pos_indonesia || '',
@@ -83,6 +85,7 @@
                 periode_kerja_mulai: $wire.periode_kerja_mulai || '',
                 periode_kerja_selesai: $wire.periode_kerja_selesai || '',
                 nama_penanggung_jawab: $wire.nama_penanggung_jawab || '',
+                jenis_kelamin_penanggung_jawab: $wire.jenis_kelamin_penanggung_jawab || '',
                 alamat_penanggung_jawab: $wire.alamat_penanggung_jawab || '',
                 telepon_penanggung_jawab: $wire.telepon_penanggung_jawab || ''
             };
@@ -98,6 +101,8 @@
                 nama_lengkap: $wire.nama_lengkap,
                 tempat_lahir: $wire.tempat_lahir,
                 tanggal_lahir: $wire.tanggal_lahir,
+                jenis_kelamin: $wire.jenis_kelamin,
+                status_kawin: $wire.status_kawin,
                 nik_ktp: $wire.nik_ktp,
                 alamat_indonesia: $wire.alamat_indonesia,
                 kode_pos_indonesia: $wire.kode_pos_indonesia,
@@ -130,6 +135,7 @@
                 periode_kerja_mulai: $wire.periode_kerja_mulai,
                 periode_kerja_selesai: $wire.periode_kerja_selesai,
                 nama_penanggung_jawab: $wire.nama_penanggung_jawab,
+                jenis_kelamin_penanggung_jawab: $wire.jenis_kelamin_penanggung_jawab,
                 alamat_penanggung_jawab: $wire.alamat_penanggung_jawab,
                 telepon_penanggung_jawab: $wire.telepon_penanggung_jawab
             };
@@ -320,6 +326,48 @@
                                        wire:model="tanggal_lahir" 
                                        required
                                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
+                            </div>
+                        </div>
+
+                        <!-- 2c. Jenis Kelamin -->
+                        <div>
+                            <label for="jenis_kelamin" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                                Jenis Kelamin <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">wc</span>
+                                <select id="jenis_kelamin" 
+                                        name="jenis_kelamin" 
+                                        wire:model="jenis_kelamin" 
+                                        required 
+                                        class="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none appearance-none cursor-pointer">
+                                    <option value="">Pilih Jenis Kelamin...</option>
+                                    <option value="L">Laki-laki (Male)</option>
+                                    <option value="P">Perempuan (Female)</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-lg">expand_more</span>
+                            </div>
+                        </div>
+
+                        <!-- 2d. Status Perkawinan -->
+                        <div>
+                            <label for="status_kawin" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                                Status Perkawinan <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">favorite</span>
+                                <select id="status_kawin" 
+                                        name="status_kawin" 
+                                        wire:model="status_kawin" 
+                                        required 
+                                        class="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none appearance-none cursor-pointer">
+                                    <option value="">Pilih Status Perkawinan...</option>
+                                    <option value="belum kawin">Belum Kawin (Single)</option>
+                                    <option value="kawin">Kawin (Married)</option>
+                                    <option value="janda/duda">Janda / Duda (Widowed)</option>
+                                    <option value="cerai">Cerai (Divorced)</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-lg">expand_more</span>
                             </div>
                         </div>
 
@@ -785,8 +833,28 @@
                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
                         </div>
 
-                        <!-- 23. Nomor Telepon Penanggung Jawab -->
+                        <!-- 21b. Jenis Kelamin Penanggung Jawab -->
                         <div>
+                            <label for="jenis_kelamin_penanggung_jawab" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                                Jenis Kelamin Penanggung Jawab <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">wc</span>
+                                <select id="jenis_kelamin_penanggung_jawab" 
+                                        name="jenis_kelamin_penanggung_jawab" 
+                                        wire:model="jenis_kelamin_penanggung_jawab" 
+                                        required 
+                                        class="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none appearance-none cursor-pointer">
+                                    <option value="">Pilih Jenis Kelamin Penanggung Jawab...</option>
+                                    <option value="L">Laki-laki (Male)</option>
+                                    <option value="P">Perempuan (Female)</option>
+                                </select>
+                                <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-lg">expand_more</span>
+                            </div>
+                        </div>
+
+                        <!-- 23. Nomor Telepon Penanggung Jawab -->
+                        <div class="md:col-span-2">
                             <label for="telepon_penanggung_jawab" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                                 Nomor Telepon Penanggung Jawab <span class="text-rose-500">*</span>
                             </label>
@@ -853,6 +921,7 @@
                             <dl class="space-y-1.5 text-xs">
                                 <div><dt class="text-slate-400">Nama Lengkap:</dt><dd class="font-bold text-slate-800 dark:text-white" x-text="$wire.nama_lengkap || '-'"></dd></div>
                                 <div><dt class="text-slate-400">Tempat, Tanggal Lahir:</dt><dd class="font-medium" x-text="`${$wire.tempat_lahir || '-'}, ${$wire.tanggal_lahir || '-'}`"></dd></div>
+                                <div><dt class="text-slate-400">Jenis Kelamin & Status:</dt><dd class="font-medium" x-text="`${$wire.jenis_kelamin === 'L' ? 'Laki-laki' : ($wire.jenis_kelamin === 'P' ? 'Perempuan' : '-')} • ${$wire.status_kawin ? $wire.status_kawin.toUpperCase() : '-'}`"></dd></div>
                                 <div><dt class="text-slate-400">NIK KTP:</dt><dd class="font-mono font-medium" x-text="$wire.nik_ktp || '-'"></dd></div>
                                 <div><dt class="text-slate-400">Telepon & Email:</dt><dd class="font-medium" x-text="`${$wire.telepon_indonesia || '-'} • ${$wire.email_aktif || '-'}`"></dd></div>
                             </dl>
@@ -907,7 +976,7 @@
                                 <div><dt class="text-slate-400">Kedatangan:</dt><dd class="font-medium" x-text="`${$wire.tanggal_kedatangan || '-'} (${$wire.bandara_tujuan || '-'})`"></dd></div>
                                 <div><dt class="text-slate-400">Maskapai:</dt><dd class="font-medium" x-text="$wire.maskapai || '-'"></dd></div>
                                 <div><dt class="text-slate-400">Nama Kaisha:</dt><dd class="font-bold text-slate-800 dark:text-white" x-text="$wire.nama_kaisha || '-'"></dd></div>
-                                <div><dt class="text-slate-400">Penanggung Jawab:</dt><dd class="font-medium" x-text="`${$wire.nama_penanggung_jawab || '-'} (${$wire.telepon_penanggung_jawab || '-'})`"></dd></div>
+                                <div><dt class="text-slate-400">Penanggung Jawab:</dt><dd class="font-medium" x-text="`${$wire.nama_penanggung_jawab || '-'} (${$wire.jenis_kelamin_penanggung_jawab === 'L' ? 'Laki-laki' : ($wire.jenis_kelamin_penanggung_jawab === 'P' ? 'Perempuan' : '-')}, ${$wire.telepon_penanggung_jawab || '-'})`"></dd></div>
                             </dl>
                         </div>
 
