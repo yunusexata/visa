@@ -3,6 +3,7 @@
 namespace App\Livewire\Form;
 
 use App\Enums\Form\VisaFormStatus;
+use App\Enums\Form\VisaType;
 use App\Helpers\Alert;
 use App\Models\Form\VisaForm;
 use App\Models\MasterData\Regency;
@@ -59,14 +60,14 @@ class VisaFormDetailModal extends Component
     // Step 3: COE
     public string $nomor_coe = '';
 
-    public string $status_kependudukan_jepang = 'Specified Skilled Worker (SSW / Tokutei Ginou)';
+    public VisaType $jenis_visa = VisaType::SPECIFIED_SKILLED_WORKER_I;
 
     public string $lama_stay_jepang = '1 Tahun';
 
     // Step 4: Rencana Kedatangan & Kaisha di Jepang
     public ?string $tanggal_kedatangan = null;
 
-    public string $bandara_tujuan = 'Haneda (HND)';
+    public string $bandara_tujuan = 'Haneda';
 
     public ?string $bandara_lainnya = null;
 
@@ -133,11 +134,11 @@ class VisaFormDetailModal extends Component
         $this->tanggal_habis_berlaku_paspor = $visaForm->tanggal_habis_berlaku_paspor ? Carbon::parse($visaForm->tanggal_habis_berlaku_paspor)->format('Y-m-d') : null;
 
         $this->nomor_coe = $visaForm->nomor_coe ?? '';
-        $this->status_kependudukan_jepang = $visaForm->status_kependudukan_jepang ?? 'Specified Skilled Worker (SSW / Tokutei Ginou)';
+        $this->jenis_visa = $visaForm->jenis_visa;
         $this->lama_stay_jepang = $visaForm->lama_stay_jepang ?? '1 Tahun';
 
         $this->tanggal_kedatangan = $visaForm->tanggal_kedatangan ? Carbon::parse($visaForm->tanggal_kedatangan)->format('Y-m-d') : null;
-        $this->bandara_tujuan = $visaForm->bandara_tujuan ?? 'Haneda (HND)';
+        $this->bandara_tujuan = $visaForm->bandara_tujuan ?? 'Lainnya';
         $this->bandara_lainnya = $visaForm->bandara_lainnya;
         $this->maskapai = $visaForm->maskapai ?? '';
         $this->nama_kaisha = $visaForm->nama_kaisha ?? '';
@@ -229,7 +230,7 @@ class VisaFormDetailModal extends Component
             'tanggal_pengeluaran_paspor' => $this->tanggal_pengeluaran_paspor,
             'tanggal_habis_berlaku_paspor' => $this->tanggal_habis_berlaku_paspor,
             'nomor_coe' => $this->nomor_coe,
-            'status_kependudukan_jepang' => $this->status_kependudukan_jepang,
+            'jenis_visa' => $this->jenis_visa,
             'lama_stay_jepang' => $this->lama_stay_jepang,
             'tanggal_kedatangan' => $this->tanggal_kedatangan,
             'bandara_tujuan' => $this->bandara_tujuan,

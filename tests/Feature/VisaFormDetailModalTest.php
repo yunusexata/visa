@@ -114,7 +114,7 @@ test('detail modal normalizes real input for regency, phone codes, month inputs,
         'telepon_indonesia' => '0812-3456-7890',
         'telepon_jepang' => '03-3423-1111',
         'telepon_penanggung_jawab' => '080-1234-5678',
-        'status_kependudukan_jepang' => 'Student (Ryugaku)',
+        'jenis_visa' => 'Student (Ryugaku)',
         'lama_stay_jepang' => '1 Tahun',
         'bandara_tujuan' => 'Narita (NRT)',
         'pernah_kerja_jepang' => 'ya',
@@ -136,7 +136,7 @@ test('detail modal normalizes real input for regency, phone codes, month inputs,
         ->assertSet('periode_kerja_mulai', '2026-07')
         ->assertSet('periode_kerja_selesai', '2026-12')
         // Verify selects
-        ->assertSet('status_kependudukan_jepang', 'Student (Ryugaku)')
+        ->assertSet('jenis_visa', 'Student (Ryugaku)')
         ->assertSet('lama_stay_jepang', '1 Tahun')
         ->assertSet('bandara_tujuan', 'Narita (NRT)')
         // Verify HTML does not contain country code badges (+62 and +81)

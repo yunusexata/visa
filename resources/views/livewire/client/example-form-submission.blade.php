@@ -72,7 +72,7 @@
                 tanggal_pengeluaran_paspor: $wire.tanggal_pengeluaran_paspor || '',
                 tanggal_habis_berlaku_paspor: $wire.tanggal_habis_berlaku_paspor || '',
                 nomor_coe: $wire.nomor_coe || '',
-                status_kependudukan_jepang: $wire.status_kependudukan_jepang || '',
+                jenis_visa: $wire.jenis_visa || '',
                 lama_stay_jepang: $wire.lama_stay_jepang || '',
                 tanggal_kedatangan: $wire.tanggal_kedatangan || '',
                 bandara_tujuan: $wire.bandara_tujuan || '',
@@ -119,7 +119,7 @@
         } else if (currentStep === 3) {
             return {
                 nomor_coe: $wire.nomor_coe,
-                status_kependudukan_jepang: $wire.status_kependudukan_jepang,
+                jenis_visa: $wire.jenis_visa,
                 lama_stay_jepang: $wire.lama_stay_jepang
             };
         } else if (currentStep === 4) {
@@ -598,11 +598,11 @@
 
                         <!-- 9. Status Kependudukan Di Jepang -->
                         <div>
-                            <label for="status_kependudukan_jepang" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                            <label for="jenis_visa" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                                 Status Kependudukan di Jepang (Visa Type) <span class="text-rose-500">*</span>
                             </label>
-                            <select id="status_kependudukan_jepang" 
-                                    wire:model="status_kependudukan_jepang" 
+                            <select id="jenis_visa" 
+                                    wire:model="jenis_visa" 
                                     required
                                     class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
                                 <option value="Specified Skilled Worker (SSW / Tokutei Ginou)">Specified Skilled Worker (SSW / Tokutei Ginou)</option>
@@ -957,7 +957,7 @@
                             </div>
                             <dl class="space-y-1.5 text-xs">
                                 <div><dt class="text-slate-400">Nomor COE:</dt><dd class="font-mono font-bold text-slate-800 dark:text-white" x-text="$wire.nomor_coe || '-'"></dd></div>
-                                <div><dt class="text-slate-400">Status Kependudukan:</dt><dd class="font-medium" x-text="$wire.status_kependudukan_jepang || '-'"></dd></div>
+                                <div><dt class="text-slate-400">Status Kependudukan:</dt><dd class="font-medium" x-text="$wire.jenis_visa || '-'"></dd></div>
                                 <div><dt class="text-slate-400">Masa Tinggal:</dt><dd class="font-medium" x-text="$wire.lama_stay_jepang || '-'"></dd></div>
                             </dl>
                         </div>

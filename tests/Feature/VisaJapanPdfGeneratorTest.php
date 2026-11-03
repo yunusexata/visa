@@ -23,7 +23,7 @@ beforeEach(function () {
         'tanggal_pengeluaran_paspor' => '2020-01-01',
         'tanggal_habis_berlaku_paspor' => '2030-01-01',
         'nama_kaisha' => 'HONDA MOTOR CO LTD',
-        'status_kependudukan_jepang' => 'SPECIFIED SKILLED WORKER (i)',
+        'jenis_visa' => 'SPECIFIED SKILLED WORKER (i)',
         'lama_stay_jepang' => '1 YEAR',
         'tanggal_kedatangan' => '2026-12-01',
         'bandara_tujuan' => 'HANEDA AIRPORT',

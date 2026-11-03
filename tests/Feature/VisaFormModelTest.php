@@ -28,7 +28,7 @@ test('it can create a visa form with indonesian column attributes', function () 
         'tanggal_habis_berlaku_paspor' => '2033-01-10',
 
         'nomor_coe' => 'coe-2026-9999',
-        'status_kependudukan_jepang' => 'Specified Skilled Worker (SSW / Tokutei Ginou)',
+        'jenis_visa' => 'Specified Skilled Worker (SSW / Tokutei Ginou)',
         'lama_stay_jepang' => '1 Tahun',
 
         'tanggal_kedatangan' => '2026-12-01',

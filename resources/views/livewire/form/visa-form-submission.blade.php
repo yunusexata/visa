@@ -52,7 +52,7 @@
         } else if (currentStep === 3) {
             return {
                 nomor_coe: $wire.nomor_coe,
-                status_kependudukan_jepang: $wire.status_kependudukan_jepang,
+                jenis_visa: $wire.jenis_visa,
                 lama_stay_jepang: $wire.lama_stay_jepang
             };
         } else if (currentStep === 4) {
@@ -505,9 +505,6 @@
                                        required
                                        class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
                             </div>
-                            <p class="text-[11px] text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-xs">info</span> Masa berlaku minimal disarankan 6-12 bulan ke depan
-                            </p>
                         </div>
 
                     </div>
@@ -550,30 +547,32 @@
                             </div>
                         </div>
 
-                        <!-- 9. Status Kependudukan Di Jepang -->
-                        <div>
-                            <label for="status_kependudukan_jepang" class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
-                                Status Kependudukan di Jepang (Jenis Visa) <span class="text-rose-500">*</span>
-                            </label>
-                            <select id="status_kependudukan_jepang" 
-                                    wire:model="status_kependudukan_jepang" 
-                                    required
-                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
-                                <option value="">-- Pilih Status Visa --</option>
-                                <option value="Specified Skilled Worker (I)">Specified Skilled Worker (I)</option>
-                                <option value="Specified Skilled Worker (II)">Specified Skilled Worker (II)</option>
-                                <option value="Technical Intern Training (I) (B)">Technical +Intern Training (I) (B)</option>
-                                <option value="Technical Intern Training (II) (B)">Technical Intern Training (II) (B)</option>
-                                <option value="Technical Intern Training (III) (B)">Technical Intern Training (III) (B)</option>
-                                <option value="Designated Activities">Designated Activities</option>
-                                <option value="Dependent">Dependent</option>
-                                <option value="Engineering">Engineering</option>
-                                <option value="Medical Services">Medical Services</option>
-                                <option value="Intra Company Transferee">Intra Company Transferee</option>
-                                <option value="Skilled Labor">Skilled Labor</option>
-                                <option value="Nursing Care">Nursing Care</option>
-                            </select>
-                        </div>
+                    <!-- 9 Status Kependudukan di Jepang -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
+                            Status Kependudukan di Jepang (Visa Type) <span class="text-rose-500">*</span>
+                        </label>
+                        
+                        @php
+                            // Call the enum directly. Make sure the namespace matches your app structure.
+                            $visaOptions = \App\Enums\Form\VisaType::options();
+                        @endphp
+
+                        <select wire:model="jenis_visa" id="jenis_visa"  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
+                            
+                            <option value="">-- Pilih Status Kependudukan --</option>
+
+                            <!-- Loop through the key-value pairs -->
+                            @foreach ($visaOptions as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
+                            @endforeach
+
+                        </select>
+                        
+                        @error('jenis_visa') 
+                            <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> 
+                        @enderror
+                    </div>
 
                         <!-- 10. Berapa Lama Stay Di Jepang -->
                         <div>
@@ -653,7 +652,7 @@
                                 Bandara Kedatangan di Jepang <span class="text-rose-500">*</span>
                             </label>
                             @php
-                                $airportOptions = ['Haneda', 'Narita', 'Osaka', 'Nagoya', 'Fukuoka', 'Sapporo', 'Okinawa'];
+                                $airportOptions = ['Haneda', 'Narita', 'Osaka', 'Nagoya', 'Fukuoka', 'Sapporo', 'Okinawa', 'Lainnya'];
                             @endphp
                             <div class="relative">
                                 <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg pointer-events-none">flight_land</span>
@@ -907,7 +906,7 @@
                             <dl class="space-y-1.5 text-xs">
                                 <div><dt class="text-slate-400">Nama Lengkap:</dt><dd class="font-bold text-slate-800 dark:text-white" x-text="$wire.nama_lengkap || '-'"></dd></div>
                                 <div><dt class="text-slate-400">Tempat, Tanggal Lahir:</dt><dd class="font-medium" x-text="`${$wire.tempat_lahir || '-'}, ${$wire.tanggal_lahir || '-'}`"></dd></div>
-                                <div><dt class="text-slate-400">Jenis Kelamin & Status:</dt><dd class="font-medium" x-text="`${$wire.jenis_kelamin === 'L' ? 'Laki-laki' : ($wire.jenis_kelamin === 'P' ? 'Perempuan' : '-')} • ${$wire.status_kawin ? $wire.status_kawin.toUpperCase() : '-'}`"></dd></div>
+                                <div><dt class="text-slate-400">Jenis Kelamin & Status:</dt><dd class="font-medium" x-text="`${$wire.jenis_kelamin === 'M' ? 'Laki-laki' : ($wire.jenis_kelamin === 'F' ? 'Perempuan' : 'Laki-Laki')} • ${$wire.status_kawin ? $wire.status_kawin.toUpperCase() : '-'}`"></dd></div>
                                 <div><dt class="text-slate-400">NIK KTP:</dt><dd class="font-mono font-medium" x-text="$wire.nik_ktp || '-'"></dd></div>
                                 <div><dt class="text-slate-400">Telepon & Email:</dt><dd class="font-medium" x-text="`${$wire.telepon_indonesia || '-'} • ${$wire.email_aktif || '-'}`"></dd></div>
                             </dl>
@@ -943,7 +942,7 @@
                             </div>
                             <dl class="space-y-1.5 text-xs">
                                 <div><dt class="text-slate-400">Nomor COE:</dt><dd class="font-mono font-bold text-slate-800 dark:text-white" x-text="$wire.nomor_coe || '-'"></dd></div>
-                                <div><dt class="text-slate-400">Status Kependudukan:</dt><dd class="font-medium" x-text="$wire.status_kependudukan_jepang || '-'"></dd></div>
+                                <div><dt class="text-slate-400">Status Kependudukan:</dt><dd class="font-medium" x-text="$wire.jenis_visa || '-'"></dd></div>
                                 <div><dt class="text-slate-400">Masa Tinggal:</dt><dd class="font-medium" x-text="$wire.lama_stay_jepang || '-'"></dd></div>
                             </dl>
                         </div>
@@ -962,7 +961,7 @@
                                 <div><dt class="text-slate-400">Kedatangan:</dt><dd class="font-medium" x-text="`${$wire.tanggal_kedatangan || '-'} (${$wire.bandara_tujuan || '-'})`"></dd></div>
                                 <div><dt class="text-slate-400">Maskapai:</dt><dd class="font-medium" x-text="$wire.maskapai || '-'"></dd></div>
                                 <div><dt class="text-slate-400">Nama Kaisha:</dt><dd class="font-bold text-slate-800 dark:text-white" x-text="$wire.nama_kaisha || '-'"></dd></div>
-                                <div><dt class="text-slate-400">Penanggung Jawab:</dt><dd class="font-medium" x-text="`${$wire.nama_penanggung_jawab || '-'} (${$wire.jenis_kelamin_penanggung_jawab === 'L' ? 'Laki-laki' : ($wire.jenis_kelamin_penanggung_jawab === 'P' ? 'Perempuan' : '-')}, ${$wire.telepon_penanggung_jawab || '-'})`"></dd></div>
+                                <div><dt class="text-slate-400">Penanggung Jawab:</dt><dd class="font-medium" x-text="`${$wire.nama_penanggung_jawab || '-'} (${$wire.jenis_kelamin_penanggung_jawab === 'M' ? 'Laki-laki' : ($wire.jenis_kelamin_penanggung_jawab === 'F' ? 'Perempuan' : '-')}, ${$wire.telepon_penanggung_jawab || '-'})`"></dd></div>
                             </dl>
                         </div>
 

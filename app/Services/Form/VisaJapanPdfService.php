@@ -146,7 +146,7 @@ class VisaJapanPdfService
         // 8. COE & Status Tinggal
         $this->writeField($pdf, 65, 158, strtoupper((string) $visaForm->nomor_coe), 9);
 
-        $statusJepang = strtoupper((string) ($visaForm->status_kependudukan_jepang ?: 'SPECIFIED SKILLED WORKER (i)'));
+        $statusJepang = strtoupper((string) ($visaForm->jenis_visa ?: 'SPECIFIED SKILLED WORKER (i)'));
         $this->writeField($pdf, 95, 164, $statusJepang, 8.5);
 
         // 9. Lama Tinggal & Tanggal Kedatangan

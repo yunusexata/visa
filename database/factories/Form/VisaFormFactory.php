@@ -22,7 +22,7 @@ class VisaFormFactory extends Factory
     {
         return [
             'visa_form_link_id' => null,
-            'nomor_registrasi' => 'VISA-'.date('Ymd').'-'.fake()->unique()->numerify('####'),
+            'nomor_registrasi' => 'VISA-' . date('Ymd') . '-' . fake()->unique()->numerify('####'),
             'status' => VisaFormStatus::DIAJUKAN,
             'pic_code' => fake()->bothify('PIC-###'),
 
@@ -46,7 +46,7 @@ class VisaFormFactory extends Factory
 
             // Step 3: COE
             'nomor_coe' => fake()->bothify('COE-2026-######'),
-            'status_kependudukan_jepang' => 'Specified Skilled Worker (SSW / Tokutei Ginou)',
+            'jenis_visa' => 'Specified Skilled Worker (SSW / Tokutei Ginou)',
             'lama_stay_jepang' => '1 Tahun',
 
             // Step 4: Rencana Kedatangan & Kaisha di Jepang
@@ -54,7 +54,7 @@ class VisaFormFactory extends Factory
             'bandara_tujuan' => 'Haneda (HND)',
             'bandara_lainnya' => null,
             'maskapai' => 'Garuda Indonesia',
-            'nama_kaisha' => fake()->company().' CO., LTD.',
+            'nama_kaisha' => fake()->company() . ' CO., LTD.',
             'alamat_jepang' => 'Tokyo-to, Shinjuku-ku, 1-2-3',
             'kode_pos_jepang' => '100-0001',
             'telepon_jepang' => fake()->numerify('080########'),

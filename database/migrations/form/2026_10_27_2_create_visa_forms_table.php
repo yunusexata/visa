@@ -50,6 +50,7 @@ return new class extends Migration
         $table->string('nama_lengkap');
         $table->string('tempat_lahir');
         $table->date('tanggal_lahir');
+        $table->string('jenis_visa');
         $table->string('nik_ktp', 16)->index();
         $table->text('alamat_indonesia');
         $table->string('kode_pos_indonesia', 10)->nullable();
@@ -64,7 +65,6 @@ return new class extends Migration
 
         // Step 3: Certificate of Eligibility (COE)
         $table->string('nomor_coe', 50)->index();
-        $table->string('status_kependudukan_jepang');
         $table->string('lama_stay_jepang', 30);
 
         // Step 4: Rencana Kedatangan & Kaisha di Jepang

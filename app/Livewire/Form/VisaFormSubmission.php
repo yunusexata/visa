@@ -3,6 +3,7 @@
 namespace App\Livewire\Form;
 
 use App\Enums\Form\VisaFormLinkStatus;
+use App\Enums\Form\VisaType;
 use App\Helpers\Alert;
 use App\Models\Form\VisaForm;
 use App\Models\Form\VisaFormLink;
@@ -63,14 +64,14 @@ class VisaFormSubmission extends Component
     // Step 3: Certificate of Eligibility (COE)
     public $nomor_coe = '';
 
-    public $status_kependudukan_jepang = 'Specified Skilled Worker (SSW / Tokutei Ginou)';
+    public $jenis_visa = VisaType::SPECIFIED_SKILLED_WORKER_I->value;
 
-    public $lama_stay_jepang = '1 Tahun';
+    public $lama_stay_jepang = 'ONE YEARS';
 
     // Step 4: Data Lainnya & Kaisha di Jepang
     public $tanggal_kedatangan = '';
 
-    public $bandara_tujuan = 'Haneda (HND)';
+    public $bandara_tujuan = 'Haneda';
 
     public $bandara_lainnya = '';
 
@@ -247,7 +248,7 @@ class VisaFormSubmission extends Component
             'tanggal_pengeluaran_paspor',
             'tanggal_habis_berlaku_paspor',
             'nomor_coe',
-            'status_kependudukan_jepang',
+            'jenis_visa',
             'lama_stay_jepang',
             'tanggal_kedatangan',
             'bandara_tujuan',
@@ -326,7 +327,7 @@ class VisaFormSubmission extends Component
 
             // Step 3: COE
             'nomor_coe' => $this->nomor_coe,
-            'status_kependudukan_jepang' => $this->status_kependudukan_jepang,
+            'jenis_visa' => $this->jenis_visa,
             'lama_stay_jepang' => $this->lama_stay_jepang,
 
             // Step 4: Rencana Kedatangan & Kaisha di Jepang

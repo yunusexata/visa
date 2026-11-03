@@ -192,7 +192,7 @@
                             <div>
                                 <span class="text-slate-400 block text-[10px]">Nomor COE & Kependudukan</span>
                                 <span class="font-medium text-slate-800 dark:text-slate-200">
-                                    {{ $visaForm->nomor_coe ?: '-' }} • {{ $visaForm->status_kependudukan_jepang ?: '-' }}
+                                    {{ $visaForm->nomor_coe ?: '-' }} • {{ $visaForm->jenis_visa ?: '-' }}
                                 </span>
                             </div>
                             <div>

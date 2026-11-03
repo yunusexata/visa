@@ -2,7 +2,9 @@
 
 namespace App\Models\Form;
 
+use App\Enums\Form\BandaraTujuan;
 use App\Enums\Form\VisaFormStatus;
+use App\Enums\Form\VisaType;
 use App\Helpers\NumberGenerator;
 use App\Models\User;
 use App\Traits\Models\LowercaseAttributes;
@@ -48,6 +50,7 @@ class VisaForm extends Model
     {
         return [
             'status' => VisaFormStatus::class,
+            'jenis_visa' => VisaType::class,
             'tanggal_lahir' => 'date',
             'tanggal_pengeluaran_paspor' => 'date',
             'tanggal_habis_berlaku_paspor' => 'date',

@@ -236,7 +236,7 @@
                     </div>
 
                     <!-- Email Aktif -->
-                    <div class="md:col-span-2">
+                    <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                             Email Aktif <span class="text-rose-500">*</span>
                         </label>
@@ -332,31 +332,25 @@
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                             Status Kependudukan di Jepang (Visa Type) <span class="text-rose-500">*</span>
                         </label>
+                        
                         @php
-                            $statusKependudukanOptions = [
-                                "Specified Skilled Worker (I)",
-                                "Specified Skilled Worker (II)",
-                                "Technical Intern Training (I) (B)",
-                                "Technical Intern Training (II) (B)",
-                                "Technical Intern Training (III) (B)",
-                                "Designated Activities",
-                                "Dependent",
-                                "Engineering",
-                                "Medical Services",
-                                "Intra Company Transferee",
-                                "Skilled Labor",
-                                "Nursing Care",
-                            ];
+                            // Call the enum directly. Make sure the namespace matches your app structure.
+                            $visaOptions = \App\Enums\Form\VisaType::options();
                         @endphp
-                        <select wire:model="status_kependudukan_jepang" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
-                            @if ($status_kependudukan_jepang && !in_array($status_kependudukan_jepang, $statusKependudukanOptions))
-                                <option value="{{ $status_kependudukan_jepang }}">{{ $status_kependudukan_jepang }}</option>
-                            @endif
-                            @foreach ($statusKependudukanOptions as $opt)
-                                <option value="{{ $opt }}">{{ $opt }}</option>
+
+                        <select wire:model="jenis_visa" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
+                            
+                            <option value="">-- Pilih Status Kependudukan --</option>
+                            <!-- Loop through the key-value pairs -->
+                            @foreach ($visaOptions as $value => $label)
+                                <option value="{{ $value }}">{{ $label }}</option>
                             @endforeach
+
                         </select>
-                        @error('status_kependudukan_jepang') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
+                        
+                        @error('jenis_visa') 
+                            <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> 
+                        @enderror
                     </div>
 
                     <!-- Lama Stay di Jepang -->
@@ -403,7 +397,7 @@
                     </div>
 
                     <!-- Bandara Tujuan -->
-                    <div class="md:col-span-2">
+                    <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                             Bandara Kedatangan di Jepang <span class="text-rose-500">*</span>
                         </label>
@@ -550,7 +544,7 @@
                         @error('jenis_kelamin_penanggung_jawab') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
-                    <div class="md:col-span-2">
+                    <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                             Telepon Penanggung Jawab <span class="text-rose-500">*</span>
                         </label>
@@ -568,7 +562,7 @@
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1.5">
                             Alamat Penanggung Jawab di Jepang <span class="text-rose-500">*</span>
                         </label>
-                        <input type="text" wire:model="alamat_penanggung_jawab" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                        <textarea wire:model="alamat_penanggung_jawab" rows="2" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"></textarea>
                         @error('alamat_penanggung_jawab') <span class="text-xs text-rose-500">{{ $message }}</span> @enderror
                     </div>
                 </div>
