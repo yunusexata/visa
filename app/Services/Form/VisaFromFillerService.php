@@ -129,6 +129,7 @@ class VisaFromFillerService
             'guarantor_tel'      => $phone($a->telepon_penanggung_jawab) ?? ' ',
             'inviter_name'       => 'SAME AS ABOVE' ?? ' ',
         ];
+        dd($v);
 
         foreach ($v as $k => $val) {
             $val = preg_replace('/\s+/u', ' ', trim((string) $val));   // no newlines, no double spaces
