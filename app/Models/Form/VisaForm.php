@@ -4,6 +4,7 @@ namespace App\Models\Form;
 
 use App\Enums\Form\BandaraTujuan;
 use App\Enums\Form\VisaFormStatus;
+use App\Enums\Form\VisaStatus;
 use App\Enums\Form\VisaType;
 use App\Helpers\NumberGenerator;
 use App\Models\User;
@@ -67,6 +68,19 @@ class VisaForm extends Model
             $model->nomor_registrasi = $model->nomor_registrasi ?? NumberGenerator::generate(self::class);
             $model->status = $model->status ?? VisaFormStatus::DRAFT;
             // $model->created_by = rand(7, 9);
+        });
+        self::updating(function ($model) {
+            if ($model->isDirty('status') && $model->status) {
+                if ($model->status == VisaFormStatus::DIAJUKAN) {
+                    $model->tanggal_diajukan = now();
+                }
+                if ($model->status == VisaFormStatus::VERIFIKASI) {
+                    $model->tanggal_verifikasi = now();
+                }
+                if ($model->status == VisaFormStatus::DITOLAK) {
+                    $model->tanggal_cancel = now();
+                }
+            }
         });
     }
 

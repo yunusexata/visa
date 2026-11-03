@@ -346,7 +346,6 @@ class VisaFormSubmission extends Component
             'jenis_kelamin_penanggung_jawab' => $this->jenis_kelamin_penanggung_jawab,
             'alamat_penanggung_jawab' => $this->alamat_penanggung_jawab,
             'telepon_penanggung_jawab' => $this->telepon_penanggung_jawab,
-            'tanggal_diajukan' => now(),
         ];
         $visaForm = VisaForm::create($validatedData);
 
