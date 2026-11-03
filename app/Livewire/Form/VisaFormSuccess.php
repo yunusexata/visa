@@ -44,7 +44,7 @@ class VisaFormSuccess extends Component
     public function getWhatsappUrlProperty(): string
     {
         $phone = $this->visaForm->link?->creator?->no_whatsapp
-            ?: ($this->visaForm->creator?->no_whatsapp ?: config('app.support_whatsapp', '81188899744'));
+            ?: ($this->visaForm->creator?->no_whatsapp ?: config('app.support_whatsapp', '6281188899744'));
         $phone = preg_replace('/[^0-9]/', '', (string) $phone);
 
         if (str_starts_with($phone, '0')) {

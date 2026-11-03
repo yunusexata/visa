@@ -134,5 +134,5 @@ return [
         'Alert' => Alert::class,
     ])->toArray(),
 
-    'support_whatsapp' => '81188899744'
+    'support_whatsapp' => '6281188899744'
 ];
