@@ -155,7 +155,7 @@
                 </div>
 
                 <!-- Collapsible Rincian Dokumen & Kaisha -->
-                <div x-data="{ expanded: false }" class="bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+                <div x-data="{ expanded: true }" class="bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
                     <button type="button"
                             @click="expanded = !expanded"
                             class="w-full flex items-center justify-between p-4 text-left hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
