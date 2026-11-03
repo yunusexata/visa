@@ -130,8 +130,16 @@
                     </div>
                 </flux:table.column>
 
-                <flux:table.column>KAISHA</flux:table.column>
-                <flux:table.column>PASPOR / COE</flux:table.column>
+                <flux:table.column>
+                    <div class="flex items-center gap-1.5 font-semibold justify-center mx-auto text-gray-700 dark:text-gray-300 text-xs">
+                        <span>KAISHA</span>
+                    </div>
+                </flux:table.column>
+                <flux:table.column>
+                    <div class="flex items-center gap-1.5 font-semibold justify-center mx-auto text-gray-700 dark:text-gray-300 text-xs">
+                        <span>PASPOR / COE</span>
+                    </div>
+                </flux:table.column>
 
                 <flux:table.column class="cursor-pointer" wire:click="datatableSort('tanggal_kedatangan')">
                     <div class="flex items-center gap-1.5 font-semibold justify-center mx-auto text-gray-700 dark:text-gray-300 text-xs">
