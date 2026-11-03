@@ -5,9 +5,8 @@ namespace App\Enums\Form;
 enum VisaFormStatus: string
 {
     case DRAFT = 'DRAFT';
+    case VERIFIKASI = 'TERVERIFIKASI';
     case DIAJUKAN = 'DIAJUKAN';
-    case SIAP_VERIFIKASI = 'SIAP VERIFIKASI';
-    case VERIFIKASI = 'VERIFIKASI';
     case SELESAI = 'SELESAI';
     case DITOLAK = 'DITOLAK';
 
@@ -15,9 +14,8 @@ enum VisaFormStatus: string
     {
         return match ($this) {
             self::DRAFT => 'Draft',
-            self::DIAJUKAN => 'Diajukan',
-            self::SIAP_VERIFIKASI => 'Siap Verifikasi',
             self::VERIFIKASI => 'Terverifikasi',
+            self::DIAJUKAN => 'Diajukan',
             self::SELESAI => 'Selesai',
             self::DITOLAK => 'Ditolak',
         };
@@ -42,7 +40,7 @@ enum VisaFormStatus: string
     public static function options(): array
     {
         return collect(self::cases())
-            ->mapWithKeys(fn ($case) => [
+            ->mapWithKeys(fn($case) => [
                 $case->value => $case->label(),
             ])
             ->toArray();
