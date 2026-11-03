@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Form;
 
 use App\Http\Controllers\Controller;
 use App\Models\Form\VisaForm;
+use App\Repositories\Form\VisaFormRepository;
+use App\Services\Form\VisaFromFillerService;
 use App\Services\Form\VisaJapanPdfService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -24,17 +26,18 @@ class VisaFormController extends Controller
         ]);
     }
 
-    public function generatePdf(int $id, VisaJapanPdfService $service): StreamedResponse
+    public function generatePdf(int $id)
     {
         $visaForm = VisaForm::findOrFail($id);
-        $pdfBinary = $service->generate($visaForm);
-        $safeNoReg = str_replace(['/', '\\'], '_', $visaForm->nomor_registrasi ?: (string) $visaForm->id);
-        $filename = "Visa_Japan_Application_{$safeNoReg}.pdf";
+        $filename = "FORM PENGAJUAN VISA TG - AN {$visaForm->nama_lengkap} " . now()->year . ".pdf";
 
-        return response()->streamDownload(function () use ($pdfBinary) {
-            echo $pdfBinary;
-        }, $filename, [
-            'Content-Type' => 'application/pdf',
-        ]);
+        $filler = new VisaFromFillerService();
+        $out = storage_path("app/public/{$filename}.pdf");
+        $filler->fill($visaForm, $out);
+
+        return response()->streamDownload(function () use ($out) {
+            readfile($out);
+            @unlink($out);
+        }, $filename, ['Content-Type' => 'application/pdf']);
     }
 }

@@ -295,8 +295,8 @@
                                         required 
                                         class="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none appearance-none cursor-pointer">
                                     <option value="">Pilih Jenis Kelamin...</option>
-                                    <option value="L">Laki-laki (Male)</option>
-                                    <option value="P">Perempuan (Female)</option>
+                                    <option value="M">Laki-laki (Male)</option>
+                                    <option value="F">Perempuan (Female)</option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-lg">expand_more</span>
                             </div>
@@ -315,10 +315,10 @@
                                         required 
                                         class="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none appearance-none cursor-pointer">
                                     <option value="">Pilih Status Perkawinan...</option>
-                                    <option value="belum kawin">Belum Kawin (Single)</option>
-                                    <option value="kawin">Kawin (Married)</option>
-                                    <option value="janda/duda">Janda / Duda (Widowed)</option>
-                                    <option value="cerai">Cerai (Divorced)</option>
+                                    <option value="single">Belum Kawin (Single)</option>
+                                    <option value="married">Kawin (Married)</option>
+                                    <option value="widowed">Janda / Duda (Widowed)</option>
+                                    <option value="divorced">Cerai (Divorced)</option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-lg">expand_more</span>
                             </div>
@@ -584,11 +584,11 @@
                                     wire:model="lama_stay_jepang" 
                                     required
                                     class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none">
-                                <option value="1 YEARS">1 Tahun (1 Year)</option>
-                                <option value="2 YEARS">2 Tahun (2 Year)</option>
-                                <option value="3 YEARS">3 Tahun (3 Years)</option>
-                                <option value="5 YEARS">5 Tahun (5 Years)</option>
-                                <option value="6 Bulan">6 Bulan (6 Months)</option>
+                                <option value="SIX MONTHS">6 Bulan (6 Months)</option>
+                                <option value="ONE YEARS">1 Tahun (1 Years)</option>
+                                <option value="TWO YEARS">2 Tahun (2 Years)</option>
+                                <option value="THREE YEARS">3 Tahun (3 Years)</option>
+                                <option value="FIVE YEARS">5 Tahun (5 Years)</option>
                                 <option value="Lainnya">Lainnya</option>
                             </select>
                         </div>
@@ -831,8 +831,8 @@
                                         required 
                                         class="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium focus:border-[#0049FF] focus:ring-4 focus:ring-blue-500/10 transition-all outline-none appearance-none cursor-pointer">
                                     <option value="">Pilih Jenis Kelamin Penanggung Jawab...</option>
-                                    <option value="L">Laki-laki (Male)</option>
-                                    <option value="P">Perempuan (Female)</option>
+                                    <option value="M">Laki-laki (Male)</option>
+                                    <option value="F">Perempuan (Female)</option>
                                 </select>
                                 <span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-lg">expand_more</span>
                             </div>

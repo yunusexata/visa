@@ -4,7 +4,7 @@ namespace App\Services\Form;
 
 use App\Models\Form\VisaForm;
 use Carbon\Carbon;
-use setasign\Fpdi\Fpdi;
+use setasign\Fpdi\Tfpdf\Fpdi;
 
 class VisaJapanPdfService
 {
@@ -19,6 +19,11 @@ class VisaJapanPdfService
             throw new \RuntimeException("Template PDF formulir visa Jepang tidak ditemukan di: {$templatePath}");
         }
 
+        // Tell tFPDF exactly where your raw TTF files are located
+        // The trailing slash is strictly required by tFPDF
+        if (!defined('_SYSTEM_TTFONTS')) {
+            define('_SYSTEM_TTFONTS', storage_path('app/private/font/'));
+        }
         $pdf = new Fpdi;
         $pdf->SetMargins(0, 0, 0);
         $pdf->SetAutoPageBreak(false);
@@ -51,6 +56,8 @@ class VisaJapanPdfService
      */
     protected function renderPage1(Fpdi $pdf, VisaForm $visaForm): void
     {
+        // Add the font using your exact filename: 'Myriad_Pro_Regular.ttf'
+        $pdf->AddFont('MyriadPro', '', 'Myriad_Pro_Regular.ttf', true);
         $pdf->SetTextColor(0, 0, 0);
 
         // Pemisahan Nama Lengkap menjadi Surname dan Given Names
@@ -64,14 +71,14 @@ class VisaJapanPdfService
         }
 
         // 1. Surname & Given Names
-        $this->writeField($pdf, 75, 75, strtoupper($surname), 9);
-        $this->writeField($pdf, 90, 83, strtoupper($givenNames), 9);
+        $this->writeField($pdf, 75, 76, strtoupper($surname), 9);
+        $this->writeField($pdf, 110, 83, strtoupper($givenNames), 9);
 
         // 2. Tanggal Lahir & Tempat Lahir
         $dob = $visaForm->tanggal_lahir instanceof Carbon
             ? $visaForm->tanggal_lahir->format('d - m - Y')
             : ($visaForm->tanggal_lahir ? Carbon::parse($visaForm->tanggal_lahir)->format('d - m - Y') : '');
-        $this->writeField($pdf, 40, 100, $dob, 9);
+        $this->writeField($pdf, 56, 101, $dob, 9);
 
         $pob = trim(strtoupper((string) $visaForm->tempat_lahir));
         if ($pob && ! str_contains($pob, 'INDONESIA')) {
@@ -92,13 +99,13 @@ class VisaJapanPdfService
         if ($isFemale) {
             $this->writeCheckbox($pdf, 60, 106.5); // Female [X]
         } else {
-            $this->writeCheckbox($pdf, 41, 106.5); // Male [X]
+            $this->writeCheckbox($pdf, 38, 106.5); // Male [X]
         }
 
         // 4. Status Perkawinan (Marital Status)
         $statusKawin = strtolower((string) ($visaForm->status_kawin ?? ''));
         if ($statusKawin === 'belum kawin' || $statusKawin === 'single') {
-            $this->writeCheckbox($pdf, 115, 106.5); // Single [X]
+            $this->writeCheckbox($pdf, 117, 106.5); // Single [X]
         } elseif ($statusKawin === 'janda/duda' || $statusKawin === 'widowed') {
             $this->writeCheckbox($pdf, 156, 106.5); // Widowed [X]
         } elseif ($statusKawin === 'cerai' || $statusKawin === 'divorced') {
@@ -108,43 +115,43 @@ class VisaJapanPdfService
         }
 
         // 5. Kewarganegaraan (Nationality)
-        $this->writeField($pdf, 65, 115, 'INDONESIA', 9);
-        $this->writeField($pdf, 120, 120.5, 'INDONESIA', 9);
+        $this->writeField($pdf, 65, 116, 'INDONESIA', 9);
+        $this->writeField($pdf, 120, 124.5, 'INDONESIA', 9);
 
         // 6. ID No. (NIK KTP)
-        $this->writeField($pdf, 85, 128, (string) $visaForm->nik_ktp, 9);
+        $this->writeField($pdf, 85, 131, (string) $visaForm->nik_ktp, 9);
 
         // 7. Passport Type & Details
-        $this->writeCheckbox($pdf, 122, 133); // Ordinary [X]
-        $this->writeField($pdf, 158, 133, strtoupper((string) $visaForm->nomor_paspor), 9);
+        $this->writeCheckbox($pdf, 100, 136); // Other [X]
+        $this->writeField($pdf, 158, 138, strtoupper((string) $visaForm->nomor_paspor), 9);
 
         // Tempat Penerbitan & Tanggal Terbit
         $passportOffice = strtoupper((string) $visaForm->kantor_paspor);
-        $this->writeField($pdf, 48, 144, $passportOffice, 8.5);
+        $this->writeField($pdf, 48, 142, $passportOffice, 8.5);
 
         $issueDate = $visaForm->tanggal_pengeluaran_paspor instanceof Carbon
             ? $visaForm->tanggal_pengeluaran_paspor->format('d - m - Y')
             : ($visaForm->tanggal_pengeluaran_paspor ? Carbon::parse($visaForm->tanggal_pengeluaran_paspor)->format('d - m - Y') : '');
-        $this->writeField($pdf, 162, 142, $issueDate, 8.5);
+        $this->writeField($pdf, 168, 143, $issueDate, 8.5);
 
         // Instansi Penerbit & Tanggal Habis Berlaku
         $authority = $passportOffice ? "IMIGRASI {$passportOffice}" : 'KANTOR IMIGRASI';
-        $this->writeField($pdf, 55, 149, $authority, 8.5);
+        $this->writeField($pdf, 55, 151, $authority, 8.5);
 
         $expiryDate = $visaForm->tanggal_habis_berlaku_paspor instanceof Carbon
             ? $visaForm->tanggal_habis_berlaku_paspor->format('d - m - Y')
             : ($visaForm->tanggal_habis_berlaku_paspor ? Carbon::parse($visaForm->tanggal_habis_berlaku_paspor)->format('d - m - Y') : '');
-        $this->writeField($pdf, 170, 149, $expiryDate, 8.5);
+        $this->writeField($pdf, 170, 153, $expiryDate, 8.5);
 
         // 8. COE & Status Tinggal
-        $this->writeField($pdf, 65, 156, strtoupper((string) $visaForm->nomor_coe), 9);
+        $this->writeField($pdf, 65, 158, strtoupper((string) $visaForm->nomor_coe), 9);
 
         $statusJepang = strtoupper((string) ($visaForm->status_kependudukan_jepang ?: 'SPECIFIED SKILLED WORKER (i)'));
-        $this->writeField($pdf, 95, 163, $statusJepang, 8.5);
+        $this->writeField($pdf, 95, 164, $statusJepang, 8.5);
 
         // 9. Lama Tinggal & Tanggal Kedatangan
         $lamaStay = strtoupper((string) ($visaForm->lama_stay_jepang ?: '1 YEAR'));
-        $this->writeField($pdf, 75, 171, $lamaStay, 9);
+        $this->writeField($pdf, 78, 171, $lamaStay, 9);
 
         $arrivalDate = $visaForm->tanggal_kedatangan instanceof Carbon
             ? $visaForm->tanggal_kedatangan->format('d/m/Y')
@@ -160,37 +167,35 @@ class VisaJapanPdfService
 
         // 11. Data Kaisha / Hotel / Tempat Tinggal di Jepang
         $kaisha = strtoupper((string) $visaForm->nama_kaisha);
-        $this->writeField($pdf, 45, 193, $kaisha, 8.5);
+        $this->writeField($pdf, 43, 191, $kaisha, 8.5);
 
         $telpJepang = (string) $visaForm->telepon_jepang;
-        $this->writeField($pdf, 152, 193, $telpJepang, 8.5);
+        $this->writeField($pdf, 156, 191, $telpJepang, 8.5);
 
         $alamatJepang = strtoupper((string) $visaForm->alamat_jepang);
-        $this->writeField($pdf, 45, 204, $alamatJepang, 8);
+        $this->writeField($pdf, 47, 204, $alamatJepang, 8);
 
         // 12. Riwayat Tinggal Sebelumnya di Jepang
         if (strtolower((string) $visaForm->pernah_kerja_jepang) === 'ya') {
-            $riwayat = trim($visaForm->periode_kerja_mulai.' - '.$visaForm->periode_kerja_selesai);
-            $this->writeField($pdf, 93, 218, $riwayat ?: 'YES', 8.5);
-        } else {
-            $this->writeField($pdf, 93, 218, 'NO', 8.5);
+            $riwayat = trim($visaForm->periode_kerja_mulai . ' - ' . $visaForm->periode_kerja_selesai);
+            $this->writeField($pdf, 93, 218, $riwayat, 8.5);
         }
 
         // 13. Alamat Domisili Indonesia, Telepon, & Email
         $alamatIndo = strtoupper((string) $visaForm->alamat_indonesia);
         if ($visaForm->kode_pos_indonesia) {
-            $alamatIndo .= ', '.$visaForm->kode_pos_indonesia;
+            $alamatIndo .= ', ' . $visaForm->kode_pos_indonesia;
         }
-        $this->writeField($pdf, 45, 224, $alamatIndo, 8);
+        $this->writeField($pdf, 47, 230, $alamatIndo, 8);
 
         $telpIndo = (string) $visaForm->telepon_indonesia;
         $this->writeField($pdf, 95, 236, $telpIndo, 9);
 
         $email = strtoupper((string) $visaForm->email_aktif);
-        $this->writeField($pdf, 45, 244, $email, 8.5);
+        $this->writeField($pdf, 45, 240, $email, 8.5);
 
         // 14. Pekerjaan Sekarang
-        $this->writeField($pdf, 95, 251, 'UNEMPLOYEE', 8.5);
+        $this->writeField($pdf, 95, 248, 'UNEMPLOYEE', 8.5);
     }
 
     /**
@@ -207,7 +212,7 @@ class VisaJapanPdfService
         $guarantorTel = (string) ($visaForm->telepon_penanggung_jawab ?: $visaForm->telepon_jepang);
         $this->writeField($pdf, 152, 31, $guarantorTel, 8.5);
 
-        $guarantorAddress = strtoupper(trim(($visaForm->kode_pos_jepang ? $visaForm->kode_pos_jepang.' ' : '').($visaForm->alamat_penanggung_jawab ?: $visaForm->alamat_jepang)));
+        $guarantorAddress = strtoupper(trim(($visaForm->kode_pos_jepang ? $visaForm->kode_pos_jepang . ' ' : '') . ($visaForm->alamat_penanggung_jawab ?: $visaForm->alamat_jepang)));
         $this->writeField($pdf, 45, 41, $guarantorAddress, 8);
 
         // Jenis Kelamin Penanggung Jawab
@@ -254,7 +259,7 @@ class VisaJapanPdfService
             return;
         }
 
-        $pdf->SetFont('Helvetica', '', $fontSize);
+        $pdf->SetFont('MyriadPro', '', $fontSize);
         $pdf->SetXY($x, $y);
         $pdf->Cell(0, 0, $text, 0, 0, $align, false);
     }
@@ -264,7 +269,7 @@ class VisaJapanPdfService
      */
     protected function writeCheckbox(Fpdi $pdf, float $x, float $y): void
     {
-        $pdf->SetFont('Helvetica', 'B', 10);
+        $pdf->SetFont('MyriadPro', '', 10);
         $pdf->SetXY($x, $y);
         $pdf->Cell(4, 4, 'X', 0, 0, 'C', false);
     }

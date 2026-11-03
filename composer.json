@@ -24,6 +24,7 @@
         "livewire/flux": "^2.13.1",
         "livewire/livewire": "^4.3",
         "maatwebsite/excel": "^3.1",
+        "mikehaertl/php-pdftk": "^0.14.4",
         "muhammadyunus1072/track-history": "^1.0",
         "predis/predis": "^3.7",
         "pusher/pusher-php-server": "^7.3",

@@ -190,8 +190,8 @@
                         </label>
                         <select wire:model="jenis_kelamin" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                             <option value="">Pilih Jenis Kelamin...</option>
-                            <option value="L">Laki-laki (Male)</option>
-                            <option value="P">Perempuan (Female)</option>
+                            <option value="M">Laki-laki (Male)</option>
+                            <option value="F">Perempuan (Female)</option>
                         </select>
                         @error('jenis_kelamin') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
                     </div>
@@ -203,10 +203,10 @@
                         </label>
                         <select wire:model="status_kawin" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                             <option value="">Pilih Status Perkawinan...</option>
-                            <option value="belum kawin">Belum Kawin (Single)</option>
-                            <option value="kawin">Kawin (Married)</option>
-                            <option value="janda/duda">Janda / Duda (Widowed)</option>
-                            <option value="cerai">Cerai (Divorced)</option>
+                            <option value="single">Belum Kawin (Single)</option>
+                            <option value="married">Kawin (Married)</option>
+                            <option value="widowed">Janda / Duda (Widowed)</option>
+                            <option value="divorced">Cerai (Divorced)</option>
                         </select>
                         @error('status_kawin') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
                     </div>
@@ -334,13 +334,18 @@
                         </label>
                         @php
                             $statusKependudukanOptions = [
-                                'Specified Skilled Worker (SSW / Tokutei Ginou)',
-                                'Technical Intern Training (TITP / Gino Jisshusei)',
-                                'Engineer / Specialist in Humanities / Int Services (Gijinkoku)',
-                                'Student (Ryugaku)',
-                                'Dependent (Kazoku Taizai)',
-                                'Business Manager',
-                                'Lainnya',
+                                "Specified Skilled Worker (I)",
+                                "Specified Skilled Worker (II)",
+                                "Technical Intern Training (I) (B)",
+                                "Technical Intern Training (II) (B)",
+                                "Technical Intern Training (III) (B)",
+                                "Designated Activities",
+                                "Dependent",
+                                "Engineering",
+                                "Medical Services",
+                                "Intra Company Transferee",
+                                "Skilled Labor",
+                                "Nursing Care",
                             ];
                         @endphp
                         <select wire:model="status_kependudukan_jepang" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
@@ -360,15 +365,25 @@
                             Masa Tinggal di Jepang (Period of Stay) <span class="text-rose-500">*</span>
                         </label>
                         @php
-                            $stayOptions = ['1 Tahun', '3 Tahun', '5 Tahun', '6 Bulan', 'Lainnya'];
+                            $stayOptions = [
+                                'SIX MONTHS'=>'6 BULAN',
+                                'ONE YEARS'=>'1 TAHUN',
+                                'TWO YEARS'=> '2 TAHUN', 
+                                'THREE YEARS'=> '3 TAHUN', 
+                                'FIVE YEARS'=>'5 TAHUN'
+                            ];
                         @endphp
                         <select wire:model="lama_stay_jepang" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
                             @if ($lama_stay_jepang && !in_array($lama_stay_jepang, $stayOptions))
                                 <option value="{{ $lama_stay_jepang }}">{{ $lama_stay_jepang }}</option>
                             @endif
-                            @foreach ($stayOptions as $opt)
-                                <option value="{{ $opt }}">{{ $opt }}</option>
-                            @endforeach
+                            
+                            <option value="SIX MONTHS">6 Bulan (6 Months)</option>
+                            <option value="ONE YEARS">1 Tahun (1 Years)</option>
+                            <option value="TWO YEARS">2 Tahun (2 Years)</option>
+                            <option value="THREE YEARS">3 Tahun (3 Years)</option>
+                            <option value="FIVE YEARS">5 Tahun (5 Years)</option>
+                            <option value="Lainnya">Lainnya</option>
                         </select>
                         @error('lama_stay_jepang') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
                     </div>
@@ -393,7 +408,7 @@
                             Bandara Kedatangan di Jepang <span class="text-rose-500">*</span>
                         </label>
                         @php
-                            $airportOptions = ['Haneda (HND)', 'Narita (NRT)', 'Fukuoka (FUK)', 'Osaka / Kansai (KIX)', 'Lainnya'];
+                            $airportOptions = ['Haneda', 'Narita', 'Osaka', 'Nagoya', 'Fukuoka', 'Sapporo', 'Okinawa'];
                         @endphp
                         <select wire:model.live="bandara_tujuan" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-medium dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none">
                             @if ($bandara_tujuan && !in_array($bandara_tujuan, $airportOptions))
@@ -529,8 +544,8 @@
                         </label>
                         <select wire:model="jenis_kelamin_penanggung_jawab" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
                             <option value="">Pilih Jenis Kelamin Penanggung Jawab...</option>
-                            <option value="L">Laki-laki (Male)</option>
-                            <option value="P">Perempuan (Female)</option>
+                            <option value="M">Laki-laki (Male)</option>
+                            <option value="F">Perempuan (Female)</option>
                         </select>
                         @error('jenis_kelamin_penanggung_jawab') <span class="text-xs text-rose-500 font-semibold mt-1 block">{{ $message }}</span> @enderror
                     </div>

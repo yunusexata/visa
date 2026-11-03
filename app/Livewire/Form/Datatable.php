@@ -47,19 +47,19 @@ class Datatable extends Component
         $this->sortDirection = 'desc';
     }
 
-    public function generateVisaJapanPdf(int $id, VisaJapanPdfService $service): StreamedResponse
-    {
-        $visaForm = VisaForm::findOrFail($id);
-        $pdfBinary = $service->generate($visaForm);
-        $safeNoReg = str_replace(['/', '\\'], '_', $visaForm->nomor_registrasi ?: (string) $visaForm->id);
-        $filename = "Visa_Japan_Application_{$safeNoReg}.pdf";
+    // public function generateVisaJapanPdf(int $id)
+    // {
+    //     $visaForm = VisaForm::findOrFail($id);
+    //     $pdfBinary = $service->generate($visaForm);
+    //     $safeNoReg = str_replace(['/', '\\'], '_', $visaForm->nomor_registrasi ?: (string) $visaForm->id);
+    //     $filename = "Visa_Japan_Application_{$safeNoReg}.pdf";
 
-        return response()->streamDownload(function () use ($pdfBinary) {
-            echo $pdfBinary;
-        }, $filename, [
-            'Content-Type' => 'application/pdf',
-        ]);
-    }
+    //     return response()->streamDownload(function () use ($pdfBinary) {
+    //         echo $pdfBinary;
+    //     }, $filename, [
+    //         'Content-Type' => 'application/pdf',
+    //     ]);
+    // }
 
     public function updatingSearch(): void
     {
@@ -131,6 +131,6 @@ class Datatable extends Component
 
     public function getView(): string
     {
-        return 'livewire.form.visa-form';
+        return 'livewire.form.datatable';
     }
 }
