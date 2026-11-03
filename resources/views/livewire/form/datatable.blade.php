@@ -178,9 +178,9 @@
                         $badgeColor = match($statusEnum) {
                             \App\Enums\Form\VisaFormStatus::DRAFT => 'zinc',
                             \App\Enums\Form\VisaFormStatus::DIAJUKAN => 'blue',
-                            \App\Enums\Form\VisaFormStatus::SIAP_VERIFIKASI => 'amber',
-                            \App\Enums\Form\VisaFormStatus::VERIFIKASI, \App\Enums\Form\VisaFormStatus::SELESAI => 'emerald',
+                            \App\Enums\Form\VisaFormStatus::VERIFIKASI => 'emerald',
                             \App\Enums\Form\VisaFormStatus::DITOLAK => 'red',
+                            \App\Enums\Form\VisaFormStatus::SELESAI => 'green',
                             default => 'zinc',
                         };
                     @endphp
