@@ -112,6 +112,14 @@
                         @endif
                     </div>
                 </flux:table.column>
+                <flux:table.column sticky class="bg-white dark:bg-zinc-900 z-20 cursor-pointer" wire:click="datatableSort('created_at')">
+                    <div class="flex items-center gap-1.5 font-semibold justify-center mx-auto text-gray-700 dark:text-gray-300 text-xs">
+                        <span class="text-center">Tgl Input</span>
+                        @if ($sortBy === 'created_at')
+                            <span class="text-blue-500 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
+                        @endif
+                    </div>
+                </flux:table.column>
 
                 <flux:table.column class="cursor-pointer" wire:click="datatableSort('nama_lengkap')">
                     <div class="flex items-center gap-1.5 font-semibold justify-center mx-auto text-gray-700 dark:text-gray-300 text-xs">
@@ -126,7 +134,7 @@
                 <flux:table.column>PASPOR / COE</flux:table.column>
 
                 <flux:table.column class="cursor-pointer" wire:click="datatableSort('tanggal_kedatangan')">
-                    <div class="flex items-center gap-1.5 font-semibold text-gray-700 dark:text-gray-300 text-xs">
+                    <div class="flex items-center gap-1.5 font-semibold justify-center mx-auto text-gray-700 dark:text-gray-300 text-xs">
                         <span>TGL BERANGKAT</span>
                         @if ($sortBy === 'tanggal_kedatangan')
                             <span class="text-blue-500 font-bold">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
@@ -145,7 +153,11 @@
                     </div>
                 </flux:table.column>
 
-                <flux:table.column class="text-center">AKSI</flux:table.column>
+                <flux:table.column class="text-center">
+                    <div class="flex items-center gap-1.5 font-semibold justify-center mx-auto text-gray-700 dark:text-gray-300 text-xs">
+                        <span>AKSI</span>
+                    </div>
+                </flux:table.column>
             </flux:table.columns>
 
             <flux:table.rows>
@@ -171,6 +183,10 @@
                                 {{ $item->nomor_registrasi }}
                             </div>
                         </flux:table.cell>
+                        
+                        <flux:table.cell class="text-gray-500 dark:text-zinc-400 text-sm text-center">
+                            {{ $item->created_at ? $item->created_at->format('d/m/Y') : '-' }}
+                        </flux:table.cell>
 
                         <flux:table.cell class="font-semibold text-gray-900 dark:text-white">
                             <div class="text-sm font-medium">{{ $item->nama_lengkap }}</div>
@@ -186,9 +202,9 @@
                         </flux:table.cell>
 
                         <flux:table.cell class="text-gray-600 dark:text-zinc-400 font-mono text-xs">
-                            <div>{{ $item->nomor_paspor ?: '-' }}</div>
+                            <div class="text-center">{{ $item->nomor_paspor ?: '-' }}</div>
                             @if ($item->nomor_coe)
-                                <div class="text-[11px] text-gray-400">{{ $item->nomor_coe }}</div>
+                                <div class="text-[11px] text-gray-400 text-center">{{ $item->nomor_coe }}</div>
                             @endif
                         </flux:table.cell>
 

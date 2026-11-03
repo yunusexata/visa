@@ -82,7 +82,7 @@ class Datatable extends Component
             return;
         }
 
-        VisaForm::destroy($this->targetDeleteId);
+        VisaFormRepository::delete($this->targetDeleteId);
         $this->targetDeleteId = null;
         Alert::success($this, 'Berhasil', 'Data permohonan visa berhasil dihapus.');
     }
