@@ -133,4 +133,6 @@ return [
         'PermissionHelper' => PermissionHelper::class,
         'Alert' => Alert::class,
     ])->toArray(),
+
+    'support_whatsapp' => '81188899744'
 ];

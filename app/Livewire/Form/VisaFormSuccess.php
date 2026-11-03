@@ -28,7 +28,7 @@ class VisaFormSuccess extends Component
         // Eager load seluruh relasi yang dibutuhkan untuk mencegah query N+1
         $form = VisaForm::with([
             'link.creator',
-            'attachments' => fn ($q) => $q->orderBy('urutan')->orderBy('created_at'),
+            'attachments' => fn($q) => $q->orderBy('urutan')->orderBy('created_at'),
         ])->find($id);
 
         if (! $form) {
@@ -44,18 +44,18 @@ class VisaFormSuccess extends Component
     public function getWhatsappUrlProperty(): string
     {
         $phone = $this->visaForm->link?->creator?->no_whatsapp
-            ?: ($this->visaForm->creator?->no_whatsapp ?: config('app.support_whatsapp', '6281234567890'));
+            ?: ($this->visaForm->creator?->no_whatsapp ?: config('app.support_whatsapp', '81188899744'));
         $phone = preg_replace('/[^0-9]/', '', (string) $phone);
 
         if (str_starts_with($phone, '0')) {
-            $phone = '62'.substr($phone, 1);
+            $phone = '62' . substr($phone, 1);
         }
 
         $registrationNumber = $this->visaForm->nomor_registrasi;
         $fullName = $this->visaForm->nama_lengkap;
         $message = "Halo Admin Exata Indonesia, saya telah menyelesaikan pengajuan formulir visa dengan Nomor Registrasi: {$registrationNumber} atas nama {$fullName}. Mohon informasi proses verifikasinya. Terima kasih.";
 
-        return 'https://wa.me/'.$phone.'?text='.rawurlencode($message);
+        return 'https://wa.me/' . $phone . '?text=' . rawurlencode($message);
     }
 
     /**
@@ -77,11 +77,6 @@ class VisaFormSuccess extends Component
                 'label' => 'Diajukan',
                 'bg' => 'bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800/60',
                 'dot' => 'bg-blue-500 animate-pulse',
-            ],
-            VisaFormStatus::SIAP_VERIFIKASI => [
-                'label' => 'Siap Verifikasi',
-                'bg' => 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800/60',
-                'dot' => 'bg-amber-500 animate-pulse',
             ],
             VisaFormStatus::VERIFIKASI => [
                 'label' => 'Terverifikasi',
@@ -113,7 +108,7 @@ class VisaFormSuccess extends Component
     {
         $nik = (string) ($this->visaForm->nik_ktp ?? '');
         if (strlen($nik) >= 16) {
-            return substr($nik, 0, 4).'********'.substr($nik, -4);
+            return substr($nik, 0, 4) . '********' . substr($nik, -4);
         }
 
         return $nik ?: '-';
@@ -126,7 +121,7 @@ class VisaFormSuccess extends Component
     {
         $paspor = (string) ($this->visaForm->nomor_paspor ?? '');
         if (strlen($paspor) >= 6) {
-            return substr($paspor, 0, 2).'****'.substr($paspor, -2);
+            return substr($paspor, 0, 2) . '****' . substr($paspor, -2);
         }
 
         return $paspor ?: '-';
@@ -162,7 +157,7 @@ class VisaFormSuccess extends Component
             $fileSize = $att->file_size ?? $att->ukuran_file ?? 0;
             $sizeKb = $fileSize ? round($fileSize / 1024, 1) : 0;
             $sizeDisplay = $sizeKb >= 1024
-                ? round($sizeKb / 1024, 2).' MB'
+                ? round($sizeKb / 1024, 2) . ' MB'
                 : "{$sizeKb} KB";
 
             $ext = $att->extension ?? $att->ekstensi ?? 'FILE';
@@ -187,8 +182,8 @@ class VisaFormSuccess extends Component
     public function render()
     {
         $tanggalDiajukan = $this->visaForm->tanggal_diajukan
-            ? $this->visaForm->tanggal_diajukan->translatedFormat('d F Y, H:i').' WIB'
-            : ($this->visaForm->created_at ? $this->visaForm->created_at->translatedFormat('d F Y, H:i').' WIB' : '-');
+            ? $this->visaForm->tanggal_diajukan->translatedFormat('d F Y, H:i') . ' WIB'
+            : ($this->visaForm->created_at ? $this->visaForm->created_at->translatedFormat('d F Y, H:i') . ' WIB' : '-');
 
         $tanggalKedatangan = $this->visaForm->tanggal_kedatangan
             ? $this->visaForm->tanggal_kedatangan->translatedFormat('d F Y')

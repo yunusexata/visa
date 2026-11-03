@@ -38,7 +38,7 @@ class VisaFormStatusPage extends Component
 
         $this->link = VisaFormLink::with([
             'creator',
-            'visaForms' => fn ($q) => $q->withCount('attachments')->latest('created_at'),
+            'visaForms' => fn($q) => $q->withCount('attachments')->latest('created_at'),
         ])->find($this->linkId);
 
         if (! $this->link) {
@@ -81,14 +81,14 @@ class VisaFormStatusPage extends Component
     public function getWhatsappUrlProperty(): string
     {
         $phone = $this->link?->creator?->no_whatsapp
-            ?: config('app.support_whatsapp', '6281234567890');
+            ?: config('app.support_whatsapp', '81188899744');
         $phone = preg_replace('/[^0-9]/', '', (string) $phone);
 
         if (str_starts_with($phone, '0')) {
-            $phone = '62'.substr($phone, 1);
+            $phone = '62' . substr($phone, 1);
         }
 
-        $clientName = $this->link?->name ?: 'Kandidat';
+        $clientName = $this->link?->name ?: '-';
 
         $context = match ($this->statusType) {
             'expired' => "Tautan formulir visa {$clientName} telah kedaluwarsa. Mohon informasi perpanjangan batas pengisian.",
@@ -99,7 +99,7 @@ class VisaFormStatusPage extends Component
 
         $message = "Halo Admin Exata Indonesia, {$context} Terima kasih.";
 
-        return 'https://wa.me/'.$phone.'?text='.rawurlencode($message);
+        return 'https://wa.me/' . $phone . '?text=' . rawurlencode($message);
     }
 
     /**
@@ -132,7 +132,7 @@ class VisaFormStatusPage extends Component
             'expired' => [
                 'code' => '410',
                 'title' => 'Masa Berlaku Pengisian Telah Berakhir',
-                'subtitle' => 'Tautan pengisian formulir ini memiliki batas waktu dan telah kedaluwarsa pada '.($this->link?->expired_at ? $this->link->expired_at->translatedFormat('d F Y, H:i') : '-').'.',
+                'subtitle' => 'Tautan pengisian formulir ini memiliki batas waktu dan telah kedaluwarsa pada ' . ($this->link?->expired_at ? $this->link->expired_at->translatedFormat('d F Y, H:i') : '-') . '.',
                 'badge_label' => 'Masa Berlaku Habis',
                 'badge_color' => 'amber',
                 'image_light' => '/images/error/503.svg',
@@ -142,7 +142,7 @@ class VisaFormStatusPage extends Component
             'exhausted' => [
                 'code' => '429',
                 'title' => 'Batas Pengisian Formulir Telah Tercapai',
-                'subtitle' => 'Tautan ini telah digunakan untuk menyelesaikan pengajuan formulir aplikasi visa (kuota terpakai: '.($this->link?->used_count ?? 1).' dari '.($this->link?->max_usage ?? 1).' pengajuan).',
+                'subtitle' => 'Tautan ini telah digunakan untuk menyelesaikan pengajuan formulir aplikasi visa (kuota terpakai: ' . ($this->link?->used_count ?? 1) . ' dari ' . ($this->link?->max_usage ?? 1) . ' pengajuan).',
                 'badge_label' => 'Batas Kuota Tercapai',
                 'badge_color' => 'emerald',
                 'image_light' => '/images/error/503.svg',
