@@ -71,16 +71,29 @@ class VisaForm extends Model
         });
         self::updating(function ($model) {
             if ($model->isDirty('status') && $model->status) {
+                if ($model->status == VisaFormStatus::DRAFT) {
+                    $model->tanggal_verifikasi = null;
+                    $model->tanggal_cancel = null;
+                    $model->tanggal_selesai = null;
+                    $model->tanggal_diajukan = null;
+                }
                 if ($model->status == VisaFormStatus::DIAJUKAN) {
+                    $model->tanggal_verifikasi = null;
+                    $model->tanggal_cancel = null;
+                    $model->tanggal_selesai = null;
                     $model->tanggal_diajukan = now();
                 }
                 if ($model->status == VisaFormStatus::VERIFIKASI) {
+                    $model->tanggal_cancel = null;
+                    $model->tanggal_selesai = null;
                     $model->tanggal_verifikasi = now();
                 }
                 if ($model->status == VisaFormStatus::DITOLAK) {
+                    $model->tanggal_selesai = null;
                     $model->tanggal_cancel = now();
                 }
                 if ($model->status == VisaFormStatus::SELESAI) {
+                    $model->tanggal_cancel = null;
                     $model->tanggal_selesai = now();
                 }
             }
