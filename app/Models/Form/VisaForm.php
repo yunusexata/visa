@@ -80,6 +80,9 @@ class VisaForm extends Model
                 if ($model->status == VisaFormStatus::DITOLAK) {
                     $model->tanggal_cancel = now();
                 }
+                if ($model->status == VisaFormStatus::SELESAI) {
+                    $model->tanggal_selesai = now();
+                }
             }
         });
     }
