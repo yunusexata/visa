@@ -54,7 +54,7 @@ class VisaFromFillerService
             $data[$field] = 'No';   // only safe because pernyataan_persetujuan is checked above
         }
 
-        $template = storage_path('app/private/template_form_visa.pdf');
+        $template = storage_path('app/private/template_visa_tg.pdf');
         if (!is_file($template)) {
             throw new RuntimeException("Template not found: {$template}");
         }
@@ -129,7 +129,6 @@ class VisaFromFillerService
             'guarantor_tel'      => $phone($a->telepon_penanggung_jawab) ?? ' ',
             'inviter_name'       => 'SAME AS ABOVE' ?? ' ',
         ];
-        dd($v);
 
         foreach ($v as $k => $val) {
             $val = preg_replace('/\s+/u', ' ', trim((string) $val));   // no newlines, no double spaces
